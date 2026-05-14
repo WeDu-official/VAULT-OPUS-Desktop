@@ -8,6 +8,7 @@ import logging
 import re as regexa
 import tempfile
 from datetime import datetime
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any, Optional
@@ -44,7 +45,34 @@ file_table_columns = [
 DB_DIR = os.path.join(VAULT_OPUS_SRC_DIR, "DATABASES")
 os.makedirs(DB_DIR, exist_ok=True)
 
-app = FastAPI(title="VAULT_OPUS Web GUI API")
+# Global instances for reuse
+db_manager = DatabaseManager(file_table_columns=file_table_columns, log=logger)
+versioning_manager = VersioningManager(db_read_func=db_manager._db_read_sync, db=db_manager, log=logger)
+parser = ListFilesParser(log=logger)
+tree_builder = ListFilesTreeBuilder(log=logger)
+formatter = ListFilesFormatter(log=logger)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
+    config = get_config(os.path.join(VAULT_OPUS_SRC_DIR, "config.json"))._config
+    vacuum_on_startup = config.get("database", {}).get("vacuum_on_startup", False)
+    if vacuum_on_startup:
+        logger.info("Vacuum on startup is enabled. Vacuuming all databases...")
+        if os.path.exists(DB_DIR):
+            for f in os.listdir(DB_DIR):
+                if f.endswith(".db"):
+                    db_path = os.path.join(DB_DIR, f)
+                    try:
+                        await db_manager._db_vacuum_sync(db_path)
+                    except Exception as e:
+                        logger.error(f"Error vacuuming {f} on startup: {e}")
+    else:
+        logger.info("Vacuum on startup is disabled.")
+    
+    yield
+
+app = FastAPI(title="VAULT_OPUS Web GUI API", lifespan=lifespan)
 
 # Setup CORS for the React frontend
 app.add_middleware(
@@ -54,13 +82,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Global instances for reuse
-db_manager = DatabaseManager(file_table_columns=file_table_columns, log=logger)
-versioning_manager = VersioningManager(db_read_func=db_manager._db_read_sync, db=db_manager, log=logger)
-parser = ListFilesParser(log=logger)
-tree_builder = ListFilesTreeBuilder(log=logger)
-formatter = ListFilesFormatter(log=logger)
 
 # Concurrency & Rate Limiting Manager
 class TaskManager:
@@ -109,22 +130,7 @@ class TaskManager:
 
 task_manager = TaskManager(os.path.join(VAULT_OPUS_SRC_DIR, "config.json"))
 
-@app.on_event("startup")
-async def startup_event():
-    config = get_config(os.path.join(VAULT_OPUS_SRC_DIR, "config.json"))._config
-    vacuum_on_startup = config.get("database", {}).get("vacuum_on_startup", False)
-    if vacuum_on_startup:
-        logger.info("Vacuum on startup is enabled. Vacuuming all databases...")
-        if os.path.exists(DB_DIR):
-            for f in os.listdir(DB_DIR):
-                if f.endswith(".db"):
-                    db_path = os.path.join(DB_DIR, f)
-                    try:
-                        await db_manager._db_vacuum_sync(db_path)
-                    except Exception as e:
-                        logger.error(f"Error vacuuming {f} on startup: {e}")
-    else:
-        logger.info("Vacuum on startup is disabled.")
+
 
 @app.get("/api/dbs")
 async def list_dbs():
