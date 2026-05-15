@@ -1,4 +1,14 @@
-#VAULT_OPUS.py
+#---------------------------------------------------------------------
+#VAULT_OPUS.py (AL-MALIK AL- A'LA) from the VAULT OPUS PROJECT version 1-beta-5-15-2026
+#by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
+#I HAD MADE THIS PROJECT FOR FREE FOR ALL
+#from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
+#this code will still be here so DO GOOD NO EVIL....good luck :)
+#---------------------------------------------------------------------
+#[]===================THE ENCODING FIX==========================[]
+from encoding_fix import apply as _fix_encoding
+_fix_encoding()
+#[]=================START OF ACTUAL CODE========================[]
 import sys
 import aiohttp
 import discord
@@ -13,6 +23,7 @@ from versioning import VersioningManager
 from upload import UPLOAD
 from config_manager import get_salt, get_info, get_token, get_channel_id, get_config
 from platform_handler import PlatformHandler
+import io
 # Load configuration (creates config.json if it doesn't exist)
 VAULT_OPUS_SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 #------------------TOKENS------------------------------------------------------------
