@@ -15,6 +15,8 @@ from typing import Dict, Tuple, Optional, Any, List
 import discord
 from itertools import chain
 from database import DatabaseManager
+import argon2
+from argon2 import PasswordHasher
 
 class denc:
     def __init__(self, log, ddb, version_manager):
@@ -25,6 +27,14 @@ class denc:
         self.db_path = None
         self.salt = None
         self.info = None
+        # Argon2id verifier — parameters must match upload side
+        self._ph = PasswordHasher(
+            time_cost=3,
+            memory_cost=65536,
+            parallelism=4,
+            hash_len=32,
+            type=argon2.Type.ID
+        )
 
     def initialize_for_volume(self, db_path: str):
         """Initializes salt and info for the specific volume database."""
@@ -35,6 +45,7 @@ class denc:
             self.info = get_info(db_path)
         except Exception as e:
             self.log.warning(f"Could not load encryption config for {db_path}: {e}")
+
     def _get_file_encryption_key(
             self,
             file_data: dict,
@@ -77,7 +88,6 @@ class denc:
         benc_instance: Any
     ) -> Tuple[Dict[Tuple[str, str, str, str], str], Dict[Tuple[str, str, str, str], bytes], Dict[Tuple[str, str, str, str], str], bool]:
         """Process a single password entry for a group of items."""
-        import hashlib
         new_passwords = {}
         new_keys = {}
         errors = {}
@@ -85,7 +95,6 @@ class denc:
 
         try:
             derived_key = benc_instance._derive_key_from_seed(entered_password)
-            provided_seed_hash = hashlib.sha256(entered_password.encode('utf-8')).hexdigest()
         except Exception as e:
             for item in items:
                 item_key = (item['root_upload_name'], item['relative_path_in_archive'], item['base_filename'], item['version'])
@@ -99,16 +108,20 @@ class denc:
 
             new_passwords[item_key] = entered_password
             if store_hash:
-                if provided_seed_hash == db_password_hash:
+                try:
+                    # Argon2id verification — constant-time, handles salt/parameters internally
+                    self._ph.verify(db_password_hash, entered_password)
                     new_keys[item_key] = derived_key
-                else:
+                except argon2.exceptions.VerifyMismatchError:
                     errors[item_key] = "Incorrect password."
+                    all_correct = False
+                except Exception as e:
+                    errors[item_key] = f"Password verification error: {e}"
                     all_correct = False
             else:
                 new_keys[item_key] = derived_key
 
         return new_passwords, new_keys, errors, all_correct
-
 
     async def _handle_decryption_failure(
             self,
@@ -127,6 +140,7 @@ class denc:
         if not new_seed:
             return 'cancel_all', None
         return 'retry', new_seed
+
     async def _get_items_requiring_password_for_download(
             self,
             database_file: str,

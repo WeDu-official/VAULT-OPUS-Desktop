@@ -7,3 +7,4 @@ pydantic
 aiofiles
 cryptography
 powerdb>=2.2.5.3
+argon2-cffi
