@@ -184,15 +184,16 @@ export default function SettingsModal({ isOpen, onClose, config, onSave }) {
                 </div>
               </div>
 
-              {/* Dynamic Sections from Config */}
-              {Object.entries(localConfig).map(([section, data]) => (
-                <ConfigSection 
-                  key={section} 
-                  title={section} 
-                  data={data} 
-                  onChange={handleFieldChange} 
-                />
-              ))}
+              {Object.entries(localConfig)
+                .filter(([_, data]) => data !== null && typeof data === 'object' && !Array.isArray(data))
+                .map(([section, data]) => (
+                  <ConfigSection
+                    key={section}
+                    title={section}
+                    data={data}
+                    onChange={handleFieldChange}
+                  />
+                ))}
             </>
           )}
         </div>

@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
+// ==================== FULL MOBILE App.jsx (Mirror of Desktop) ====================
+import React, { useState, useEffect, useRef } from 'react';
 
+// ---------- Icon Set (same as your original) ----------
 const Ico = {
   folder: <svg viewBox="0 0 20 20" fill="currentColor" className="w-12 h-12 text-[#3bb5ff]"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" /></svg>,
   file: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-12 h-12 text-gray-400"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>,
@@ -21,34 +23,22 @@ const Ico = {
   newFolder: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M9 13h6m-3-3v6m-5 4h10a2 2 0 002-2V9a2 2 0 00-2-2h-2.586a1 1 0 01-.707-.293l-1.414-1.414a1 1 0 00-.707-.293H7a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>,
   selectAll: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>,
   share: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>,
-  version: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>,
+  version: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg>,
   alert: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
   copy: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>,
   folderOpen: <svg viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6 text-[#3bb5ff]"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" /></svg>,
   home: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
   import: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-6 h-6"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>,
-}
-// ─────────────────── TOAST / ALERT ───────────────────
-function Toast({ message, type, onClose }) {
-  useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t) }, [])
-  const bg = type === 'error' ? 'bg-red-900/80 border-red-500/50' : type === 'success' ? 'bg-green-900/80 border-green-500/50' : 'bg-[#0a1628] border-[#1a3a5c]'
-  const icon = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : 'text-[#3bb5ff]'
-  return (
-    <div className={`fixed top-16 left-4 right-4 z-50 ${bg} border rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3 animate-in fade-in`}>
-      <span className={icon}>{Ico.alert}</span>
-      <span className="text-sm text-gray-200 flex-1">{message}</span>
-      <button onClick={onClose} className="text-gray-500 btn-touch p-1">{Ico.close}</button>
-    </div>
-  )
-}
+  bomb: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+};
 
-// ─────────────────── BOTTOM SHEET ───────────────────
+// ---------- Helper Components (Sheet, Modal, Toast) ----------
 function Sheet({ open, onClose, title, children }) {
-  if (!open) return null
+  if (!open) return null;
   return (
     <>
-      <div className="modal-overlay fixed inset-0 z-40" onClick={onClose} />
-      <div className="fixed bottom-0 left-0 right-0 z-50 sheet-enter safe-bottom" style={{ maxHeight: '85vh' }}>
+      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 z-50 safe-bottom" style={{ maxHeight: '85vh' }}>
         <div className="bg-[#0a1628] border-t border-[#1a3a5c] rounded-t-2xl shadow-2xl flex flex-col max-h-[85vh]">
           <div className="flex items-center justify-between p-4 border-b border-[#1a3a5c] sticky top-0 bg-[#0a1628] rounded-t-2xl z-10">
             <h3 className="text-lg font-bold text-white">{title}</h3>
@@ -58,17 +48,16 @@ function Sheet({ open, onClose, title, children }) {
         </div>
       </div>
     </>
-  )
+  );
 }
 
-// ─────────────────── MODAL ───────────────────
 function Modal({ open, onClose, title, children, wide }) {
-  if (!open) return null
+  if (!open) return null;
   return (
     <>
-      <div className="modal-overlay fixed inset-0 z-40" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className={`bg-[#0a1628] border border-[#1a3a5c] rounded-xl shadow-2xl ${wide ? 'w-full max-w-lg' : 'w-full max-w-md'} max-h-[80vh] overflow-y-auto p-4 animate-in fade-in`}>
+        <div className={`bg-[#0a1628] border border-[#1a3a5c] rounded-xl shadow-2xl ${wide ? 'w-full max-w-lg' : 'w-full max-w-md'} max-h-[85vh] overflow-y-auto p-4 animate-in fade-in`}>
           <div className="flex items-center justify-between mb-4 border-b border-[#1a3a5c] pb-3">
             <h3 className="text-lg font-bold text-white">{title}</h3>
             <button onClick={onClose} className="p-2 btn-touch text-gray-400 hover:text-white">{Ico.close}</button>
@@ -77,18 +66,29 @@ function Modal({ open, onClose, title, children, wide }) {
         </div>
       </div>
     </>
-  )
+  );
 }
 
-// ─────────────────── REMOTE FOLDER PICKER (MOBILE) ───────────────────
-const RemoteFolderPicker = ({ initialPath, onSelect, onCancel, showFiles = false, multiSelect = false }) => {
+function Toast({ message, type, onClose }) {
+  useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t); }, []);
+  const bg = type === 'error' ? 'bg-red-900/80 border-red-500/50' : type === 'success' ? 'bg-green-900/80 border-green-500/50' : 'bg-[#0a1628] border-[#1a3a5c]';
+  const icon = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-green-400' : 'text-[#3bb5ff]';
+  return (
+    <div className={`fixed top-16 left-4 right-4 z-50 ${bg} border rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3 animate-in fade-in`}>
+      <span className={icon}>{Ico.alert}</span>
+      <span className="text-sm text-gray-200 flex-1">{message}</span>
+      <button onClick={onClose} className="text-gray-500 btn-touch p-1">{Ico.close}</button>
+    </div>
+  );
+}
+
+// ---------- Remote Folder Picker (System File Browser) ----------
+function RemoteFolderPicker({ initialPath, onSelect, onCancel, showFiles = false, multiSelect = false }) {
   const [currentPath, setCurrentPath] = useState(initialPath || '');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPaths, setSelectedPaths] = useState([]);
-
-  useEffect(() => { fetchDirectory(initialPath); }, [initialPath]);
 
   const fetchDirectory = async (path) => {
     setLoading(true); setError(null);
@@ -103,26 +103,29 @@ const RemoteFolderPicker = ({ initialPath, onSelect, onCancel, showFiles = false
     finally { setLoading(false); }
   };
 
-  const handleItemClick = (item) => {
-    if (item.name === '..') { fetchDirectory(item.path); return; }
-    if (multiSelect) {
-      setSelectedPaths(prev => prev.includes(item.path) ? prev.filter(p => p !== item.path) : [...prev, item.path]);
-    } else {
-      if (showFiles && !item.is_dir) {
-        onSelect(item.path);
-      } else {
-        setSelectedPaths([item.path]);
-      }
-    }
+  useEffect(() => { fetchDirectory(initialPath); }, [initialPath]);
+
+  const toggleSelect = (path) => {
+    setSelectedPaths(prev => prev.includes(path) ? prev.filter(p => p !== path) : [...prev, path]);
   };
 
-  const handleItemDoubleClick = (item) => {
+  const handleItemTap = (item) => {
     if (item.name === '..') { fetchDirectory(item.path); return; }
     if (item.is_dir) {
-      setSelectedPaths([]);
-      fetchDirectory(item.path);
-    } else if (showFiles && !multiSelect) {
-      onSelect(item.path);
+      if (!multiSelect) {
+        // In single-select folder mode: tap navigates, selection handled by "Select Folder" button
+        fetchDirectory(item.path);
+      } else {
+        // In multiSelect: tap navigates into folder
+        fetchDirectory(item.path);
+      }
+    } else {
+      // File: tap toggles selection
+      if (multiSelect) {
+        toggleSelect(item.path);
+      } else {
+        onSelect(item.path);
+      }
     }
   };
 
@@ -134,116 +137,88 @@ const RemoteFolderPicker = ({ initialPath, onSelect, onCancel, showFiles = false
           <div className="text-[10px] text-[#3bb5ff] font-bold uppercase mb-0.5 opacity-50">Current Location</div>
           <div className="text-xs text-gray-300 font-mono truncate">{currentPath}</div>
         </div>
+        {selectedPaths.length > 0 && (
+          <div className="px-3 py-1.5 bg-[#3bb5ff]/20 border border-[#3bb5ff]/40 rounded-full">
+            <span className="text-[10px] text-[#3bb5ff] font-black">{selectedPaths.length} SEL</span>
+          </div>
+        )}
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {loading ? <p className="text-center p-8 text-gray-500 animate-pulse">Scanning...</p> : error ? <p className="text-red-400 p-4 text-center">{error}</p> : items.map(item => {
           const isSel = selectedPaths.includes(item.path);
+          const isDir = item.is_dir;
+          const isBack = item.name === '..';
           return (
-            <button key={item.path} onClick={() => handleItemClick(item)} onDoubleClick={() => handleItemDoubleClick(item)} className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl border btn-touch transition-all ${isSel ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : item.is_dir ? 'text-[#3bb5ff] bg-[#0f1f3a]/40 border-[#1a3a5c]' : 'text-gray-300 bg-[#060d1a] border-[#1a3a5c]'}`}>
-              <span className={isSel ? 'text-white' : item.is_dir ? 'text-[#3bb5ff]' : 'text-gray-500'}>
-                {isSel ? Ico.check : item.is_dir ? Ico.folder : Ico.file}
-              </span>
-              <div className="flex-1 flex flex-col items-start min-w-0">
-                <span className="text-sm font-medium truncate w-full text-left">{item.name === '..' ? 'Parent Directory' : item.name}</span>
-                {item.is_dir && item.name !== '..' && <span className="text-[9px] text-[#3bb5ff]/50 uppercase tracking-widest">Double-tap to open</span>}
-              </div>
-              {multiSelect && item.name !== '..' && (
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSel ? 'bg-[#3bb5ff] border-[#3bb5ff]' : 'border-gray-600'}`}>
-                  {isSel && <div className="w-2 h-2 bg-white rounded-full" />}
-                </div>
+            <div key={item.path} className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl border btn-touch transition-all ${isSel ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : isDir ? 'text-[#3bb5ff] bg-[#0f1f3a]/40 border-[#1a3a5c]' : 'text-gray-300 bg-[#060d1a] border-[#1a3a5c]'}`}>
+              {/* Selection checkbox for multiSelect (files always, folders optionally) */}
+              {multiSelect && !isBack && (
+                <button onClick={(e) => { e.stopPropagation(); toggleSelect(item.path); }} className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSel ? 'bg-[#3bb5ff] border-[#3bb5ff]' : 'border-gray-600 bg-transparent'}`}>
+                  {isSel && <div className="text-white">{Ico.check}</div>}
+                </button>
               )}
-            </button>
-          )
+              {/* Main tap area: folders navigate, files select */}
+              <button onClick={() => handleItemTap(item)} className="flex-1 flex items-center gap-3 min-w-0 text-left">
+                <span className={isSel ? 'text-white' : isDir ? 'text-[#3bb5ff]' : 'text-gray-500'}>{isSel && !isDir ? Ico.check : isDir ? Ico.folder : Ico.file}</span>
+                <div className="flex-1 flex flex-col items-start min-w-0">
+                  <span className="text-sm font-medium truncate w-full">{isBack ? 'Parent Directory' : item.name}</span>
+                  {isDir && !isBack && <span className="text-[9px] text-[#3bb5ff]/50 uppercase tracking-widest">Tap to open</span>}
+                </div>
+              </button>
+              {/* Navigate arrow for folders */}
+              {isDir && !isBack && (
+                <button onClick={() => fetchDirectory(item.path)} className="p-2 text-gray-600 hover:text-[#3bb5ff] transition-colors flex-shrink-0">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><path d="M9 5l7 7-7 7" /></svg>
+                </button>
+              )}
+            </div>
+          );
         })}
       </div>
       <div className="p-4 bg-[#0a1628] border-t border-[#1a3a5c] flex gap-3">
         {multiSelect ? (
           <button onClick={() => onSelect(selectedPaths)} disabled={selectedPaths.length === 0} className="flex-1 py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 disabled:opacity-40 uppercase tracking-widest text-xs">Confirm ({selectedPaths.length})</button>
         ) : !showFiles ? (
-          <button onClick={() => onSelect(selectedPaths.length > 0 ? selectedPaths[0] : currentPath)} className="flex-1 py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 uppercase tracking-widest text-xs">Select Folder</button>
+          <button onClick={() => onSelect(currentPath)} className="flex-1 py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 uppercase tracking-widest text-xs">Select This Folder</button>
         ) : null}
         <button onClick={onCancel} className="px-8 py-4 bg-[#0f1f3a] text-white rounded-2xl border border-[#1a3a5c] btn-touch font-bold uppercase tracking-widest text-xs">Cancel</button>
       </div>
     </div>
   );
-};
+}
 
-
-// ─────────────────── CONFIG EDITOR (MOBILE) ───────────────────
-const ConfigField = ({ label, value, path, onChange }) => {
-  if (typeof value === 'boolean') {
-    return (
-      <label className="flex items-center justify-between p-4 bg-[#060d1a] border border-[#1a3a5c] rounded-xl cursor-pointer active:bg-[#0f1f3a] transition-all">
-        <span className="text-sm text-gray-300">{label}</span>
-        <input
-          type="checkbox"
-          checked={value}
-          onChange={(e) => onChange(path, e.target.checked)}
-          className="w-5 h-5 accent-[#3bb5ff]"
-        />
-      </label>
-    );
-  }
-
-  if (typeof value === 'number' || typeof value === 'string') {
-    const isSecret = label.toLowerCase().includes('token') || label.toLowerCase().includes('salt');
-    return (
-      <div className="space-y-1.5">
-        <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-widest font-bold ml-1">{label}</label>
-        <input
-          type={isSecret ? "password" : (typeof value === 'number' ? "number" : "text")}
-          value={value}
-          onChange={(e) => onChange(path, typeof value === 'number' ? parseFloat(e.target.value) : e.target.value)}
-          className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-4 py-3 text-sm focus:border-[#3bb5ff] outline-none text-gray-200"
-          placeholder={`Enter ${label}...`}
-        />
-      </div>
-    );
-  }
-  return null;
-};
-
-const ConfigSection = ({ title, data, path = [], onChange }) => {
-  return (
-    <div className="space-y-4 mb-6">
-      <div className="flex items-center gap-2 pb-2 border-b border-[#1a3a5c]">
-        <h3 className="text-xs font-bold text-[#3bb5ff] uppercase tracking-wider">{title}</h3>
-      </div>
-      <div className="space-y-4">
-        {Object.entries(data).map(([key, val]) => {
-          if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
-            return (
-              <div key={key} className="pl-2 border-l border-[#1a3a5c]/50">
-                <ConfigSection title={key} data={val} path={[...path, key]} onChange={onChange} />
-              </div>
-            );
+// ---------- Archive Folder Picker (for destination / parent selection inside vault) ----------
+function ArchiveFolderPicker({ selectedDb, onSelect, onCancel, initialPath = '.' }) {
+  const [path, setPath] = useState(initialPath);
+  const [folders, setFolders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (selectedDb) {
+      setLoading(true);
+      fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(path)}&depth=1`)
+        .then(r => r.json())
+        .then(d => {
+          let f = [];
+          if (path === '.' || path === '') {
+            f = Object.values(d.results || {}).filter(i => i.type === 'folder').map(i => ({ name: i.name, path: i.name }));
+          } else {
+            const k = Object.keys(d.results || {});
+            if (k.length) {
+              const t = d.results[k[0]];
+              if (t.contents) f = Object.values(t.contents).filter(i => i.type === 'folder').map(i => ({ name: i.name, path: `${path}/${i.name}` }));
+            }
           }
-          return (
-            <ConfigField
-              key={key}
-              label={key.replace(/_/g, ' ')}
-              value={val}
-              path={[...path, key]}
-              onChange={onChange}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+          setFolders(f);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    }
+  }, [selectedDb, path]);
 
-// ─────────────────── ARCHIVE FOLDER PICKER ───────────────────
-function ArchiveFolderPicker({ selectedDb, onSelect, onCancel }) {
-  const [path, setPath] = useState('.')
-  const [folders, setFolders] = useState([])
-  const [loading, setLoading] = useState(false)
-  useEffect(() => { if (selectedDb) { setLoading(true); fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(path)}&depth=1`).then(r => r.json()).then(d => { let f = []; if (path === '.' || path === '') { f = Object.values(d.results || {}).filter(i => i.type === 'folder').map(i => ({ name: i.name, path: i.name })) } else { const k = Object.keys(d.results || {}); if (k.length) { const t = d.results[k[0]]; if (t.contents) f = Object.values(t.contents).filter(i => i.type === 'folder').map(i => ({ name: i.name, path: `${path}/${i.name}` })) } } setFolders(f); setLoading(false) }).catch(() => setLoading(false)) } }, [selectedDb, path])
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <button onClick={() => setPath('.')} className="btn-touch text-[#3bb5ff] p-1">{Ico.home}</button>
-        {path !== '.' && <button onClick={() => { const p = path.split('/'); p.pop(); setPath(p.length ? p.join('/') : '.') }} className="btn-touch text-gray-400 p-1">{Ico.back}</button>}
+        {path !== '.' && <button onClick={() => { const p = path.split('/'); p.pop(); setPath(p.length ? p.join('/') : '.'); }} className="btn-touch text-gray-400 p-1">{Ico.back}</button>}
         <span className="text-xs text-gray-300 font-mono truncate flex-1">{path}</span>
       </div>
       <div className="max-h-48 overflow-y-auto space-y-1">
@@ -251,151 +226,31 @@ function ArchiveFolderPicker({ selectedDb, onSelect, onCancel }) {
           <button key={f.path} onClick={() => setPath(f.path)} className="w-full flex items-center gap-2 px-3 py-2 bg-[#0f1f3a] rounded-lg text-sm text-[#3bb5ff] btn-touch">{Ico.folderOpen}{f.name}</button>
         ))}
       </div>
-      <button onClick={() => { if (onSelect) onSelect(path); else if (onCancel) onCancel(path) }} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch">Select "{path}"</button>
-    </div>
-  )
-}
-
-// ─────────────────── SETTINGS TAB COMPONENT (EXTRACTED TO FIX HOOKS RULES) ───────────────────
-function SettingsTab({ config, fetchConfig, connectionStatus, connectWS, showToast }) {
-  const [localConfig, setLocalConfig] = useState(null);
-  const [downloadFolder, setDownloadFolder] = useState(localStorage.getItem('VAULT_OPUS_download_folder') || './downloads');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
-  const [showPicker, setShowPicker] = useState(false);
-
-  useEffect(() => {
-    if (config) {
-      setLocalConfig(JSON.parse(JSON.stringify(config)));
-      setError(null);
-    } else {
-      fetchConfig().catch(() => setError('Failed to load configuration'));
-    }
-  }, [config]);
-
-  const handleFieldChange = (path, value) => {
-    setLocalConfig(prev => {
-      const updateNested = (obj, pathParts, val) => {
-        const [first, ...rest] = pathParts;
-        if (rest.length === 0) return { ...obj, [first]: val };
-        return { ...obj, [first]: updateNested(obj[first] || {}, rest, val) };
-      };
-      return updateNested(prev, path, value);
-    });
-  };
-
-  const saveSettings = async () => {
-    setSaving(true);
-    try {
-      await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(localConfig)
-      });
-      localStorage.setItem('VAULT_OPUS_download_folder', downloadFolder);
-      showToast('Settings saved', 'success');
-      await fetchConfig();
-    } catch (e) { showToast('Failed to save', 'error'); }
-    setSaving(false);
-  };
-
-  return (
-    <div className="flex flex-col h-full bg-[#060d1a] relative w-full overflow-hidden">
-      <div className="px-6 py-4 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between sticky top-0 z-20">
-        <h2 className="text-xl font-black text-white tracking-tight">Settings</h2>
-        {connectionStatus === 'disconnected' && (
-          <button onClick={connectWS} className="px-4 py-2 bg-red-500/20 border border-red-500/50 text-red-500 text-[10px] font-black rounded-full animate-pulse uppercase tracking-widest">Reconnect</button>
-        )}
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 pb-40">
-        {error ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-            <div className="text-red-500 scale-150">{Ico.alert}</div>
-            <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">{error}</p>
-            <button onClick={fetchConfig} className="px-8 py-4 bg-[#0f1f3a] border border-[#1a3a5c] text-[#3bb5ff] rounded-2xl font-black btn-touch uppercase text-[10px] tracking-widest">Retry Load</button>
-          </div>
-        ) : !localConfig ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-10 h-10 border-4 border-[#3bb5ff]/20 border-t-[#3bb5ff] rounded-full animate-spin mb-4" />
-            <p className="text-[#3bb5ff] text-[10px] font-black uppercase tracking-[0.2em] animate-pulse">Syncing Config</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="space-y-4 mb-8 bg-[#0a1628] p-6 rounded-3xl border border-[#1a3a5c] shadow-xl">
-              <div className="flex items-center gap-2 pb-3 border-b border-[#1a3a5c]">
-                <h3 className="text-[10px] font-black text-[#3bb5ff] uppercase tracking-[0.2em]">Interface</h3>
-              </div>
-              <div className="space-y-1.5 pt-2">
-                <label className="text-[10px] text-gray-500 uppercase tracking-widest font-black ml-1">Download Destination</label>
-                {showPicker ? (
-                  <div className="h-[50vh] border border-[#1a3a5c] rounded-2xl overflow-hidden mt-2 bg-[#060d1a]">
-                    <RemoteFolderPicker
-                      initialPath={downloadFolder}
-                      onSelect={p => { setDownloadFolder(p); setShowPicker(false); }}
-                      onCancel={() => setShowPicker(false)}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      type="text"
-                      value={downloadFolder}
-                      onChange={(e) => setDownloadFolder(e.target.value)}
-                      className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-2xl px-4 py-4 text-sm focus:border-[#3bb5ff] outline-none text-gray-200"
-                      placeholder="./downloads"
-                    />
-                    <button onClick={() => setShowPicker(true)} className="p-4 bg-[#0f1f3a] border border-[#1a3a5c] rounded-2xl text-[#3bb5ff] btn-touch">{Ico.folderOpen}</button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {Object.entries(localConfig).map(([section, data]) => (
-              <div key={section} className="bg-[#0a1628] p-6 rounded-3xl border border-[#1a3a5c] shadow-xl">
-                <ConfigSection
-                  title={section}
-                  data={data}
-                  onChange={handleFieldChange}
-                />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {localConfig && (
-        <div className="fixed bottom-24 left-6 right-6 z-30">
-          <button
-            onClick={saveSettings}
-            disabled={saving}
-            className="w-full py-5 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-3xl font-black btn-touch shadow-2xl shadow-[#3bb5ff]/30 uppercase tracking-[0.2em] text-xs"
-          >
-            {saving ? 'Syncing...' : 'Commit Settings'}
-          </button>
-        </div>
-      )}
+      <button onClick={() => onSelect(path)} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch">Select "{path}"</button>
+      {onCancel && <button onClick={onCancel} className="w-full py-3 bg-[#0f1f3a] text-gray-300 rounded-xl border border-[#1a3a5c] btn-touch">Cancel</button>}
     </div>
   );
 }
 
-// ─────────────────── APP ───────────────────
+// ---------- Main App ----------
 export default function App() {
-  const [tab, setTab] = useState('explorer')
-  const [dbs, setDbs] = useState([])
-  const [selectedDb, setSelectedDb] = useState(localStorage.getItem('mob_selectedDb') || '')
-  const [tree, setTree] = useState(null)
-  const [currentPath, setCurrentPath] = useState('.')
-  const [currentVersion, setCurrentVersion] = useState(null)
-  const [selectedItems, setSelectedItems] = useState([])
-  const [ws, setWs] = useState(null)
-  const [terminalOutput, setTerminalOutput] = useState('')
-  const [queue, setQueue] = useState([])
-  const [config, setConfig] = useState(null)
-  const [promptData, setPromptData] = useState(null)
-  const [bottomSheet, setBottomSheet] = useState(null)
-  const [modal, setModal] = useState(null)
-  const [showCreateVolume, setShowCreateVolume] = useState(false)
+  // State
+  const [tab, setTab] = useState('explorer');
+  const [dbs, setDbs] = useState([]);
+  const [selectedDb, setSelectedDb] = useState(localStorage.getItem('mob_selectedDb') || '');
+  const [tree, setTree] = useState(null);
+  const [currentPath, setCurrentPath] = useState('.');
+  const [currentVersion, setCurrentVersion] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [ws, setWs] = useState(null);
+  const [terminalOutput, setTerminalOutput] = useState('');
+  const [queue, setQueue] = useState([]);
+  const [config, setConfig] = useState(null);
+  const [promptData, setPromptData] = useState(null);
+  const [bottomSheet, setBottomSheet] = useState(null);
+  const [modal, setModal] = useState(null);
+  const [showCreateVolume, setShowCreateVolume] = useState(false);
+  const [newDbName, setNewDbName] = useState('');
   const [externalVolumes, setExternalVolumes] = useState(() => {
     const saved = localStorage.getItem('mob_externalVolumes');
     return saved ? JSON.parse(saved) : [];
@@ -404,364 +259,721 @@ export default function App() {
     const saved = localStorage.getItem('mob_recentVolumes');
     return saved ? JSON.parse(saved) : [];
   });
-  const [newDbName, setNewDbName] = useState('')
-  const [toast, setToast] = useState(null)
-
-  const showToast = (msg, type = 'info') => setToast({ message: msg, type, key: Date.now() })
-
-  // WebSocket
+  const [toast, setToast] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('connecting');
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
 
+  const showToast = (msg, type = 'info') => setToast({ message: msg, type, key: Date.now() });
+
+  // WebSocket
   const connectWS = () => {
     if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-
-    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    // Fix: Always target port 8000 for backend if on localhost or PC IP, 
-    // unless the app is being served by the backend itself (usually port 8000)
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     let host = window.location.host;
-    if (window.location.port === '5173') {
-      host = window.location.hostname + ':8000';
-    }
-
+    if (window.location.port === '5173') host = window.location.hostname + ':8000';
     setConnectionStatus('connecting');
-    const socket = new WebSocket(`${proto}//${host}/ws/cli`)
-
+    const socket = new WebSocket(`${proto}//${host}/ws/cli`);
     socket.onopen = () => {
       setWs(socket);
       setConnectionStatus('connected');
       reconnectAttemptsRef.current = 0;
-      setTerminalOutput(p => p + '\n[Connected]\n');
+      setTerminalOutput(p => p + '\n[Connected to VAULT_OPUS CLI]\n');
     };
-
     socket.onmessage = e => {
-      const msg = JSON.parse(e.data)
-      const tid = msg.task_id
-      if (msg.type === 'stdout' || msg.type === 'stderr') setTerminalOutput(p => p + msg.data)
-      else if (msg.type === 'status') setQueue(q => q.map(i => i.id === tid ? { ...i, status: msg.data.includes('Queued') ? 'queued' : 'running' } : i))
-      else if (msg.type === 'prompt') setPromptData({ text: msg.prompt, isPassword: msg.is_password, taskId: tid })
-      else if (msg.type === 'exit') {
-        setTerminalOutput(p => p + `\n[Exit ${msg.code}]\n`)
-        setQueue(q => q.map(i => i.id === tid ? { ...i, status: msg.code === 0 ? 'completed' : 'failed', progress: msg.code === 0 ? 100 : i.progress } : i))
-        if (msg.code === 0) showToast('Operation completed', 'success')
-        else showToast('Operation failed', 'error')
-        fetchFiles(currentPath)
+      const msg = JSON.parse(e.data);
+      const tid = msg.task_id;
+      const line = msg.data || '';
+      if (msg.type === 'stdout' || msg.type === 'stderr') {
+        setTerminalOutput(p => p + line);
+        // Parse progress % from output lines
+        const progressMatch = line.match(/Overall.*Progress.*\((\d+)%\)/i) || line.match(/Overall:.*\((\d+)%\)/i);
+        setQueue(q => q.map(i => {
+          if (i.id !== tid) return i;
+          let status = i.status === 'queued' ? 'running' : i.status;
+          if (line.includes('[OP_SUCCESS]')) return { ...i, status: 'completed', progress: 100 };
+          if (line.includes('[OP_FAILURE]')) return { ...i, status: 'failed' };
+          if (progressMatch) return { ...i, status: 'running', progress: parseInt(progressMatch[1], 10) };
+          return { ...i, status };
+        }));
+      } else if (msg.type === 'status') {
+        setQueue(q => q.map(i => i.id === tid ? { ...i, status: line.includes('Queued') ? 'queued' : 'running' } : i));
+      } else if (msg.type === 'prompt') {
+        setPromptData({ text: msg.prompt, isPassword: msg.is_password, taskId: tid });
+      } else if (msg.type === 'exit') {
+        setTerminalOutput(p => p + `\n[Process ${tid} exited with code: ${msg.code}]\n`);
+        setQueue(q => q.map(i => i.id === tid ? { ...i, status: msg.code === 0 ? 'completed' : 'failed', progress: msg.code === 0 ? 100 : i.progress } : i));
+        if (msg.code === 0) { showToast('Operation completed', 'success'); fetchFiles(currentPath); }
+        else showToast('Operation failed', 'error');
       }
-    }
-
+    };
     socket.onclose = () => {
       setWs(null);
       setConnectionStatus('disconnected');
-      setTerminalOutput(p => p + '\n[Disconnected]\n');
-
-      // Retry logic: up to 3 times, then stop as per original request, 
-      // but user later said "until it's connected". 
-      // I'll implement a 3-retry limit with a manual option, 
-      // or just keep retrying if that's what "until it's connected" means.
-      // Given the conflicting requests, I'll do 3 auto-retries and then show a "Reconnect" button.
+      setTerminalOutput(p => p + '\n[Disconnected from VAULT_OPUS CLI]\n');
       if (reconnectAttemptsRef.current < 3) {
-        reconnectAttemptsRef.current += 1;
+        reconnectAttemptsRef.current++;
         reconnectTimeoutRef.current = setTimeout(connectWS, 3000);
       }
-    }
-
-    socket.onerror = () => {
-      socket.close();
     };
+    socket.onerror = () => socket.close();
   };
+  useEffect(() => { connectWS(); return () => { if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current); if (ws) ws.close(); }; }, []);
 
-  useEffect(() => {
-    connectWS();
-    return () => {
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (ws) ws.close(); // Crucial: close the socket on unmount
-    }
-  }, [])
+  const sendWS = (action, args, task_id) => { if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ action, args, task_id })); };
+  const addQueue = (name, type) => { const id = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`; setQueue(q => [...q, { id, name, status: 'queued', progress: 0 }]); return id; };
+  const runCmd = (args, name, type) => { const id = addQueue(name, type); sendWS('run', args, id); };
 
-  const sendWS = (action, args, task_id) => { if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ action, args, task_id })) }
-  const addQueue = (name, type) => { const id = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`; setQueue(q => [...q, { id, name, status: 'queued', progress: 0 }]); return id }
-  const runCmd = (args, name, type) => { const id = addQueue(name, type); sendWS('run', args, id) }
-
+  // Data fetching
   const fetchDbs = async () => {
     try {
       const r = await fetch('/api/dbs');
       const data = await r.json();
       const availableDbs = data.dbs || [];
-
-      setDbs(prev => {
-        const all = [...availableDbs];
-        externalVolumes.forEach(ext => {
-          if (!all.includes(ext)) all.push(ext);
-        });
-        return all;
-      });
-    } catch (e) {
-      showToast('Failed to fetch volumes', 'error')
-    }
-  }
-  const fetchConfig = async () => { try { const r = await fetch('/api/config'); setConfig(await r.json()) } catch (e) { } }
-  const fetchFiles = async (path, version) => {
-    if (!selectedDb) return
+      const all = [...availableDbs];
+      externalVolumes.forEach(ext => { if (!all.includes(ext)) all.push(ext); });
+      setDbs(all);
+    } catch (e) { showToast('Failed to fetch volumes', 'error'); }
+  };
+  const fetchConfig = async () => { try { const r = await fetch('/api/config'); setConfig(await r.json()); } catch (e) { } };
+  const fetchFiles = async (path, version = currentVersion) => {
+    if (!selectedDb) return;
     try {
-      let url = `/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(path)}`
-      if (version) url += `&version=${encodeURIComponent(version)}`
-      const r = await fetch(url); setTree(await r.json())
-    } catch (e) { showToast('Failed to fetch files', 'error') }
-  }
-
-  useEffect(() => { fetchDbs(); fetchConfig() }, [])
+      let url = `/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(path)}`;
+      if (version) url += `&version=${encodeURIComponent(version)}`;
+      const r = await fetch(url);
+      const data = await r.json();
+      setTree(data);
+    } catch (e) { showToast('Failed to fetch files', 'error'); }
+  };
+  useEffect(() => { fetchDbs(); fetchConfig(); }, []);
   useEffect(() => {
     if (selectedDb) {
       localStorage.setItem('mob_selectedDb', selectedDb);
-
-      // Update recent volumes
       setRecentVolumes(prev => {
         const updated = [selectedDb, ...prev.filter(db => db !== selectedDb)].slice(0, 10);
         localStorage.setItem('mob_recentVolumes', JSON.stringify(updated));
         return updated;
       });
-
       setCurrentVersion(null);
       fetchFiles(currentPath);
     }
-  }, [selectedDb])
+  }, [selectedDb]);
 
-  const handleNavigate = (path) => { setCurrentPath(path); setSelectedItems([]); fetchFiles(path, currentVersion) }
+  const handleNavigate = (path) => { setCurrentPath(path); setSelectedItems([]); fetchFiles(path, currentVersion); };
+  const handleRefresh = () => { if (selectedDb) fetchFiles(currentPath, currentVersion); };
 
-  let items = []
+  // Build items list from tree
+  let items = [];
   if (tree?.results) {
-    const keys = Object.keys(tree.results)
+    const keys = Object.keys(tree.results);
     if (currentPath !== '.' && keys.length === 1) {
-      const s = tree.results[keys[0]]
-      if (s.type === 'folder' && s.contents) items = Object.values(s.contents).map(i => ({ ...i, displayName: i.name || i.db_name || 'Unknown', type: i.type || (i.itemid?.startsWith('d') ? 'folder' : 'file') }))
-      else items = keys.map(k => ({ ...tree.results[k], itemid: k, displayName: tree.results[k].name || tree.results[k].db_name || 'Unknown', type: tree.results[k].type || (tree.results[k].itemid?.startsWith('d') ? 'folder' : 'file') }))
-    } else items = keys.map(k => ({ ...tree.results[k], itemid: k, displayName: tree.results[k].name || tree.results[k].db_name || 'Unknown', type: tree.results[k].type || (tree.results[k].itemid?.startsWith('d') ? 'folder' : 'file') }))
+      const single = tree.results[keys[0]];
+      if (single.type === 'folder' && single.contents) {
+        items = Object.values(single.contents).map(i => ({ ...i, displayName: i.name || i.db_name || 'Unknown', type: i.type || (i.itemid?.startsWith('d') ? 'folder' : 'file') }));
+      } else {
+        items = keys.map(k => ({ ...tree.results[k], itemid: k, displayName: tree.results[k].name || tree.results[k].db_name || 'Unknown', type: tree.results[k].type || (tree.results[k].itemid?.startsWith('d') ? 'folder' : 'file') }));
+      }
+    } else {
+      items = keys.map(k => ({ ...tree.results[k], itemid: k, displayName: tree.results[k].name || tree.results[k].db_name || 'Unknown', type: tree.results[k].type || (tree.results[k].itemid?.startsWith('d') ? 'folder' : 'file') }));
+    }
   }
 
-  const handleItemClick = (item, e) => {
-    setSelectedItems(p => {
-      const exists = p.find(i => i.itemid === item.itemid);
-      return exists ? p.filter(i => i.itemid !== item.itemid) : [...p, item];
-    });
-  }
-  const handleItemDoubleClick = (item) => { if (item.type === 'folder') { const t = item.db_name || item.name; handleNavigate(currentPath === '.' ? t : `${currentPath}/${t}`) } }
+  // Selection helpers
+  const toggleSelect = (item) => {
+    setSelectedItems(prev => prev.find(i => i.itemid === item.itemid) ? prev.filter(i => i.itemid !== item.itemid) : [...prev, item]);
+  };
+  const clearSelection = () => setSelectedItems([]);
 
-  const renderExplorer = () => (
-    <div className="flex flex-col h-full bg-[#060d1a]">
-      <div className="flex items-center gap-1 px-3 py-2 bg-[#0a1628] border-b border-[#1a3a5c] overflow-x-auto no-scrollbar shadow-md">
-        <button onClick={() => handleNavigate('.')} className={`px-3 py-1.5 text-[10px] font-bold rounded-lg btn-touch whitespace-nowrap transition-all ${currentPath === '.' ? 'bg-[#3bb5ff] text-[#0a1628]' : 'bg-[#0f1f3a] text-gray-400 border border-[#1a3a5c]'}`}>ROOT</button>
-        {currentPath !== '.' && currentPath.split('/').map((part, i, arr) => (
-          <React.Fragment key={i}>
-            <span className="text-gray-700 font-bold text-[10px]">/</span>
-            <button onClick={() => handleNavigate(arr.slice(0, i + 1).join('/'))} className={`px-3 py-1.5 text-[10px] font-bold rounded-lg btn-touch whitespace-nowrap transition-all ${i === arr.length - 1 ? 'bg-[#3bb5ff]/20 text-[#3bb5ff] border border-[#3bb5ff]/40' : 'bg-[#0f1f3a] text-gray-400'}`}>{part.toUpperCase()}</button>
-          </React.Fragment>
-        ))}
-        {currentVersion && (
-          <button onClick={() => { setCurrentVersion(null); fetchFiles(currentPath) }} className="ml-2 px-3 py-1.5 text-[9px] bg-orange-500/20 border border-orange-500/50 rounded-full text-orange-400 font-black btn-touch animate-pulse whitespace-nowrap">V: {currentVersion} ✕</button>
-        )}
-      </div>
-
-      <div className="flex gap-2 px-3 py-3 bg-[#0a1628] border-b border-[#1a3a5c] overflow-x-auto no-scrollbar shadow-inner items-center">
-        <button onClick={() => setBottomSheet({ title: 'Upload Files', content: <UploadForm /> })} className="flex items-center justify-center p-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl btn-touch shadow-lg shadow-[#3bb5ff]/20 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
-          {Ico.upload}
-        </button>
-        <button onClick={() => { if (selectedItems.length) setBottomSheet({ title: 'Download Options', content: <DownloadForm /> }) }} disabled={!selectedItems.length} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
-          {Ico.download}
-        </button>
-        <button onClick={() => { if (selectedItems.length) setBottomSheet({ title: 'Delete Items', content: <DeleteForm /> }) }} disabled={!selectedItems.length} className="flex items-center justify-center p-3 bg-red-900/20 border border-red-900/40 text-red-400 rounded-xl btn-touch disabled:opacity-40 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
-          {Ico.trash}
-        </button>
-        <button onClick={() => setBottomSheet({ title: 'New Folder', content: <MakeFolderForm /> })} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
-          {Ico.newFolder}
-        </button>
-        <button onClick={() => setSelectedItems([...items])} disabled={!items.length} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
-          {Ico.selectAll}
-        </button>
-        <button onClick={() => { if (selectedItems.length === 1) setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu /> }) }} disabled={selectedItems.length !== 1} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
-          {Ico.menu}
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
-        {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-600 opacity-40 py-20">
-            <div className="mb-6 scale-150">{Ico.folder}</div>
-            <p className="text-sm font-bold uppercase tracking-widest">Folder is empty</p>
-            <p className="text-[10px] mt-2 font-mono">TAP UPLOAD TO ADD CONTENT</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3">
-            {items.map((item, idx) => {
-              const isSelected = selectedItems.find(i => i.itemid === item.itemid)
-              const isFolder = item.type === 'folder'
-              return (
-                <div key={idx} onClick={() => handleItemClick(item)} onDoubleClick={() => handleItemDoubleClick(item)}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200 btn-touch aspect-square relative
-                    ${isSelected ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] shadow-lg shadow-[#3bb5ff]/10 scale-[0.98]' : 'bg-[#0a1628]/60 border-[#1a3a5c] hover:border-[#3bb5ff]/40'}`}>
-                  {isSelected && <div className="absolute top-2 right-2 w-5 h-5 bg-[#3bb5ff] text-[#0a1628] rounded-full flex items-center justify-center border-2 border-[#0a1628] z-10">{Ico.check}</div>}
-                  <div className={`mb-2 transition-transform ${isSelected ? 'scale-110' : ''}`}>
-                    {isFolder ? React.cloneElement(Ico.folder, { className: 'w-12 h-12' }) : React.cloneElement(Ico.file, { className: 'w-12 h-12' })}
-                  </div>
-                  <div className={`text-[10px] font-bold text-center truncate w-full px-1 ${isSelected ? 'text-white' : 'text-gray-400'}`}>{item.displayName}</div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      {selectedItems.length > 0 && (
-        <div className="fixed bottom-24 left-4 right-4 bg-[#0a1628]/95 backdrop-blur-xl border border-[#3bb5ff]/40 px-6 py-4 rounded-3xl flex items-center justify-between z-40 shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
-          <div>
-            <span className="text-xs text-[#3bb5ff] font-black uppercase tracking-widest">{selectedItems.length} SELECTED</span>
-          </div>
-          <div className="flex gap-4">
-            <button onClick={() => setBottomSheet({ title: 'Download Options', content: <DownloadForm /> })} className="p-3 bg-[#3bb5ff]/10 text-[#3bb5ff] rounded-xl btn-touch border border-[#3bb5ff]/20">{Ico.download}</button>
-            <button onClick={() => setBottomSheet({ title: 'Delete Items', content: <DeleteForm /> })} className="p-3 bg-red-900/20 text-red-400 rounded-xl btn-touch border border-red-500/30">{Ico.trash}</button>
-            <button onClick={() => { if (selectedItems.length === 1) setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu /> }) }} disabled={selectedItems.length !== 1} className="p-3 bg-[#0f1f3a] text-gray-300 rounded-xl btn-touch border border-[#1a3a5c] disabled:opacity-40">{Ico.menu}</button>
-            <button onClick={() => setSelectedItems([])} className="p-3 text-gray-500 btn-touch hover:text-white">{Ico.close}</button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-
-
-  // ─────────────────── VOLUMES TAB ───────────────────
-  const renderVolumes = () => (
-    <div className="flex flex-col h-full">
-      <div className="px-4 py-3 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between shadow-sm">
-        <h2 className="text-lg font-bold text-white">Volumes</h2>
-        <div className="flex gap-2">
-          <button onClick={() => setBottomSheet({ title: 'Sharables Explorer', content: <SharablesView /> })} className="p-2 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch" title="Sharables">{Ico.share}</button>
-          <button onClick={() => { setNewDbName(''); setShowCreateVolume(true) }} className="p-2 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl btn-touch shadow-lg shadow-[#3bb5ff]/20" title="New Volume">{Ico.plus}</button>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-3 space-y-6">
-        {/* Recent Volumes */}
-        {recentVolumes.length > 0 && (
-          <section>
-            <div className="flex items-center gap-2 px-1 mb-3">
-              <span className="text-[#3bb5ff]/50">{Ico.clock}</span>
-              <h3 className="text-[10px] uppercase font-bold text-[#3bb5ff]/50 tracking-widest">Recent</h3>
-            </div>
-            <div className="space-y-2">
-              {recentVolumes.map(db => (
-                <div key={'recent-' + db} onClick={() => { setSelectedDb(db); setTab('explorer') }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border btn-touch transition-all ${selectedDb === db ? 'bg-[#3bb5ff]/15 border-[#3bb5ff] shadow-[0_0_15px_rgba(59,181,255,0.1)]' : 'bg-[#0f1f3a]/40 border-[#1a3a5c]'}`}>
-                  <span className={selectedDb === db ? 'text-[#3bb5ff]' : 'text-gray-500'}>{Ico.cube}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-bold truncate ${selectedDb === db ? 'text-white' : 'text-gray-300'}`}>{db.replace('.db', '')}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* All Volumes */}
-        <section>
-          <div className="flex items-center justify-between px-1 mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-[#3bb5ff]/50">{Ico.cube}</span>
-              <h3 className="text-[10px] uppercase font-bold text-[#3bb5ff]/50 tracking-widest">Available</h3>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => setBottomSheet({ title: 'Add External Volume', content: <RemoteFolderPicker showFiles onSelect={p => { if (p.endsWith('.db')) { setExternalVolumes(prev => { const n = [...new Set([...prev, p])]; localStorage.setItem('mob_externalVolumes', JSON.stringify(n)); return n; }); fetchDbs(); setBottomSheet(null); showToast('Added volume', 'success'); } else { showToast('Must be a .db file', 'error'); } }} onCancel={() => setBottomSheet(null)} /> })} className="text-[10px] text-[#3bb5ff] font-bold btn-touch uppercase">+ Add External</button>
-            </div>
-          </div>
-
-          {dbs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 bg-[#0f1f3a]/20 border border-dashed border-[#1a3a5c] rounded-2xl text-gray-500">
-              <p className="text-xs">No volumes found</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {dbs.map(db => (
-                <div key={db} onClick={() => { setSelectedDb(db); setTab('explorer') }}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border btn-touch transition-all ${selectedDb === db ? 'bg-[#3bb5ff]/15 border-[#3bb5ff] shadow-[0_0_15px_rgba(59,181,255,0.1)]' : 'bg-[#0f1f3a]/40 border-[#1a3a5c]'}`}>
-                  <span className={selectedDb === db ? 'text-[#3bb5ff]' : 'text-gray-500'}>{Ico.cube}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-bold truncate ${selectedDb === db ? 'text-white' : 'text-gray-300'}`}>{db.replace('.db', '')}</div>
-                    <div className="text-[10px] text-gray-500 truncate">{db}</div>
-                  </div>
-                  <button onClick={e => { e.stopPropagation(); setBottomSheet({ title: 'Volume Options', content: <VolumeOptions db={db} /> }) }} className="p-2 text-gray-500 hover:text-white transition-colors">{Ico.menu}</button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <button onClick={() => setModal({ title: 'Import Package (.vov)', content: <ImportForm /> })} className="w-full py-4 bg-[#0f1f3a] border border-[#1a3a5c] rounded-2xl text-xs text-gray-300 font-bold uppercase tracking-widest btn-touch flex items-center justify-center gap-2">
-          {Ico.import} Import VOV Package
-        </button>
-      </div>
-    </div>
-  )
-
-
-  // ─────────────────── QUEUE ───────────────────
-  const renderQueue = () => (
-    <div className="flex flex-col h-full">
-      <div className="px-4 py-3 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between">
-        <h2 className="text-lg font-bold text-white">Queue</h2>
-        <button onClick={() => setQueue([])} className="text-xs text-gray-400 btn-touch">Clear All</button>
-      </div>
-      <div className="flex-1 overflow-y-auto p-3">
-        {queue.length === 0 ? <div className="flex items-center justify-center h-full text-gray-500 text-sm">No active tasks</div> : (
-          <div className="space-y-2">
-            {[...queue].reverse().map(item => (
-              <div key={item.id} className="flex items-center gap-3 px-3 py-2 bg-[#0a1628] border border-[#1a3a5c] rounded-xl">
-                <div className={`w-2 h-2 rounded-full ${item.status === 'completed' ? 'bg-green-400' : item.status === 'failed' ? 'bg-red-400' : item.status === 'running' ? 'bg-[#3bb5ff] animate-pulse' : 'bg-gray-500'}`} />
-                <div className="flex-1 min-w-0"><div className="text-xs text-gray-200 truncate">{item.name}</div><div className="text-[10px] text-gray-500 capitalize">{item.status}</div></div>
-                {item.progress > 0 && <div className="text-xs text-[#3bb5ff]">{item.progress}%</div>}
-              </div>
+  // ---------- Modal Components (Mirroring Desktop) ----------
+  // Download Modal (strictness only)
+  const DownloadModalContent = ({ onConfirm, onCancel }) => {
+    const [strictnessMode, setStrictnessMode] = useState('NA');
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-400">Download {selectedItems.length} item(s)</p>
+        <div>
+          <label className="text-xs text-gray-500 uppercase mb-1 block">Strictness Mode</label>
+          <div className="grid grid-cols-1 gap-2">
+            {[
+              { value: 'NA', label: 'NOT ATOMIC (DEFAULT)', desc: 'Continue on failure' },
+              { value: 'SA', label: 'SOFT ATOMIC', desc: 'Stop immediately, ask before cleanup' },
+              { value: 'HA', label: 'HARD ATOMIC', desc: 'Stop immediately, auto‑cleanup' }
+            ].map(m => (
+              <button key={m.value} onClick={() => setStrictnessMode(m.value)} className={`px-4 py-3 rounded-xl border text-left transition-all ${strictnessMode === m.value ? 'bg-[#1a3a5c]/40 border-[#3bb5ff] text-white shadow-[0_0_15px_rgba(59,181,255,0.2)]' : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'}`}>
+                <div className="font-medium">{m.label}</div>
+                <div className="text-xs opacity-60">{m.desc}</div>
+              </button>
             ))}
           </div>
+        </div>
+        <div className="flex justify-end gap-3 pt-4">
+          <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+          <button onClick={() => onConfirm({ strictnessMode })} className="px-6 py-2 rounded-lg text-sm font-bold bg-[#3bb5ff] hover:bg-[#2e9ee6] text-[#060d1a] shadow-[0_0_20px_rgba(59,181,255,0.3)]">Start Download</button>
+        </div>
+      </div>
+    );
+  };
+
+  // Delete Modal (with version controls for single item)
+  const DeleteModalContent = ({ onConfirm, onCancel, singleItem }) => {
+    const [deleteType, setDeleteType] = useState('soft');
+    const [scope, setScope] = useState(singleItem ? 'all' : 'all');
+    const [version, setVersion] = useState('');
+    const [startVersion, setStartVersion] = useState('');
+    const [endVersion, setEndVersion] = useState('');
+    const [availableVersions, setAvailableVersions] = useState([]);
+    const [loadingVersions, setLoadingVersions] = useState(false);
+
+    useEffect(() => {
+      if (singleItem && selectedDb) {
+        setLoadingVersions(true);
+        const itemPath = currentPath === '.' ? singleItem.displayName : `${currentPath}/${singleItem.displayName}`;
+        fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(itemPath)}`)
+          .then(r => r.json())
+          .then(pathData => {
+            let itemid = null;
+            if (pathData.results) {
+              const keys = Object.keys(pathData.results);
+              if (keys.length) itemid = keys[0];
+            }
+            if (!itemid) throw new Error('No itemid');
+            return fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&itemid=${encodeURIComponent(itemid)}`);
+          })
+          .then(r => r.json())
+          .then(vd => {
+            const versionSet = new Set();
+            const vers = [];
+            if (vd.results) {
+              Object.values(vd.results).forEach(item => {
+                if (item.version && !versionSet.has(item.version)) {
+                  versionSet.add(item.version);
+                  vers.push(item.version);
+                }
+              });
+            }
+            vers.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+            setAvailableVersions(vers);
+            if (vers.length) setVersion(vers[0]);
+          })
+          .catch(console.error)
+          .finally(() => setLoadingVersions(false));
+      }
+    }, [singleItem]);
+
+    const handleConfirm = () => {
+      if (scope === 'specific' && !version) { showToast('Select a version', 'error'); return; }
+      if (scope === 'range' && (!startVersion || !endVersion)) { showToast('Select version range', 'error'); return; }
+      onConfirm({ type: deleteType, scope, version, startVersion, endVersion });
+    };
+
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-400">Delete {singleItem ? `"${singleItem.displayName}"` : `${selectedItems.length} items`}</p>
+        <div>
+          <label className="text-xs text-gray-500 uppercase mb-1 block">Delete Type</label>
+          <div className="flex gap-2">
+            <button onClick={() => setDeleteType('soft')} className={`flex-1 py-3 rounded-xl text-sm border transition-all ${deleteType === 'soft' ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400'}`}>SOFT DELETE</button>
+            <button onClick={() => setDeleteType('hard')} className={`flex-1 py-3 rounded-xl text-sm border transition-all ${deleteType === 'hard' ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400'}`}>HARD DELETE</button>
+          </div>
+        </div>
+        {singleItem && (
+          <div>
+            <label className="text-xs text-gray-500 uppercase mb-1 block">Version Scope</label>
+            <div className="grid grid-cols-1 gap-2">
+              <button onClick={() => setScope('all')} className={`px-4 py-3 rounded-xl border text-left ${scope === 'all' ? 'bg-[#1a3a5c]/40 border-[#3bb5ff]' : 'bg-[#0d1b2e] border-[#1a3a5c]'} text-gray-300`}>All Versions</button>
+              <button onClick={() => setScope('specific')} className={`px-4 py-3 rounded-xl border text-left ${scope === 'specific' ? 'bg-[#1a3a5c]/40 border-[#3bb5ff]' : 'bg-[#0d1b2e] border-[#1a3a5c]'} text-gray-300`}>Specific Version</button>
+              {scope === 'specific' && (
+                <div className="mt-2">
+                  {loadingVersions ? <div className="text-xs text-gray-500 animate-pulse">Loading versions...</div> : (
+                    <select value={version} onChange={e => setVersion(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200">
+                      {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+                    </select>
+                  )}
+                </div>
+              )}
+              <button onClick={() => setScope('range')} className={`px-4 py-3 rounded-xl border text-left ${scope === 'range' ? 'bg-[#1a3a5c]/40 border-[#3bb5ff]' : 'bg-[#0d1b2e] border-[#1a3a5c]'} text-gray-300`}>Version Range</button>
+              {scope === 'range' && (
+                <div className="flex gap-2 mt-2">
+                  <select value={startVersion} onChange={e => setStartVersion(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm">
+                    <option value="">Start</option>
+                    {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                  <select value={endVersion} onChange={e => setEndVersion(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm">
+                    <option value="">End</option>
+                    {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
         )}
+        <div className="flex justify-end gap-3 pt-4 border-t border-[#1a3a5c]">
+          <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+          <button onClick={handleConfirm} className={`px-6 py-2 rounded-lg text-sm font-bold ${deleteType === 'hard' ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-[#3bb5ff] hover:bg-[#2e9ee6] text-[#060d1a]'} transition-all`}>Confirm Deletion</button>
+        </div>
       </div>
-    </div>
-  )
+    );
+  };
 
-  // ─────────────────── TERMINAL ───────────────────
-  const renderTerminal = () => (
-    <div className="flex flex-col h-full">
-      <div className="px-4 py-3 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between">
-        <h2 className="text-lg font-bold text-white">Terminal</h2>
-        <button onClick={() => setTerminalOutput('')} className="text-xs text-gray-400 btn-touch">Clear</button>
+  // Download Version Modal (dropdowns, range, all versions)
+  const DownloadVersionModalContent = ({ itemPath, item, onDownload }) => {
+    const [versionInput, setVersionInput] = useState('');
+    const [startVersion, setStartVersion] = useState('');
+    const [endVersion, setEndVersion] = useState('');
+    const [allVersions, setAllVersions] = useState(false);
+    const [strictnessMode, setStrictnessMode] = useState('NA');
+    const [availableVersions, setAvailableVersions] = useState([]);
+    const [loadingVersions, setLoadingVersions] = useState(true);
+
+    useEffect(() => {
+      if (!selectedDb) return;
+      setLoadingVersions(true);
+      fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(itemPath)}`)
+        .then(r => r.json())
+        .then(pathData => {
+          let itemid = null;
+          if (pathData.results) {
+            const keys = Object.keys(pathData.results);
+            if (keys.length) itemid = keys[0];
+          }
+          if (!itemid) throw new Error('No itemid');
+          return fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&itemid=${encodeURIComponent(itemid)}`);
+        })
+        .then(r => r.json())
+        .then(vd => {
+          const vers = [];
+          if (vd.results) {
+            Object.values(vd.results).forEach(i => { if (i.version) vers.push(i.version); });
+          }
+          vers.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+          setAvailableVersions(vers);
+        })
+        .catch(console.error)
+        .finally(() => setLoadingVersions(false));
+    }, [itemPath]);
+
+    const handleDownload = () => {
+      const args = ['download', itemPath, '-db', selectedDb, '--download_folder', localStorage.getItem('VAULT_OPUS_download_folder') || './downloads'];
+      if (allVersions) args.push('--all_versions', 'yes');
+      else if (startVersion && endVersion) args.push('--start_version', startVersion, '--end_version', endVersion);
+      else if (versionInput) args.push('--version', versionInput);
+      if (strictnessMode !== 'NA') args.push('--strictness_mode', strictnessMode);
+      onDownload(args);
+    };
+
+    return (
+      <div className="space-y-4">
+        <div className="p-3 bg-[#3bb5ff]/10 border border-[#3bb5ff]/30 rounded-lg">
+          <div className="text-[10px] text-[#3bb5ff] uppercase">Item</div>
+          <div className="text-xs text-gray-300 font-mono truncate">{itemPath}</div>
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 uppercase mb-1 block">Specific Version</label>
+          {loadingVersions ? <div className="h-9 bg-[#060d1a] border border-[#1a3a5c] rounded animate-pulse" /> : (
+            <select value={versionInput} onChange={e => { setVersionInput(e.target.value); setStartVersion(''); setEndVersion(''); setAllVersions(false); }} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200">
+              <option value="">Select version...</option>
+              {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+          )}
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 uppercase mb-1 block">Version Range</label>
+          <div className="flex gap-2">
+            <select value={startVersion} onChange={e => { setStartVersion(e.target.value); setVersionInput(''); setAllVersions(false); }} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm">
+              <option value="">Start</option>
+              {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+            <select value={endVersion} onChange={e => { setEndVersion(e.target.value); setVersionInput(''); setAllVersions(false); }} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm">
+              <option value="">End</option>
+              {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+            </select>
+          </div>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" checked={allVersions} onChange={e => { setAllVersions(e.target.checked); if (e.target.checked) { setVersionInput(''); setStartVersion(''); setEndVersion(''); } }} className="w-4 h-4 accent-[#3bb5ff]" />
+          <span className="text-sm text-gray-300">Download All Versions</span>
+        </label>
+        <div>
+          <label className="text-xs text-gray-500 uppercase mb-1 block">Strictness Mode</label>
+          <div className="grid grid-cols-1 gap-2">
+            {['NA', 'SA', 'HA'].map(s => (
+              <button key={s} onClick={() => setStrictnessMode(s)} className={`px-3 py-2 rounded-lg border text-left transition-all ${strictnessMode === s ? 'bg-[#1a3a5c]/40 border-[#3bb5ff] text-white' : 'bg-[#060d1a] border-[#1a3a5c] text-gray-400'}`}>
+                {s === 'NA' ? 'NOT ATOMIC (DEFAULT)' : s === 'SA' ? 'SOFT ATOMIC' : 'HARD ATOMIC'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex justify-end gap-3 pt-4">
+          <button onClick={() => onDownload(null)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
+          <button onClick={handleDownload} className="px-6 py-2 rounded-lg text-sm font-bold bg-[#3bb5ff] text-[#060d1a]">Download</button>
+        </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-3 bg-[#060d1a]">
-        <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap break-all">{terminalOutput || 'No output yet'}</pre>
+    );
+  };
+
+  // See Versions Modal
+  const SeeVersionsModalContent = ({ itemPath, onVersionSelect }) => {
+    const [versions, setVersions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+      fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(itemPath)}`)
+        .then(r => r.json())
+        .then(d => {
+          let itemid = null;
+          if (d.results) {
+            const keys = Object.keys(d.results);
+            if (keys.length) itemid = keys[0];
+          }
+          if (!itemid) throw new Error('No itemid');
+          return fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&itemid=${encodeURIComponent(itemid)}`);
+        })
+        .then(r => r.json())
+        .then(vd => {
+          const vers = [];
+          if (vd.results) {
+            Object.values(vd.results).forEach(i => { if (i.version) vers.push(i.version); });
+          }
+          vers.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+          setVersions(vers);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }, [itemPath]);
+    return (
+      <div className="space-y-2">
+        {loading ? <div className="text-center py-8 text-gray-500">Loading versions...</div> : versions.length === 0 ? <div className="text-center py-8 text-gray-500">No versions found</div> : versions.map(v => (
+          <div key={v} onDoubleClick={() => onVersionSelect(v)} className="flex items-center justify-between px-3 py-2 bg-[#0f1f3a] border border-[#1a3a5c] rounded-lg cursor-pointer hover:bg-[#1a3a5c] transition-all">
+            <span className="text-sm text-gray-200">Version {v}</span>
+            <span className="text-[10px] text-[#3bb5ff]/70">Double‑tap to view</span>
+          </div>
+        ))}
+        <button onClick={() => onVersionSelect(null)} className="w-full py-2 mt-4 text-[#3bb5ff] btn-touch">Close</button>
       </div>
-    </div>
-  )
+    );
+  };
 
-  // ─────────────────── FORMS ───────────────────
-  const UploadForm = () => {
-    const [localPaths, setLocalPaths] = useState([])
-    const [showPicker, setShowPicker] = useState(false)
-    const [encryption, setEncryption] = useState('automatic')
-    const [password, setPassword] = useState('')
-    const [randomSeed, setRandomSeed] = useState(false)
-    const [zeroKnowledge, setZeroKnowledge] = useState(false)
-    const [uploadName, setUploadName] = useState('')
-    const [newVersionString, setNewVersionString] = useState('')
-    const [strictness, setStrictness] = useState('NA')
-    const [chunkSize, setChunkSize] = useState('')
-    const [minimize, setMinimize] = useState(false)
-    const [nameCheck, setNameCheck] = useState(true)
-    const [showPassword, setShowPassword] = useState(false)
+  // New Version Upload Modal
+  const NewVersionUploadModalContent = ({ targetItemPath, onUpload }) => {
+    const [showFolderPicker, setShowFolderPicker] = useState(false);
+    const [uploadPath, setUploadPath] = useState('');
+    const [encryption, setEncryption] = useState('automatic');
+    const [password, setPassword] = useState('');
+    const [randomSeed, setRandomSeed] = useState(false);
+    const [zeroKnowledge, setZeroKnowledge] = useState(false);
+    const [uploadName, setUploadName] = useState('');
+    const [newVersionString, setNewVersionString] = useState('');
+    const [nameCheck, setNameCheck] = useState(true);
+    const [strictnessMode, setStrictnessMode] = useState('NA');
+    const [chunkSizeMb, setChunkSizeMb] = useState('');
+    const [minimize, setMinimize] = useState(false);
+    const [additionMode, setAdditionMode] = useState(false);
+    const [sourceVersion, setSourceVersion] = useState('');
+    const [availableVersions, setAvailableVersions] = useState([]);
+    const [isLoadingVersions, setIsLoadingVersions] = useState(false);
+    const [generatedPassword, setGeneratedPassword] = useState('');
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-    const genPass = () => {
-      const c = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
-      return Array.from(crypto.getRandomValues(new Uint32Array(24))).map(x => c[x % c.length]).join('')
+    const generateRandomPassword = () => {
+      const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+      return Array.from(crypto.getRandomValues(new Uint32Array(24))).map(x => chars[x % chars.length]).join('');
+    };
+
+    useEffect(() => {
+      if (targetItemPath && selectedDb) {
+        setIsLoadingVersions(true);
+        fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(targetItemPath)}`)
+          .then(r => r.json())
+          .then(d => {
+            let itemid = null;
+            if (d.results) {
+              const keys = Object.keys(d.results);
+              if (keys.length) itemid = keys[0];
+            }
+            if (!itemid) throw new Error('No itemid');
+            return fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&itemid=${encodeURIComponent(itemid)}`);
+          })
+          .then(r => r.json())
+          .then(vd => {
+            const vers = [];
+            if (vd.results) {
+              Object.values(vd.results).forEach(i => { if (i.version) vers.push(i.version); });
+            }
+            vers.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+            setAvailableVersions(vers);
+            if (vers.length) setSourceVersion(vers[0]);
+          })
+          .catch(console.error)
+          .finally(() => setIsLoadingVersions(false));
+      }
+    }, [targetItemPath]);
+
+    const handleStartUpload = () => {
+      if (!uploadPath) { showToast('Select a path to upload', 'error'); return; }
+      if (encryption === 'not_automatic' && !minimize) {
+        if (!password && !randomSeed) { showToast('Provide password or select Random', 'error'); return; }
+        if (randomSeed) {
+          const pass = generateRandomPassword();
+          setGeneratedPassword(pass);
+          setShowPasswordModal(true);
+          return;
+        }
+      }
+      proceedWithUpload(password);
+    };
+    const proceedWithUpload = (finalPassword) => {
+      const enc = minimize && encryption === 'not_automatic' ? 'automatic' : encryption;
+      const args = [
+        'upload', uploadPath, '-db', selectedDb, '-c', config?.discord?.channel_id || '',
+        '--encryption_mode', enc,
+        '--target_item_path', targetItemPath, '--upload_mode', 'new_version'
+      ];
+      if (enc === 'not_automatic' && finalPassword) args.push('--password_seed', finalPassword);
+      if (uploadName) args.push('--upload_name', uploadName);
+      if (newVersionString) args.push('--new_version_string', newVersionString);
+      if (strictnessMode !== 'NA') args.push('--strictness_mode', strictnessMode);
+      if (chunkSizeMb) args.push('--chunk_size_mb', chunkSizeMb);
+      if (minimize) args.push('--minimize', 'yes');
+      if (!nameCheck) args.push('--no_name_check');
+      if (additionMode) { args.push('--addition'); if (sourceVersion) args.push('--source_version', sourceVersion); }
+      args.push('--save_hash', encryption === 'not_automatic' && zeroKnowledge ? 'False' : 'True');
+      runCmd(args, uploadPath.split(/[/\\]/).pop(), 'upload');
+      setModal(null);
+      showToast('New version queued', 'success');
+    };
+
+    if (showPasswordModal) {
+      return (
+        <div className="space-y-4 text-center">
+          <div className="p-4 bg-[#3bb5ff]/10 border border-[#3bb5ff]/30 rounded-xl">
+            <p className="text-sm text-[#3bb5ff] font-bold">Save This Password</p>
+            <code className="block mt-2 p-2 bg-[#060d1a] rounded text-white font-mono text-xs break-all">{generatedPassword}</code>
+            <button onClick={() => { navigator.clipboard?.writeText(generatedPassword); showToast('Copied', 'success'); }} className="mt-2 px-4 py-2 text-xs bg-[#0f1f3a] rounded">Copy</button>
+          </div>
+          <button onClick={() => proceedWithUpload(generatedPassword)} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold">Confirm & Upload</button>
+          <button onClick={() => setShowPasswordModal(false)} className="text-sm text-gray-500">Cancel</button>
+        </div>
+      );
     }
 
-    const startUpload = () => {
-      if (localPaths.length === 0) { showToast('Select at least one file', 'error'); return }
+    if (showFolderPicker) {
+      return <RemoteFolderPicker initialPath={uploadPath} showFiles onSelect={p => { setUploadPath(p); setShowFolderPicker(false); }} onCancel={() => setShowFolderPicker(false)} />;
+    }
 
+    return (
+      <div className="space-y-4">
+        <div className="p-3 bg-[#3bb5ff]/10 border border-[#3bb5ff]/30 rounded-lg">
+          <div className="text-[10px] text-[#3bb5ff] uppercase">Target Item</div>
+          <div className="text-xs text-gray-300 font-mono truncate">{targetItemPath}</div>
+        </div>
+        <div className="flex gap-2">
+          <input type="text" value={uploadPath} onChange={e => setUploadPath(e.target.value)} placeholder="Local file/folder" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200" />
+          <button onClick={() => setShowFolderPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">Browse</button>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-[10px] text-gray-500 uppercase">Encryption</label>
+            <select value={encryption} onChange={e => setEncryption(e.target.value)} disabled={minimize} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm">
+              <option value="automatic">Automatic</option>
+              <option value="off">Off</option>
+              <option value="not_automatic">Password</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[10px] text-gray-500 uppercase">Strictness</label>
+            <select value={strictnessMode} onChange={e => setStrictnessMode(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm">
+              <option value="NA">Not Atomic</option>
+              <option value="SA">Soft Atomic</option>
+              <option value="HA">Hard Atomic</option>
+            </select>
+          </div>
+        </div>
+        {encryption === 'not_automatic' && (
+          <div className="flex gap-2">
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={randomSeed} placeholder="Password seed" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+            <button onClick={() => setRandomSeed(!randomSeed)} className={`px-4 py-3 rounded-xl text-xs font-bold border ${randomSeed ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>Random</button>
+          </div>
+        )}
+        <div>
+          <label className="text-[10px] text-gray-500 uppercase">Upload Strategy</label>
+          <div className="flex gap-2 mt-1">
+            <button onClick={() => setAdditionMode(false)} className={`flex-1 py-2 rounded-xl text-sm border ${!additionMode ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#060d1a] border-[#1a3a5c] text-gray-400'}`}>Independent</button>
+            <button onClick={() => setAdditionMode(true)} className={`flex-1 py-2 rounded-xl text-sm border ${additionMode ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#060d1a] border-[#1a3a5c] text-gray-400'}`}>Addition</button>
+          </div>
+        </div>
+        {additionMode && (
+          <div>
+            <label className="text-[10px] text-gray-500 uppercase">Source Version</label>
+            {isLoadingVersions ? <div className="h-9 bg-[#060d1a] animate-pulse rounded" /> : (
+              <select value={sourceVersion} onChange={e => setSourceVersion(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm">
+                {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
+                {availableVersions.length === 0 && <option value="">Latest (Auto)</option>}
+              </select>
+            )}
+          </div>
+        )}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-[10px] text-gray-500 uppercase">Version String</label>
+            <input type="text" value={newVersionString} onChange={e => setNewVersionString(e.target.value)} placeholder="e.g. 1.0.0" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+          </div>
+          <div>
+            <label className="text-[10px] text-gray-500 uppercase">Chunk Size (MB)</label>
+            <input type="number" step="0.1" value={chunkSizeMb} onChange={e => setChunkSizeMb(e.target.value)} placeholder="Auto" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-4">
+          <label className="flex items-center gap-2"><input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="accent-[#3bb5ff]" /><span className="text-xs">Name Check</span></label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={minimize} onChange={e => setMinimize(e.target.checked)} className="accent-[#3bb5ff]" /><span className="text-xs">Minimize</span></label>
+          {encryption === 'not_automatic' && <label className="flex items-center gap-2"><input type="checkbox" checked={zeroKnowledge} onChange={e => setZeroKnowledge(e.target.checked)} disabled={minimize} className="accent-[#3bb5ff]" /><span className="text-xs">Zero‑Knowledge</span></label>}
+        </div>
+        <button onClick={handleStartUpload} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch shadow-lg">Start Upload</button>
+      </div>
+    );
+  };
+
+  // Modify Modal (Move / Copy & Rename)
+  const ModifyModalContent = ({ type, item, onConfirm }) => {
+    const [destination, setDestination] = useState('.');
+    const [newName, setNewName] = useState(item.displayName);
+    const [copyMode, setCopyMode] = useState(false);
+    const [nameMode, setNameMode] = useState('D');
+    const [nameCheck, setNameCheck] = useState(true);
+    const [showPicker, setShowPicker] = useState(false);
+
+    if (showPicker && type === 'move') {
+      return <ArchiveFolderPicker selectedDb={selectedDb} onSelect={p => { setDestination(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} initialPath={destination} />;
+    }
+
+    const handleSubmit = () => {
+      if (type === 'move') {
+        onConfirm({
+          type: 'move',
+          src: item.itemid || (currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`),
+          dst: destination,
+          copyMode,
+          nameCheck,
+          srcIdBased: !!item.itemid,
+          dstIdBased: false
+        });
+      } else {
+        onConfirm({
+          type: 'rename',
+          item: item.itemid || (currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`),
+          newName,
+          nameMode,
+          nameCheck,
+          idBased: !!item.itemid
+        });
+      }
+    };
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-[#060d1a] p-3 rounded-lg border border-[#1a3a5c]">
+          <p className="text-xs text-gray-500">Source:</p>
+          <p className="text-sm text-white truncate">{item.displayName}</p>
+        </div>
+        {type === 'move' ? (
+          <>
+            <div>
+              <label className="text-xs text-gray-500 uppercase mb-1 block">Destination</label>
+              <div className="flex gap-2">
+                <input type="text" value={destination} onChange={e => setDestination(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+                <button onClick={() => setShowPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff]">Browse</button>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2"><input type="checkbox" checked={copyMode} onChange={e => setCopyMode(e.target.checked)} className="accent-[#3bb5ff]" /><span className="text-sm">Copy Mode</span></label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="accent-[#3bb5ff]" /><span className="text-sm">Name Check</span></label>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <label className="text-xs text-gray-500 uppercase mb-1 block">New Name</label>
+              <input type="text" value={newName} onChange={e => setNewName(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 uppercase mb-1 block">Rename Mode</label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'D', label: 'Default', desc: 'Nickname if exists' },
+                  { id: 'N', label: 'Nickname', desc: 'Only nickname' },
+                  { id: 'B', label: 'Original', desc: 'Only original name' },
+                  { id: 'A', label: 'All', desc: 'Update both' }
+                ].map(m => (
+                  <button key={m.id} onClick={() => setNameMode(m.id)} className={`p-3 rounded-xl border text-left transition-all ${nameMode === m.id ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>
+                    <div className="font-medium">{m.label}</div>
+                    <div className="text-[10px] opacity-70">{m.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="accent-[#3bb5ff]" /><span className="text-sm">Name Check</span></label>
+          </>
+        )}
+        <div className="flex justify-end gap-3 pt-4 border-t border-[#1a3a5c]">
+          <button onClick={() => onConfirm(null)} className="px-4 py-2 text-sm text-gray-400">Cancel</button>
+          <button onClick={handleSubmit} className="px-6 py-2 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-lg font-bold">Confirm {type}</button>
+        </div>
+      </div>
+    );
+  };
+
+  // Make Folder Modal
+  const MakeFolderModalContent = () => {
+    const [folderName, setFolderName] = useState('');
+    const [parent, setParent] = useState(currentPath);
+    const [showPicker, setShowPicker] = useState(false);
+    if (showPicker) return <ArchiveFolderPicker selectedDb={selectedDb} onSelect={p => { setParent(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} initialPath={parent} />;
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <input type="text" value={parent} onChange={e => setParent(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+          <button onClick={() => setShowPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff]">Browse</button>
+        </div>
+        <input type="text" value={folderName} onChange={e => setFolderName(e.target.value)} placeholder="Folder name" maxLength={60} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+        <button onClick={async () => {
+          if (!folderName.trim()) return;
+          try {
+            await fetch('/api/folders/make', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ db_name: selectedDb, folder_name: folderName.trim(), parent_path: parent || '.', id_based: false })
+            });
+            showToast('Folder created', 'success');
+            setModal(null);
+            fetchFiles(currentPath);
+          } catch (e) { showToast(e.message, 'error'); }
+        }} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold">Create</button>
+      </div>
+    );
+  };
+
+  // Upload Form (full options)
+  const UploadForm = () => {
+    const [localPaths, setLocalPaths] = useState([]);
+    const [showPicker, setShowPicker] = useState(false);
+    const [encryption, setEncryption] = useState('automatic');
+    const [password, setPassword] = useState('');
+    const [randomSeed, setRandomSeed] = useState(false);
+    const [zeroKnowledge, setZeroKnowledge] = useState(false);
+    const [uploadName, setUploadName] = useState('');
+    const [newVersionString, setNewVersionString] = useState('');
+    const [strictness, setStrictness] = useState('NA');
+    const [chunkSize, setChunkSize] = useState('');
+    const [minimize, setMinimize] = useState(false);
+    const [nameCheck, setNameCheck] = useState(true);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const genPass = () => {
+      const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+      return Array.from(crypto.getRandomValues(new Uint32Array(24))).map(x => chars[x % chars.length]).join('');
+    };
+
+    const startUpload = () => {
+      if (localPaths.length === 0) { showToast('Select at least one file/folder', 'error'); return; }
       let finalPassword = password;
       if (encryption === 'not_automatic' && randomSeed && !showPassword) {
         const p = genPass();
@@ -769,799 +981,506 @@ export default function App() {
         setShowPassword(true);
         return;
       }
-
       localPaths.forEach(path => {
-        const enc = minimize && encryption === 'not_automatic' ? 'automatic' : encryption
-        const args = ['upload', path, '-db', selectedDb, '-c', config?.discord?.channel_id || '', '--encryption_mode', enc]
-
-        if (enc === 'not_automatic') {
-          if (!finalPassword && !randomSeed) { showToast('Password required', 'error'); return }
-          args.push('--password_seed', finalPassword)
-        }
-
-        if (uploadName) args.push('--upload_name', uploadName)
-        if (newVersionString) args.push('--new_version_string', newVersionString)
-        if (strictness !== 'NA') args.push('--strictness_mode', strictness)
-        if (chunkSize) args.push('--chunk_size_mb', chunkSize)
-        if (minimize) args.push('--minimize', 'yes')
-        if (!nameCheck) args.push('--no_name_check')
-        args.push('--save_hash', encryption === 'not_automatic' && zeroKnowledge ? 'False' : 'True')
-
-        runCmd(args, path.split(/[/\\]/).pop(), 'upload')
+        const enc = minimize && encryption === 'not_automatic' ? 'automatic' : encryption;
+        const args = ['upload', path, '-db', selectedDb, '-c', config?.discord?.channel_id || '', '--encryption_mode', enc];
+        if (enc === 'not_automatic' && finalPassword) args.push('--password_seed', finalPassword);
+        if (uploadName) args.push('--upload_name', uploadName);
+        if (newVersionString) args.push('--new_version_string', newVersionString);
+        if (strictness !== 'NA') args.push('--strictness_mode', strictness);
+        if (chunkSize) args.push('--chunk_size_mb', chunkSize);
+        if (minimize) args.push('--minimize', 'yes');
+        if (!nameCheck) args.push('--no_name_check');
+        args.push('--save_hash', encryption === 'not_automatic' && zeroKnowledge ? 'False' : 'True');
+        runCmd(args, path.split(/[/\\]/).pop(), 'upload');
       });
+      setBottomSheet(null);
+      showToast(`${localPaths.length} upload(s) queued`, 'success');
+    };
 
-      setBottomSheet(null)
-      showToast(`${localPaths.length} upload(s) queued`, 'success')
-    }
-
-    if (showPicker) {
-      return (
-        <div className="h-[70vh] flex flex-col animate-in slide-in-from-right-4 duration-200">
-          <RemoteFolderPicker initialPath="" showFiles multiSelect onSelect={p => { setLocalPaths(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />
-        </div>
-      );
-    }
-
+    if (showPicker) return <RemoteFolderPicker initialPath="" showFiles multiSelect onSelect={p => { setLocalPaths(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />;
     return (
-      <div className="space-y-5 pb-6">
-        <div>
-          <label className="text-[11px] text-[#3bb5ff] uppercase tracking-widest font-bold mb-2 block">Source Files ({localPaths.length})</label>
-          <div className="flex gap-2">
-            <div className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-2xl px-4 py-4 text-sm text-gray-400 italic truncate overflow-hidden">
-              {localPaths.length > 0 ? localPaths.map(p => p.split(/[/\\]/).pop()).join(', ') : 'No files selected'}
-            </div>
-            <button onClick={() => setShowPicker(true)} className="p-4 bg-[#0f1f3a] border border-[#1a3a5c] rounded-2xl text-[#3bb5ff] btn-touch shadow-lg">{Ico.folderOpen}</button>
-          </div>
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <div className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-400 truncate">{localPaths.length ? localPaths.map(p => p.split(/[/\\]/).pop()).join(', ') : 'No files selected'}</div>
+          <button onClick={() => setShowPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">Browse</button>
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[11px] text-[#3bb5ff] uppercase tracking-widest font-bold mb-2 block">Encryption</label>
-            <select value={encryption} onChange={e => setEncryption(e.target.value)} disabled={minimize} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-2xl px-4 py-4 text-sm text-gray-200 outline-none focus:border-[#3bb5ff]">
+            <label className="text-[10px] text-gray-500 uppercase">Encryption</label>
+            <select value={encryption} onChange={e => setEncryption(e.target.value)} disabled={minimize} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm">
               <option value="automatic">Automatic</option>
               <option value="off">Off</option>
               <option value="not_automatic">Password</option>
             </select>
           </div>
           <div>
-            <label className="text-[11px] text-[#3bb5ff] uppercase tracking-widest font-bold mb-2 block">Strictness</label>
-            <select value={strictness} onChange={e => setStrictness(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-2xl px-4 py-4 text-sm text-gray-200 outline-none focus:border-[#3bb5ff]">
+            <label className="text-[10px] text-gray-500 uppercase">Strictness</label>
+            <select value={strictness} onChange={e => setStrictness(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm">
               <option value="NA">Not Atomic</option>
               <option value="SA">Soft Atomic</option>
               <option value="HA">Hard Atomic</option>
             </select>
           </div>
         </div>
-
-
         {encryption === 'not_automatic' && (
-          <div className="animate-in slide-in-from-top-2 duration-200">
-            <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-widest font-bold mb-1 block">Password Seed</label>
+          <div>
             <div className="flex gap-2">
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={randomSeed} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200" />
-              <button onClick={() => setRandomSeed(!randomSeed)} className={`px-4 py-3 rounded-xl text-xs font-bold border btn-touch transition-all ${randomSeed ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>Random</button>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={randomSeed} placeholder="Password seed" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+              <button onClick={() => setRandomSeed(!randomSeed)} className={`px-4 py-3 rounded-xl text-xs font-bold border ${randomSeed ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>Random</button>
             </div>
             {showPassword && (
-              <div className="mt-3 bg-green-900/20 border border-green-500/30 rounded-xl p-3 animate-in zoom-in-95">
-                <p className="text-[10px] text-green-400 uppercase font-bold mb-1">Generated Password (SAVE THIS!)</p>
-                <div className="flex items-center justify-between gap-2">
-                  <code className="text-xs text-white font-mono break-all">{password}</code>
-                  <button onClick={() => { navigator.clipboard?.writeText(password); showToast('Copied!', 'success') }} className="p-2 text-[#3bb5ff] btn-touch">{Ico.copy}</button>
-                </div>
+              <div className="mt-2 p-3 bg-green-900/20 border border-green-500/30 rounded-xl">
+                <code className="text-xs text-white break-all">{password}</code>
+                <button onClick={() => { navigator.clipboard?.writeText(password); showToast('Copied', 'success'); }} className="ml-2 text-[#3bb5ff]">Copy</button>
               </div>
             )}
           </div>
         )}
-
-        <div className="h-[1px] bg-[#1a3a5c] my-1" />
-
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Custom Name</label>
-            <input type="text" value={uploadName} onChange={e => setUploadName(e.target.value)} placeholder="Optional" maxLength={60} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200" />
-          </div>
-          <div>
-            <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Version Str</label>
-            <input type="text" value={newVersionString} onChange={e => setNewVersionString(e.target.value)} placeholder="e.g. 1.0.0" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200" />
-          </div>
+          <input type="text" value={uploadName} onChange={e => setUploadName(e.target.value)} placeholder="Custom name" className="bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+          <input type="text" value={newVersionString} onChange={e => setNewVersionString(e.target.value)} placeholder="Version string" className="bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
         </div>
-
-        <div>
-          <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Chunk Size (MB)</label>
-          <input type="number" step="0.1" min="1" max="50" value={chunkSize} onChange={e => setChunkSize(e.target.value)} placeholder="Auto (5-10MB)" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200" />
+        <input type="number" step="0.1" value={chunkSize} onChange={e => setChunkSize(e.target.value)} placeholder="Chunk size MB (auto)" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+        <div className="flex flex-wrap gap-4">
+          <label className="flex items-center gap-2"><input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="accent-[#3bb5ff]" /><span className="text-xs">Name Check</span></label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={minimize} onChange={e => setMinimize(e.target.checked)} className="accent-[#3bb5ff]" /><span className="text-xs">Minimize</span></label>
+          {encryption === 'not_automatic' && <label className="flex items-center gap-2"><input type="checkbox" checked={zeroKnowledge} onChange={e => setZeroKnowledge(e.target.checked)} disabled={minimize} className="accent-[#3bb5ff]" /><span className="text-xs">Zero‑Knowledge</span></label>}
         </div>
-
-        <div className="flex flex-wrap gap-4 pt-2">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" />
-            <span className="text-xs text-gray-300 font-medium">Name Check</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={minimize} onChange={e => setMinimize(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" />
-            <span className="text-xs text-gray-300 font-medium">Minimize</span>
-          </label>
-          {encryption === 'not_automatic' && (
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" checked={zeroKnowledge} onChange={e => setZeroKnowledge(e.target.checked)} disabled={minimize} className="w-5 h-5 accent-[#3bb5ff]" />
-              <span className="text-xs text-gray-300 font-medium">Zero-Knowledge</span>
-            </label>
-          )}
-        </div>
-
-        <button onClick={startUpload} disabled={localPaths.length === 0 || !selectedDb} className="w-full py-5 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-black btn-touch shadow-lg shadow-[#3bb5ff]/30 uppercase tracking-widest text-xs mt-2 disabled:opacity-40">
-          {showPassword ? 'Confirm & Queue' : `Queue ${localPaths.length} Upload(s)`}
-        </button>
-      </div>
-    )
-  }
-
-
-
-  const DownloadForm = () => {
-    const [strictness, setStrictness] = useState('NA')
-    const [allVersions, setAllVersions] = useState(false)
-    return (
-      <div className="space-y-4">
-        <p className="text-sm text-gray-400">Download {selectedItems.length} item(s)</p>
-        <div><label className="text-xs text-gray-500 uppercase mb-1 block">Strictness</label><select value={strictness} onChange={e => setStrictness(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200"><option value="NA">Not Atomic</option><option value="SA">Soft Atomic</option><option value="HA">Hard Atomic</option></select></div>
-        <label className="flex items-center gap-2"><input type="checkbox" checked={allVersions} onChange={e => setAllVersions(e.target.checked)} className="accent-[#3bb5ff]" /><span className="text-sm text-gray-400">All versions</span></label>
-        <button onClick={() => { selectedItems.forEach(item => { const p = currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`; const a = ['download', p, '-db', selectedDb]; if (allVersions) a.push('--all_versions', 'yes'); if (strictness !== 'NA') a.push('--strictness_mode', strictness); runCmd(a, item.displayName, 'download') }); setBottomSheet(null); showToast('Download queued', 'success') }} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch">Download</button>
-      </div>
-    )
-  }
-
-  const DeleteForm = () => {
-    const [type, setType] = useState('soft')
-    const [scope, setScope] = useState('latest')
-    const [ver, setVer] = useState('')
-    const [startVer, setStartVer] = useState('')
-    const [endVer, setEndVer] = useState('')
-
-    return (
-      <div className="space-y-4">
-        <p className="text-sm text-gray-400">Delete {selectedItems.length} item(s). This cannot be undone.</p>
-
-        <div>
-          <label className="text-xs text-gray-500 uppercase mb-1 block">Delete Type</label>
-          <div className="flex gap-2">
-            <button onClick={() => setType('soft')} className={`flex-1 py-2 rounded-lg text-xs border btn-touch ${type === 'soft' ? 'bg-[#3bb5ff]/10 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>Soft (Metadata Only)</button>
-            <button onClick={() => setType('hard')} className={`flex-1 py-2 rounded-lg text-xs border btn-touch ${type === 'hard' ? 'bg-red-900/20 border-red-500 text-red-400' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>Hard (Disk Wipe)</button>
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs text-gray-500 uppercase mb-1 block">Version Scope</label>
-          <div className="grid grid-cols-2 gap-2">
-            {['latest', 'all', 'specific', 'range'].map(s => (
-              <button key={s} onClick={() => setScope(s)} className={`py-2 rounded-lg text-xs border btn-touch capitalize ${scope === s ? 'bg-[#3bb5ff]/10 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>{s}</button>
-            ))}
-          </div>
-        </div>
-
-        {scope === 'specific' && (
-          <input type="text" value={ver} onChange={e => setVer(e.target.value)} placeholder="Version (e.g. 0.0.0.1)" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" />
-        )}
-
-        {scope === 'range' && (
-          <div className="flex gap-2">
-            <input type="text" value={startVer} onChange={e => setStartVer(e.target.value)} placeholder="Start Version" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" />
-            <input type="text" value={endVer} onChange={e => setEndVer(e.target.value)} placeholder="End Version" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" />
-          </div>
-        )}
-
-        <button onClick={() => {
-          selectedItems.forEach(item => {
-            const a = ['delete'];
-            if (item.itemid) a.push(item.itemid, '--id_based');
-            else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`);
-            a.push('-db', selectedDb, '--skip_confirmation', 'yes');
-            if (type === 'hard') a.push('--hard');
-            if (scope === 'all') a.push('--all_versions', 'yes');
-            else if (scope === 'specific' && ver) a.push('--version', ver);
-            else if (scope === 'range' && startVer && endVer) a.push('--start_version', startVer, '--end_version', endVer);
-            runCmd(a, item.displayName, 'delete')
-          });
-          setBottomSheet(null);
-          setSelectedItems([]);
-          showToast('Delete queued', 'success')
-        }} className="w-full py-4 bg-red-900/40 border border-red-900/60 text-red-300 rounded-xl font-bold btn-touch mt-2">Confirm Delete</button>
-      </div>
-    )
-  }
-
-  const MoveCopyForm = ({ type }) => {
-    const [dest, setDest] = useState('.')
-    const [copyMode, setCopyMode] = useState(type === 'copy')
-    const [nameCheck, setNameCheck] = useState(true)
-
-    const execute = () => {
-      selectedItems.forEach(item => {
-        const a = [copyMode ? 'copy' : 'move', '-db', selectedDb]
-        if (item.itemid) a.push(item.itemid, '--id_based')
-        else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`)
-        a.push(dest)
-        if (!nameCheck) a.push('--no_name_check')
-        runCmd(a, item.displayName, copyMode ? 'copy' : 'move')
-      })
-      setBottomSheet(null); setSelectedItems([])
-    }
-    return (
-      <div className="space-y-4">
-        <div><label className="text-xs text-gray-500 uppercase mb-1 block">Destination</label><div className="flex gap-2"><input type="text" value={dest} onChange={e => setDest(e.target.value)} placeholder="Path or . for root" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={() => setBottomSheet({ title: 'Folders', content: <ArchiveFolderPicker selectedDb={selectedDb} onSelect={p => { setDest(p); setBottomSheet({ title: 'Move / Copy', content: <MoveCopyForm type={type} /> }) }} onCancel={() => setBottomSheet({ title: 'Move / Copy', content: <MoveCopyForm type={type} /> })} /> })} className="px-3 py-2 bg-[#0f1f3a] border border-[#1a3a5c] rounded-lg text-xs text-gray-300 btn-touch">{Ico.folderOpen}</button></div></div>
-        <div className="flex items-center justify-between gap-4">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={copyMode} onChange={e => setCopyMode(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" />
-            <span className="text-xs text-gray-300 font-medium">Copy Mode</span>
-          </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" />
-            <span className="text-xs text-gray-300 font-medium">Name Check</span>
-          </label>
-        </div>
-        <button onClick={execute} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch uppercase">{copyMode ? 'Copy' : 'Move'}</button>
-      </div>
-    )
-  }
-
-  const ItemOptionsMenu = ({ item = selectedItems[0] }) => {
-    if (!item) return <div className="p-4 text-gray-500">No item selected</div>;
-    return (
-      <div className="space-y-2">
-        <button onClick={() => { setBottomSheet(null); setModal({ title: 'Item Details', content: <FullNameInfo item={item} /> }) }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.info} Full Details</button>
-        <button onClick={() => { setBottomSheet(null); setModal({ title: 'Upload New Version', content: <NewVersionForm item={item} /> }) }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.plus} Upload New Version</button>
-        <button onClick={() => { setBottomSheet(null); setModal({ title: 'Rename Item', content: <RenameItemForm item={item} /> }) }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.rename} Rename Item</button>
-        <button onClick={() => { setBottomSheet(null); setBottomSheet({ title: `Move / Copy`, content: <MoveCopyForm type="move" /> }) }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.move} Move / Copy</button>
-        <button onClick={() => { setBottomSheet(null); handleSeeVersions() }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.clock} See Versions</button>
-        <button onClick={() => { setBottomSheet(null); handleDownloadVersion() }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.download} Download Version</button>
-        <div className="h-[1px] bg-[#1a3a5c] my-1" />
-        <button onClick={() => { setBottomSheet(null); setBottomSheet({ title: 'Delete Confirmation', content: <DeleteForm /> }) }} className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/10 border border-red-900/20 rounded-xl text-sm text-red-400 btn-touch">{Ico.trash} Delete</button>
+        <button onClick={startUpload} disabled={localPaths.length === 0 || !selectedDb} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch disabled:opacity-40">Queue Upload</button>
       </div>
     );
   };
 
-  const RenameItemForm = ({ item }) => {
-    const [name, setName] = useState(item.displayName)
-    const [nameMode, setNameMode] = useState('D')
-    const [nameCheck, setNameCheck] = useState(true)
-
-    const execute = () => {
-      const a = ['modify', '--rename', name, '-db', selectedDb]
-      if (nameMode !== 'D') a.push('--rename_mode', nameMode)
-      if (!nameCheck) a.push('--no_name_check')
-      if (item.itemid) a.push(item.itemid, '--id_based')
-      else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`)
-      runCmd(a, item.displayName, 'rename')
-      setModal(null)
-    }
-
+  // Password Prompt for encrypted download
+  const PasswordPromptModalContent = ({ items: pwdItems, onConfirm }) => {
+    const [passwords, setPasswords] = useState({});
     return (
       <div className="space-y-4">
-        <div>
-          <label className="text-xs text-gray-500 uppercase">New Name</label>
-          <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#3bb5ff] mt-1" />
-        </div>
-        <div>
-          <label className="text-xs text-gray-500 uppercase mb-2 block">Rename Mode</label>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { id: 'D', label: 'Default', desc: 'Nickname if exists, else both' },
-              { id: 'N', label: 'Nickname', desc: 'Only if nicknamed' },
-              { id: 'B', label: 'Original', desc: 'Only original name' },
-              { id: 'A', label: 'All', desc: 'Update both' },
-            ].map(mode => (
-              <button key={mode.id} onClick={() => setNameMode(mode.id)} className={`p-3 text-left rounded-xl border transition-all ${nameMode === mode.id ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>
-                <div className="text-sm font-bold">{mode.label}</div>
-                <div className="text-[10px] opacity-70 mt-1">{mode.desc}</div>
-              </button>
-            ))}
+        {pwdItems.map(item => (
+          <div key={item.id}>
+            <label className="text-xs text-gray-500 uppercase">{item.name}</label>
+            <input type="password" value={passwords[item.id] || ''} onChange={e => setPasswords(prev => ({ ...prev, [item.id]: e.target.value }))} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
           </div>
-        </div>
-        <label className="flex items-center gap-3 cursor-pointer mt-2">
-          <input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" />
-          <span className="text-xs text-gray-300 font-medium">Name Check</span>
-        </label>
-        <button onClick={execute} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 mt-2">Confirm Rename</button>
+        ))}
+        <button onClick={() => onConfirm(passwords)} className="w-full py-3 bg-[#3bb5ff] text-[#060d1a] rounded-xl font-bold">Download</button>
       </div>
-    )
-  }
+    );
+  };
 
-  const NewVersionForm = ({ item }) => {
-    const [localPath, setLocalPath] = useState('')
-    const [showPicker, setShowPicker] = useState(false)
-    const [mode, setMode] = useState('addition')
-    const [encryption, setEncryption] = useState('automatic')
-    const [password, setPassword] = useState('')
-    const [randomSeed, setRandomSeed] = useState(false)
-    const [zeroKnowledge, setZeroKnowledge] = useState(false)
-    const [newVersionString, setNewVersionString] = useState('')
-    const [uploadName, setUploadName] = useState('')
-    const [strictness, setStrictness] = useState('NA')
-    const [chunkSize, setChunkSize] = useState('')
-    const [minimize, setMinimize] = useState(false)
-    const [nameCheck, setNameCheck] = useState(true)
-    const [sourceVersion, setSourceVersion] = useState('')
-    const [availableVersions, setAvailableVersions] = useState([])
-    const [isLoadingVersions, setIsLoadingVersions] = useState(false)
-    const [showPassword, setShowPassword] = useState(false)
+  // Open Volume / Sharables / Nuke modals (simplified but functional)
+  const OpenVolumeModalContent = () => {
+    const [viewMode, setViewMode] = useState('browse');
+    const [currentPath, setCurrentPath] = useState('');
+    const [items, setItems] = useState([]);
+    const [selectedPaths, setSelectedPaths] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-      const path = currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`
-      setIsLoadingVersions(true)
-      fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(path)}`)
-        .then(r => r.json())
-        .then(d => {
-          let itemid = null
-          if (d.results) { const k = Object.keys(d.results); if (k.length) itemid = k[0] }
-          if (itemid) return fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&itemid=${encodeURIComponent(itemid)}`).then(r => r.json())
-          throw new Error('No ID')
-        })
-        .then(vd => {
-          const v = vd?.results ? Object.keys(vd.results).filter(k => k.includes('.')) : []
-          setAvailableVersions(v.sort().reverse())
-          if (v.length > 0) setSourceVersion(v[0])
-        })
-        .catch(() => { })
-        .finally(() => setIsLoadingVersions(false))
-    }, [])
-
-    const execute = () => {
-      if (!localPath) { showToast('Select a source path', 'error'); return }
-
-      let finalPassword = password;
-      if (encryption === 'not_automatic' && randomSeed && !showPassword) {
-        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
-        const p = Array.from(crypto.getRandomValues(new Uint32Array(24))).map(x => chars[x % chars.length]).join('')
-        setPassword(p);
-        setShowPassword(true);
-        return;
-      }
-
-      const target = item.itemid || (currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`)
-      const args = ['upload', localPath, '-db', selectedDb, '-c', config?.discord?.channel_id || '', '--target_item_path', target, '--upload_mode', 'new_version']
-
-      const enc = minimize && encryption === 'not_automatic' ? 'automatic' : encryption
-      args.push('--encryption_mode', enc)
-
-      if (enc === 'not_automatic') {
-        if (!finalPassword && !randomSeed) { showToast('Password required', 'error'); return }
-        args.push('--password_seed', finalPassword)
-      }
-
-      if (mode === 'addition') args.push('--addition')
-      if (sourceVersion) args.push('--source_version', sourceVersion)
-      if (uploadName) args.push('--upload_name', uploadName)
-      if (newVersionString) args.push('--new_version_string', newVersionString)
-      if (strictness !== 'NA') args.push('--strictness_mode', strictness)
-      if (chunkSize) args.push('--chunk_size_mb', chunkSize)
-      if (minimize) args.push('--minimize', 'yes')
-      if (!nameCheck) args.push('--no_name_check')
-      args.push('--save_hash', encryption === 'not_automatic' && zeroKnowledge ? 'False' : 'True')
-      if (item.itemid) args.push('--id_based')
-
-      runCmd(args, `Update: ${item.displayName}`, 'upload')
-      setModal(null)
-      showToast('Update queued', 'success')
-    }
-
-    if (showPicker) {
-      return (
-        <div className="h-[70vh] flex flex-col animate-in slide-in-from-right-4 duration-200">
-          <RemoteFolderPicker initialPath={localPath} showFiles onSelect={p => { setLocalPath(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4 pb-4">
-        <div className="bg-[#3bb5ff]/10 border border-[#3bb5ff]/30 p-3 rounded-xl">
-          <p className="text-[10px] text-[#3bb5ff] uppercase font-bold mb-1">Targeting</p>
-          <p className="text-xs text-white truncate font-mono">{item.displayName}</p>
-        </div>
-
-        <div>
-          <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Local Source File</label>
-          <div className="flex gap-2">
-            <input type="text" value={localPath} onChange={e => setLocalPath(e.target.value)} placeholder="/path/to/new/version" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none focus:border-[#3bb5ff]" />
-            <button onClick={() => setShowPicker(true)} className="p-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">{Ico.folderOpen}</button>
-          </div>
-        </div>
-
-        <div className="bg-[#0f1f3a] p-3 rounded-xl border border-[#1a3a5c] space-y-3">
-          <label className="text-[10px] text-[#3bb5ff] uppercase tracking-widest font-bold block">Update Strategy</label>
-          <div className="flex gap-2">
-            <button onClick={() => setMode('independent')} className={`flex-1 py-3 rounded-xl text-xs font-bold border btn-touch transition-all ${mode === 'independent' ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#060d1a] border-[#1a3a5c] text-gray-500'}`}>Independent</button>
-            <button onClick={() => setMode('addition')} className={`flex-1 py-3 rounded-xl text-xs font-bold border btn-touch transition-all ${mode === 'addition' ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#060d1a] border-[#1a3a5c] text-gray-500'}`}>Addition</button>
-          </div>
-          {mode === 'addition' && (
-            <div className="animate-in slide-in-from-top-1 duration-200">
-              <label className="text-[9px] text-gray-500 uppercase mb-1 block">Previous Version (Source)</label>
-              {isLoadingVersions ? <p className="text-[10px] text-gray-600 animate-pulse">Fetching versions...</p> : (
-                <select value={sourceVersion} onChange={e => setSourceVersion(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-2 py-2 text-xs text-white outline-none">
-                  {availableVersions.map(v => <option key={v} value={v}>{v}</option>)}
-                  {availableVersions.length === 0 && <option value="">Latest (Auto)</option>}
-                </select>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Encryption</label>
-            <select value={encryption} onChange={e => setEncryption(e.target.value)} disabled={minimize} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none">
-              <option value="automatic">Automatic</option>
-              <option value="off">Off</option>
-              <option value="not_automatic">Password</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Strictness</label>
-            <select value={strictness} onChange={e => setStrictness(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none">
-              <option value="NA">Not Atomic</option>
-              <option value="SA">Soft Atomic</option>
-              <option value="HA">Hard Atomic</option>
-            </select>
-          </div>
-        </div>
-
-        {encryption === 'not_automatic' && (
-          <div className="animate-in slide-in-from-top-2 duration-200">
-            <div className="flex gap-2">
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={randomSeed} placeholder="Password Seed" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200" />
-              <button onClick={() => setRandomSeed(!randomSeed)} className={`px-4 py-3 rounded-xl text-xs font-bold border btn-touch transition-all ${randomSeed ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>Random</button>
-            </div>
-            {showPassword && (
-              <div className="mt-3 bg-green-900/20 border border-green-500/30 rounded-xl p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <code className="text-xs text-white font-mono break-all">{password}</code>
-                  <button onClick={() => { navigator.clipboard?.writeText(password); showToast('Copied!', 'success') }} className="p-2 text-[#3bb5ff] btn-touch">{Ico.copy}</button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Version Str</label>
-            <input type="text" value={newVersionString} onChange={e => setNewVersionString(e.target.value)} placeholder="e.g. 2.0" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200" />
-          </div>
-          <div>
-            <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Chunk Size</label>
-            <input type="number" step="0.1" value={chunkSize} onChange={e => setChunkSize(e.target.value)} placeholder="Auto" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200" />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-4 pt-2">
-          <label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" /><span className="text-xs text-gray-300 font-medium">Name Check</span></label>
-          <label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked={minimize} onChange={e => setMinimize(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" /><span className="text-xs text-gray-300 font-medium">Minimize</span></label>
-        </div>
-
-        <button onClick={execute} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 uppercase tracking-widest text-xs">
-          {showPassword ? 'Confirm & Start' : 'Start Update'}
-        </button>
-      </div>
-    )
-  }
-
-
-  const MakeFolderForm = () => {
-    const [name, setName] = useState('')
-    const [parent, setParent] = useState(currentPath)
-    const [showPicker, setShowPicker] = useState(false)
-    return (
-      <div className="space-y-4">
-        {showPicker ? <ArchiveFolderPicker selectedDb={selectedDb} onSelect={p => { setParent(p); setShowPicker(false) }} onCancel={() => setShowPicker(false)} /> : (
-          <>
-            <div><label className="text-xs text-gray-500 uppercase mb-1 block">Parent</label><div className="flex gap-2"><input type="text" value={parent} onChange={e => setParent(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={() => setShowPicker(true)} className="px-3 py-2 bg-[#0f1f3a] border border-[#1a3a5c] rounded-lg text-xs text-gray-300 btn-touch">{Ico.folderOpen}</button></div></div>
-            <div><label className="text-xs text-gray-500 uppercase mb-1 block">Folder Name</label><input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name" maxLength={60} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /></div>
-            <button onClick={async () => {
-              if (name.trim()) {
-                try {
-                  const res = await fetch('/api/folders/make', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ db_name: selectedDb, folder_name: name.trim(), parent_path: parent || '.', id_based: false })
-                  });
-                  if (!res.ok) throw new Error('Failed to create folder');
-                  showToast('Folder created', 'success');
-                  setBottomSheet(null);
-                  fetchFiles(currentPath);
-                } catch (e) { showToast(e.message, 'error'); }
-              }
-            }} disabled={!name.trim()} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Create</button>
-          </>
-        )}
-      </div>
-    )
-  }
-
-  const VolumeOptions = ({ db }) => {
-    const isExternal = db.includes('/') || db.includes('\\');
-
-    return (
-      <div className="space-y-2">
-        <button onClick={() => { setSelectedDb(db); setBottomSheet(null); setTab('explorer') }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.folderOpen} Open</button>
-        <button onClick={() => { setBottomSheet(null); setModal({ title: 'Rename Volume', content: <RenameVolumeForm db={db} /> }) }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.rename} Rename</button>
-        <button onClick={async () => { try { await fetch('/api/dbs/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ db_name: db }) }); showToast('Volume packaged!', 'success'); setBottomSheet(null) } catch (e) { showToast(e.message, 'error') } }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.share} Share / Package</button>
-
-        <div className="h-[1px] bg-[#1a3a5c] my-2" />
-
-        <button onClick={() => { setBottomSheet(null); setModal({ title: '☢️ NUKE VOLUME', content: <NukeConfirmation db={db} /> }) }} className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/10 rounded-xl text-sm text-red-500 font-bold border border-red-900/20 btn-touch">☢️ NUKE Content</button>
-
-        {isExternal ? (
-          <button onClick={() => {
-            setExternalVolumes(prev => {
-              const updated = prev.filter(p => p !== db);
-              localStorage.setItem('mob_externalVolumes', JSON.stringify(updated));
-              return updated;
-            });
-            setDbs(prev => prev.filter(p => p !== db));
-            if (selectedDb === db) setSelectedDb('');
-            setBottomSheet(null);
-            showToast('Removed from list', 'success');
-          }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.close} Remove from List</button>
-        ) : null}
-
-        <button onClick={async () => {
-          if (!window.confirm(`Permanently delete ${db} from disk?`)) return;
-          try {
-            await fetch('/api/dbs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ db_name: db }) });
-            fetchDbs();
-            if (selectedDb === db) setSelectedDb('');
-            showToast('Volume deleted', 'success');
-            setBottomSheet(null)
-          } catch (e) { showToast(e.message, 'error') }
-        }} className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/20 rounded-xl text-sm text-red-400 btn-touch">{Ico.trash} Delete Permanently</button>
-      </div>
-    )
-  }
-
-  const NukeConfirmation = ({ db }) => {
-    const [confirm, setConfirm] = useState('')
-    const executeNuke = async () => {
+    const load = async () => {
+      setLoading(true);
       try {
-        const res = await fetch('/api/dbs/nuke', {
+        if (viewMode === 'databases') {
+          const r = await fetch('/api/dbs');
+          const data = await r.json();
+          setItems((data.dbs || []).map(db => ({ name: db, path: db, is_dir: false, is_db: true })));
+          setCurrentPath('DATABASES folder');
+        } else {
+          const r = await fetch(`/api/fs/browse?path=${encodeURIComponent(currentPath)}`);
+          const data = await r.json();
+          setCurrentPath(data.current_path);
+          setItems(data.items.map(i => ({ ...i, is_db: i.name.toLowerCase().endsWith('.db') })));
+        }
+      } catch (e) { showToast('Failed to load', 'error'); }
+      setLoading(false);
+    };
+    useEffect(() => { load(); }, [viewMode, currentPath]);
+
+    const handleImport = async (path) => {
+      try {
+        await fetch('/api/dbs/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vov_path: path }) });
+        showToast('Imported successfully', 'success');
+        setModal(null);
+        fetchDbs();
+      } catch (e) { showToast(e.message, 'error'); }
+    };
+
+    const toggleSelect = (path) => setSelectedPaths(prev => prev.includes(path) ? prev.filter(p => p !== path) : [...prev, path]);
+
+    return (
+      <div className="space-y-4">
+        <div className="flex gap-2 p-1 bg-[#060d1a] rounded-xl border border-[#1a3a5c]">
+          {['browse', 'databases'].map(m => (
+            <button key={m} onClick={() => setViewMode(m)} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase ${viewMode === m ? 'bg-[#3bb5ff] text-[#0a1628]' : 'text-gray-400'}`}>{m}</button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setCurrentPath('')} className="p-2 btn-touch text-[#3bb5ff]">{Ico.home}</button>
+          <div className="text-xs text-gray-400 truncate flex-1">{currentPath || '/'}</div>
+        </div>
+        {loading ? <div className="text-center py-8 text-gray-500">Loading...</div> : items.map(item => (
+          <div key={item.path} onClick={() => item.is_dir ? setCurrentPath(item.path) : (item.is_db ? toggleSelect(item.path) : (item.is_vov ? handleImport(item.path) : null))} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedPaths.includes(item.path) ? 'bg-[#3bb5ff]/10 border-[#3bb5ff]' : 'hover:bg-[#0f1f3a] border-[#1a3a5c]'}`}>
+            <span className="text-[#3bb5ff]">{item.is_dir ? Ico.folder : item.is_db ? Ico.cube : Ico.file}</span>
+            <div className="flex-1 truncate">
+              <div className="text-sm text-white truncate">{item.name}</div>
+              <div className="text-[10px] text-gray-500 truncate">{item.is_dir ? 'Folder' : (item.is_db ? 'Volume' : 'File')}</div>
+            </div>
+            {item.is_db && <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${selectedPaths.includes(item.path) ? 'bg-[#3bb5ff] border-[#3bb5ff]' : 'border-gray-600'}`}>{selectedPaths.includes(item.path) && <div className="w-2 h-2 bg-white rounded-full" />}</div>}
+          </div>
+        ))}
+        <button onClick={() => setModal(null)} className="w-full py-3 bg-[#0f1f3a] text-white rounded-xl">Cancel</button>
+        <button onClick={() => { selectedPaths.forEach(p => { setExternalVolumes(prev => { const u = [...new Set([...prev, p])]; localStorage.setItem('mob_externalVolumes', JSON.stringify(u)); return u; }); }); fetchDbs(); setModal(null); }} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold">Open {selectedPaths.length} Volume(s)</button>
+      </div>
+    );
+  };
+
+  const SharablesModalContent = () => {
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+      fetch('/api/dbs/list_sharables')
+        .then(r => r.json())
+        .then(data => { setItems(data.items || []); setLoading(false); })
+        .catch(() => setLoading(false));
+    }, []);
+    const importVov = async (path) => {
+      try {
+        await fetch('/api/dbs/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vov_path: path }) });
+        showToast('Imported', 'success');
+        setModal(null);
+        fetchDbs();
+      } catch (e) { showToast(e.message, 'error'); }
+    };
+    return (
+      <div className="space-y-3">
+        {loading ? <div className="text-center py-8 text-gray-500">Loading...</div> : items.length === 0 ? <div className="text-center py-8 text-gray-500">No packages found</div> : items.map(item => (
+          <div key={item.path} className="flex items-center justify-between p-3 bg-[#0f1f3a] rounded-xl border border-[#1a3a5c]">
+            <div className="flex items-center gap-3 overflow-hidden"><span className="text-[#3bb5ff]">{item.is_dir ? Ico.folder : Ico.cube}</span><span className="text-sm text-gray-200 truncate">{item.name}</span></div>
+            {item.is_vov && <button onClick={() => importVov(item.path)} className="px-3 py-1 bg-[#3bb5ff]/20 text-[#3bb5ff] text-xs font-bold rounded-lg">Import</button>}
+          </div>
+        ))}
+        <button onClick={() => fetch('/api/dbs/open_sharables', { method: 'POST' })} className="w-full py-3 bg-[#0f1f3a] text-gray-300 rounded-xl text-sm btn-touch flex items-center justify-center gap-2">{Ico.share} Open Folder on Host</button>
+      </div>
+    );
+  };
+
+  const RenameVolumeModalContent = ({ db }) => {
+    const [newName, setNewName] = useState(db.replace(/\.db$/i, ''));
+    const [error, setError] = useState('');
+    const [saving, setSaving] = useState(false);
+    const handleRename = async () => {
+      const trimmed = newName.trim();
+      if (!trimmed) { setError('Name cannot be empty'); return; }
+      const finalName = trimmed.endsWith('.db') ? trimmed : `${trimmed}.db`;
+      if (finalName === db) { setModal(null); return; }
+      setSaving(true); setError('');
+      try {
+        const res = await fetch('/api/dbs/rename', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ db_name: db })
+          body: JSON.stringify({ old_name: db, new_name: finalName })
         });
-        if (!res.ok) throw new Error('Nuke failed');
-        const data = await res.json();
-        showToast(`Volume wiped! ${data.db_entries_deleted} entries destroyed.`, 'success');
+        if (!res.ok) { const e = await res.json(); throw new Error(e.detail || 'Rename failed'); }
+        // Update local state
+        setDbs(prev => prev.map(d => d === db ? finalName : d));
+        if (selectedDb === db) setSelectedDb(finalName);
+        setRecentVolumes(prev => { const u = prev.map(d => d === db ? finalName : d); localStorage.setItem('mob_recentVolumes', JSON.stringify(u)); return u; });
+        setExternalVolumes(prev => { const u = prev.map(d => d === db ? finalName : d); localStorage.setItem('mob_externalVolumes', JSON.stringify(u)); return u; });
+        showToast('Volume renamed', 'success');
+        setModal(null);
+      } catch (e) { setError(e.message); }
+      finally { setSaving(false); }
+    };
+    return (
+      <div className="space-y-4">
+        <div>
+          <label className="text-[10px] text-gray-500 uppercase mb-1 block">New Volume Name</label>
+          <input type="text" value={newName} onChange={e => { setNewName(e.target.value); setError(''); }}
+            className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200 focus:border-[#3bb5ff] outline-none" autoFocus />
+          {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+          <p className="text-[10px] text-gray-600 mt-1">.db extension added automatically if omitted</p>
+        </div>
+        <div className="flex gap-3 pt-2">
+          <button onClick={() => setModal(null)} className="flex-1 py-3 bg-[#0f1f3a] text-gray-300 rounded-xl border border-[#1a3a5c] btn-touch text-sm">Cancel</button>
+          <button onClick={handleRename} disabled={saving} className="flex-1 py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch text-sm disabled:opacity-50">
+            {saving ? 'Renaming…' : 'Save Name'}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const NukeModalContent = ({ db }) => {
+    const [confirm, setConfirm] = useState('');
+    const execute = async () => {
+      try {
+        await fetch('/api/dbs/nuke', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ db_name: db }) });
+        showToast(`Volume ${db} has been wiped`, 'success');
         setModal(null);
         if (selectedDb === db) fetchFiles('.');
       } catch (e) { showToast(e.message, 'error'); }
-    }
+    };
     return (
       <div className="space-y-4">
         <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-xl">
-          <p className="text-xs text-red-400 font-bold uppercase mb-2">Warning: Nuclear Option</p>
-          <p className="text-sm text-gray-300">This will destroy ALL entries in <span className="text-white font-mono">{db}</span>. The file will remain but will be empty.</p>
+          <p className="text-sm text-red-400 font-bold">☢️ NUKE VOLUME ☢️</p>
+          <p className="text-xs text-gray-300 mt-1">All data in <span className="text-white">{db}</span> will be permanently deleted. The file remains but empty.</p>
         </div>
-        <input type="text" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Type 'NUKE' to confirm" className="w-full bg-[#060d1a] border border-red-900/50 rounded-xl px-4 py-3 text-sm text-white focus:border-red-500 outline-none" />
-        <button onClick={executeNuke} disabled={confirm !== 'NUKE'} className="w-full py-4 bg-red-600 disabled:opacity-30 text-white rounded-xl font-bold btn-touch shadow-lg shadow-red-600/20">EXECUTE NUKE</button>
+        <input type="text" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder='Type "NUKE" to confirm' className="w-full bg-[#060d1a] border border-red-900/50 rounded-xl px-4 py-3 text-sm" />
+        <button onClick={execute} disabled={confirm !== 'NUKE'} className="w-full py-4 bg-red-600 disabled:opacity-30 text-white rounded-xl font-bold">EXECUTE NUKE</button>
       </div>
-    )
-  }
+    );
+  };
 
-  const SharablesView = () => {
-    const [viewMode, setViewMode] = useState('sharables') // 'sharables', 'browse', 'downloads'
-    const [items, setItems] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [currentPath, setCurrentPath] = useState('')
+  // Item context menu (long press)
+  const handleLongPress = (item) => {
+    setSelectedItems([item]);
+    setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu item={item} /> });
+  };
 
-    const importVov = async (path) => {
-      try {
-        await fetch('/api/dbs/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vov_path: path }) })
-        fetchDbs()
-        showToast('Imported successfully', 'success')
-        setBottomSheet(null)
-      } catch (e) { showToast('Import failed', 'error') }
-    }
-
-    const load = async () => {
-      setLoading(true)
-      try {
-        if (viewMode === 'sharables') {
-          const r = await fetch('/api/dbs/list_sharables')
-          const data = await r.json()
-          setItems(data.items || [])
-          setCurrentPath(data.path || 'src/SHARABLES')
-        } else if (viewMode === 'downloads') {
-          const path = localStorage.getItem('VAULT_OPUS_download_folder') || './downloads'
-          const r = await fetch(`/api/fs/browse?path=${encodeURIComponent(path)}`)
-          const data = await r.json()
-          setItems(data.items.map(i => ({ ...i, is_vov: i.name.toLowerCase().endsWith('.vov') })))
-          setCurrentPath(data.current_path)
-        } else {
-          const r = await fetch(`/api/fs/browse`)
-          const data = await r.json()
-          setItems(data.items.map(i => ({ ...i, is_vov: i.name.toLowerCase().endsWith('.vov') })))
-          setCurrentPath(data.current_path)
-        }
-      } catch (e) { showToast('Failed to load items', 'error') }
-      setLoading(false)
-    }
-
-    useEffect(() => { load() }, [viewMode])
-
-    const handleBrowseSelect = (path) => {
-      if (path.toLowerCase().endsWith('.vov')) importVov(path)
-      else showToast('Must select a .vov file', 'error')
-    }
-
-    return (
-      <div className="flex flex-col h-[70vh]">
-        <div className="flex gap-1 p-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl mb-4">
-          {['sharables', 'browse', 'downloads'].map(m => (
-            <button key={m} onClick={() => setViewMode(m)} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${viewMode === m ? 'bg-[#3bb5ff] text-[#0a1628]' : 'text-gray-500'}`}>{m}</button>
-          ))}
-        </div>
-
-        {viewMode === 'sharables' ? (
-          <div className="flex-1 overflow-y-auto space-y-2">
-            {loading ? <p className="text-center p-8 text-gray-500">Loading sharables...</p> : items.length === 0 ? <p className="text-center p-8 text-gray-500 italic">No packages found</p> : items.map(item => (
-              <div key={item.path} className="flex items-center justify-between p-3 bg-[#0f1f3a] rounded-xl border border-[#1a3a5c]">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <span className="text-[#3bb5ff]">{item.is_dir ? Ico.folder : Ico.cube}</span>
-                  <div className="truncate"><div className="text-sm text-gray-200 truncate">{item.name}</div></div>
-                </div>
-                {item.is_vov && <button onClick={() => importVov(item.path)} className="px-3 py-1 bg-[#3bb5ff]/20 text-[#3bb5ff] text-xs font-bold rounded-lg btn-touch">Import</button>}
-              </div>
-            ))}
-            <button onClick={() => fetch('/api/dbs/open_sharables', { method: 'POST' })} className="w-full py-3 bg-[#0f1f3a] text-gray-300 text-xs rounded-xl border border-[#1a3a5c] btn-touch mt-4 flex items-center justify-center gap-2">{Ico.share} Open Folder on Host</button>
-          </div>
-        ) : (
-          <div className="flex-1 flex flex-col min-h-0">
-            <RemoteFolderPicker
-              initialPath={currentPath}
-              showFiles
-              onSelect={handleBrowseSelect}
-              onCancel={() => setBottomSheet(null)}
-            />
-          </div>
-        )}
-      </div>
-    )
-  }
-
-
-  const RenameVolumeForm = ({ db }) => {
-    const [name, setName] = useState(db.replace('.db', ''))
-    return <div className="space-y-4"><input type="text" value={name} onChange={e => setName(e.target.value)} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={async () => { try { await fetch('/api/dbs/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ old_name: db, new_name: name }) }); fetchDbs(); showToast('Volume renamed', 'success'); setModal(null) } catch (e) { showToast(e.message, 'error') } }} disabled={!name.trim()} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Rename</button></div>
-  }
-
-  const ImportForm = () => {
-    const [vovPath, setVovPath] = useState('')
-    const [showPicker, setShowPicker] = useState(false)
-    return (
-      <div className="space-y-4">
-        <p className="text-sm text-gray-400">Import a .vov package file</p>
-        {showPicker ? (
-          <div className="h-[50vh] border border-[#1a3a5c] rounded-2xl overflow-hidden bg-[#060d1a]">
-            <RemoteFolderPicker
-              initialPath={vovPath || '.'}
-              showFiles
-              onSelect={p => {
-                if (p.endsWith('.vov')) {
-                  setVovPath(p);
-                  setShowPicker(false);
-                } else {
-                  showToast('Must select a .vov file', 'error')
-                }
-              }}
-              onCancel={() => setShowPicker(false)}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="flex gap-2">
-              <input type="text" value={vovPath} onChange={e => setVovPath(e.target.value)} placeholder="/path/to/package.vov" className="flex-1 w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" />
-              <button onClick={() => setShowPicker(true)} className="px-3 py-2 bg-[#0f1f3a] border border-[#1a3a5c] rounded-lg text-[#3bb5ff] btn-touch">{Ico.folderOpen}</button>
-            </div>
-            <button onClick={async () => { try { await fetch('/api/dbs/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vov_path: vovPath }) }); fetchDbs(); showToast('Package imported!', 'success'); setModal(null) } catch (e) { showToast(e.message, 'error') } }} disabled={!vovPath.trim()} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Import</button>
-          </>
-        )}
-      </div>
-    )
-  }
-
-  const FullNameInfo = ({ item }) => (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Display Name</span>
-        <p className="text-sm text-white bg-[#060d1a] p-3 rounded-lg border border-[#1a3a5c] break-all">{item.displayName}</p>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Item ID</span>
-          <p className="text-xs text-[#3bb5ff] font-mono bg-[#060d1a] p-2 rounded-lg border border-[#1a3a5c] truncate">{item.itemid || 'N/A'}</p>
-        </div>
-        <div className="space-y-1">
-          <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Type</span>
-          <p className="text-xs text-white bg-[#060d1a] p-2 rounded-lg border border-[#1a3a5c] capitalize">{item.type}</p>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Encryption</span>
-          <p className="text-xs text-white bg-[#060d1a] p-2 rounded-lg border border-[#1a3a5c] capitalize">{item.encryption_mode || 'off'}</p>
-        </div>
-        <div className="space-y-1">
-          <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Version</span>
-          <p className="text-xs text-[#3bb5ff] bg-[#060d1a] p-2 rounded-lg border border-[#1a3a5c] font-bold">v{item.version || '0.0.0.1'}</p>
-        </div>
-      </div>
-      <div className="space-y-1">
-        <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Timestamp</span>
-        <p className="text-xs text-gray-300 bg-[#060d1a] p-3 rounded-lg border border-[#1a3a5c]">{item.upload_timestamp || 'N/A'}</p>
-      </div>
-      <div className="space-y-1">
-        <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Parts</span>
-        <p className="text-xs text-gray-300 bg-[#060d1a] p-3 rounded-lg border border-[#1a3a5c]">{item.total_parts ? `${item.total_parts} part(s)` : 'N/A'}</p>
-      </div>
-      <button onClick={() => setModal(null)} className="w-full py-3.5 bg-[#0f1f3a] text-white rounded-xl font-bold btn-touch mt-2 border border-[#1a3a5c]">Close</button>
+  const ItemOptionsMenu = ({ item }) => (
+    <div className="space-y-2">
+      <button onClick={() => { setBottomSheet(null); setModal({ title: 'New Version', content: <NewVersionUploadModalContent targetItemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} onUpload={() => { }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.plus} Upload New Version</button>
+      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Versions', content: <SeeVersionsModalContent itemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} onVersionSelect={(v) => { if (v) { setCurrentVersion(v); fetchFiles(currentPath, v); setModal(null); } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.clock} See Versions</button>
+      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Download Version', content: <DownloadVersionModalContent itemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} item={item} onDownload={(args) => { if (args) { runCmd(args, item.displayName, 'download'); setModal(null); showToast('Download queued', 'success'); } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.download} Download Version</button>
+      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Move / Copy', content: <ModifyModalContent type="move" item={item} onConfirm={(data) => { if (data) { const args = ['modify', data.type]; if (data.type === 'move') { args.push(data.src, data.dst); if (data.copyMode) args.push('--copy'); if (data.srcIdBased) args.push('--src_id_based'); if (data.dstIdBased) args.push('--dst_id_based'); } else { args.push(data.item, data.newName); if (data.nameMode !== 'D') args.push('--mode', data.nameMode); } args.push('-db', selectedDb); if (data.type !== 'move' && data.idBased) args.push('--id_based'); if (!data.nameCheck) args.push('--no_name_check'); runCmd(args, item.displayName, data.type); setModal(null); showToast(`${data.type} queued`, 'success'); } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.move} Move / Copy</button>
+      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Rename', content: <ModifyModalContent type="rename" item={item} onConfirm={(data) => { if (data) { const args = ['modify', data.type]; args.push(data.item, data.newName); if (data.nameMode !== 'D') args.push('--mode', data.nameMode); args.push('-db', selectedDb); if (data.idBased) args.push('--id_based'); if (!data.nameCheck) args.push('--no_name_check'); runCmd(args, item.displayName, 'rename'); setModal(null); showToast('Rename queued', 'success'); } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.rename} Rename</button>
+      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Delete Item', content: <DeleteModalContent singleItem={item} onConfirm={(opts) => { const a = ['delete']; if (item.itemid) a.push(item.itemid, '--id_based'); else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`); a.push('-db', selectedDb, '--skip_confirmation', 'yes'); if (opts.type === 'hard') a.push('--hard'); if (opts.scope === 'all') a.push('--all_versions', 'yes'); else if (opts.scope === 'specific' && opts.version) a.push('--version', opts.version); else if (opts.scope === 'range' && opts.startVersion && opts.endVersion) a.push('--start_version', opts.startVersion, '--end_version', opts.endVersion); runCmd(a, item.displayName, 'delete'); setModal(null); clearSelection(); showToast('Delete queued', 'success'); }} onCancel={() => setModal(null)} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/20 border border-red-900/30 rounded-xl text-sm text-red-400 btn-touch">{Ico.trash} Delete</button>
+      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Full Name', content: <div className="space-y-2"><p className="text-sm text-gray-400">Display Name: <span className="text-white">{item.displayName}</span></p><p className="text-sm text-gray-400">Original Name: <span className="text-white">{item.original_name || item.db_name || 'N/A'}</span></p><p className="text-sm text-gray-400">Item ID: <span className="text-white font-mono">{item.itemid}</span></p><button onClick={() => setModal(null)} className="mt-4 w-full py-2 bg-[#0f1f3a] rounded-xl">Close</button></div> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.info} Show Full Name</button>
     </div>
-  )
+  );
 
-  // ─────────────────── VERSION VIEW ───────────────────
-  const handleSeeVersions = () => {
-    if (!selectedItems[0]) return
-    const item = selectedItems[0]; const path = currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`
-    setModal({ title: 'Versions', wide: true, content: <VersionsView path={path} /> })
-  }
-  const handleDownloadVersion = () => {
-    if (!selectedItems[0]) return
-    const item = selectedItems[0]; const path = currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`
-    setModal({ title: 'Download Version', content: <DownloadVersionView path={path} /> })
-  }
-
-  const VersionsView = ({ path }) => {
-    const [versions, setVersions] = useState([])
-    const [error, setError] = useState('')
-    useEffect(() => {
-      fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(path)}`).then(r => r.json()).then(d => {
-        let itemid = null
-        if (d.results) { const k = Object.keys(d.results); if (k.length) itemid = k[0]; if (!itemid && d.results[k[0]]?.itemid) itemid = d.results[k[0]].itemid }
-        if (itemid) return fetch(`/api/listfiles?db=${encodeURIComponent(selectedDb)}&itemid=${encodeURIComponent(itemid)}`).then(r => r.json())
-        throw new Error('No itemid found')
-      }).then(vd => { if (vd?.error) throw new Error(vd.error); const v = vd?.results ? Object.keys(vd.results).filter(k => k.includes('.')).map(k => ({ version: k, ...vd.results[k] })) : []; setVersions(v); if (!v.length) setError('No versions found') }).catch(e => setError(e.message))
-    }, [path])
-    return (
-      <div className="space-y-2">
-        {error ? <p className="text-sm text-red-400">{error}</p> : versions.map(v => (
-          <div key={v.version} className="flex items-center justify-between px-3 py-2 bg-[#0f1f3a] rounded-lg"><span className="text-sm text-gray-200">v{v.version}</span><span className="text-xs text-gray-500">{v.upload_timestamp?.split('T')[0] || ''}</span></div>
+  // -------------------- RENDER --------------------
+  const renderExplorer = () => (
+    <div className="flex flex-col h-full bg-[#060d1a]">
+      <div className="flex items-center gap-1 px-3 py-2 bg-[#0a1628] border-b border-[#1a3a5c] overflow-x-auto">
+        <button onClick={() => handleNavigate('.')} className={`px-3 py-1.5 text-[10px] font-bold rounded-lg btn-touch ${currentPath === '.' ? 'bg-[#3bb5ff] text-[#0a1628]' : 'bg-[#0f1f3a] text-gray-400'}`}>ROOT</button>
+        {currentPath !== '.' && currentPath.split('/').map((part, i, arr) => (
+          <React.Fragment key={i}>
+            <span className="text-gray-700">/</span>
+            <button onClick={() => handleNavigate(arr.slice(0, i + 1).join('/'))} className={`px-3 py-1.5 text-[10px] font-bold rounded-lg btn-touch ${i === arr.length - 1 ? 'bg-[#3bb5ff]/20 text-[#3bb5ff] border border-[#3bb5ff]/40' : 'bg-[#0f1f3a] text-gray-400'}`}>{part.toUpperCase()}</button>
+          </React.Fragment>
         ))}
-        <button onClick={() => setModal(null)} className="text-sm text-[#3bb5ff] text-center w-full btn-touch mt-2">Close</button>
+        {currentVersion && <button onClick={() => { setCurrentVersion(null); fetchFiles(currentPath); }} className="ml-2 px-3 py-1.5 text-[9px] bg-orange-500/20 border border-orange-500/50 rounded-full text-orange-400 font-bold btn-touch animate-pulse">V:{currentVersion} ✕</button>}
       </div>
-    )
-  }
 
-  const DownloadVersionView = ({ path }) => {
-    const [ver, setVer] = useState('')
-    return <div className="space-y-4"><input type="text" value={ver} onChange={e => setVer(e.target.value)} placeholder="Version (e.g. 0.0.0.1)" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={() => { if (ver) { runCmd(['download', path, '-db', selectedDb, '--version', ver], path, 'download'); setModal(null); showToast('Download queued', 'success') } }} disabled={!ver} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Download</button></div>
-  }
+      <div className="flex gap-2 px-3 py-3 bg-[#0a1628] border-b border-[#1a3a5c] overflow-x-auto">
+        <button onClick={() => setBottomSheet({ title: 'Upload', content: <UploadForm /> })} className="p-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl btn-touch shadow-lg">{Ico.upload}</button>
+        <button onClick={() => { if (selectedItems.length) setModal({ title: 'Download', content: <DownloadModalContent onConfirm={(opts) => { executeDownload(selectedItems, opts.strictnessMode); setModal(null); }} onCancel={() => setModal(null)} /> }); }} disabled={!selectedItems.length} className="p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40">{Ico.download}</button>
+        <button onClick={() => { if (selectedItems.length) setModal({ title: 'Delete', content: <DeleteModalContent singleItem={selectedItems.length === 1 ? selectedItems[0] : null} onConfirm={(opts) => { selectedItems.forEach(item => { const a = ['delete']; if (item.itemid) a.push(item.itemid, '--id_based'); else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`); a.push('-db', selectedDb, '--skip_confirmation', 'yes'); if (opts.type === 'hard') a.push('--hard'); if (opts.scope === 'all') a.push('--all_versions', 'yes'); else if (opts.scope === 'specific' && opts.version) a.push('--version', opts.version); else if (opts.scope === 'range' && opts.startVersion && opts.endVersion) a.push('--start_version', opts.startVersion, '--end_version', opts.endVersion); runCmd(a, item.displayName, 'delete'); }); clearSelection(); setModal(null); showToast('Delete queued', 'success'); }} onCancel={() => setModal(null)} /> }); }} disabled={!selectedItems.length} className="p-3 bg-red-900/20 border border-red-900/40 text-red-400 rounded-xl btn-touch disabled:opacity-40">{Ico.trash}</button>
+        <button onClick={() => setModal({ title: 'New Folder', content: <MakeFolderModalContent /> })} className="p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch">{Ico.newFolder}</button>
+        <button onClick={() => setSelectedItems([...items])} disabled={!items.length} className="p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40">{Ico.selectAll}</button>
+        <button onClick={handleRefresh} className="p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-[#3bb5ff] rounded-xl btn-touch">{Ico.version}</button>
+      </div>
 
-  // ─────────────────── MAIN RENDER ───────────────────
+      <div className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
+        {items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-600 opacity-40 py-20">
+            <div className="mb-6 scale-150">{Ico.folder}</div>
+            <p className="text-sm font-bold uppercase tracking-widest">Folder is empty</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3">
+            {items.map((item, idx) => {
+              const isSelected = selectedItems.find(i => i.itemid === item.itemid);
+              const isFolder = item.type === 'folder';
+              return (
+                <div key={idx} onClick={() => toggleSelect(item)} onDoubleClick={() => { if (isFolder) { const t = item.db_name || item.name; handleNavigate(currentPath === '.' ? t : `${currentPath}/${t}`); } }} onContextMenu={(e) => { e.preventDefault(); handleLongPress(item); }} className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all btn-touch aspect-square relative ${isSelected ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] shadow-lg scale-[0.98]' : 'bg-[#0a1628]/60 border-[#1a3a5c] hover:border-[#3bb5ff]/40'}`}>
+                  {isSelected && <div className="absolute top-2 right-2 w-5 h-5 bg-[#3bb5ff] text-[#0a1628] rounded-full flex items-center justify-center">{Ico.check}</div>}
+                  <div className={`mb-2 transition-transform ${isSelected ? 'scale-110' : ''}`}>{isFolder ? Ico.folder : Ico.file}</div>
+                  <div className={`text-[10px] font-bold text-center truncate w-full px-1 ${isSelected ? 'text-white' : 'text-gray-400'}`}>{item.displayName}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {
+        selectedItems.length === 1 && (
+          <div className="fixed bottom-24 left-4 right-4 bg-[#0a1628]/95 backdrop-blur-xl border border-[#3bb5ff]/40 px-6 py-4 rounded-3xl flex items-center justify-between z-40 shadow-2xl">
+            <span className="text-xs text-[#3bb5ff] font-black uppercase">1 SELECTED</span>
+            <div className="flex gap-4">
+              <button onClick={() => setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu item={selectedItems[0]} /> })} className="p-3 bg-[#3bb5ff]/10 text-[#3bb5ff] rounded-xl btn-touch">{Ico.menu}</button>
+              <button onClick={clearSelection} className="p-3 text-gray-500 btn-touch hover:text-white">{Ico.close}</button>
+            </div>
+          </div>
+        )
+      }
+    </div >
+  );
+
+  // Download execution helper with password prompt
+  const executeDownload = (itemsToDownload, strictnessMode = 'NA') => {
+    const encryptedItems = itemsToDownload.filter(i => i.encryption === 'not_automatic' || i.encryption_mode === 'not_automatic');
+    if (encryptedItems.length) {
+      setModal({ title: 'Passwords Required', content: <PasswordPromptModalContent items={encryptedItems.map(i => ({ id: i.itemid, name: i.displayName }))} onConfirm={(passwords) => { setModal(null); doDownload(itemsToDownload, passwords, strictnessMode); }} /> });
+    } else {
+      doDownload(itemsToDownload, {}, strictnessMode);
+    }
+  };
+  const doDownload = (itemsToDownload, passwords, strictnessMode) => {
+    const downloadFolder = localStorage.getItem('VAULT_OPUS_download_folder') || './downloads';
+    itemsToDownload.forEach(item => {
+      const itemPath = currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`;
+      const args = ['download', itemPath, '-db', selectedDb, '-o', downloadFolder];
+      if (Object.keys(passwords).length) args.push('--passwords', JSON.stringify(passwords));
+      if (strictnessMode !== 'NA') args.push('--strictness_mode', strictnessMode);
+      runCmd(args, item.displayName, 'download');
+    });
+  };
+
+  // Volume tabs
+  const renderVolumes = () => (
+    <div className="flex flex-col h-full">
+      <div className="px-4 py-3 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between">
+        <h2 className="text-lg font-bold text-white">Volumes</h2>
+        <div className="flex gap-2">
+          <button onClick={() => setModal({ title: 'Sharables', content: <SharablesModalContent /> })} className="p-2 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch">{Ico.share}</button>
+          <button onClick={() => setShowCreateVolume(true)} className="p-2 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl btn-touch">{Ico.plus}</button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto p-3 space-y-6">
+        {recentVolumes.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-3"><span className="text-[#3bb5ff]/50">{Ico.clock}</span><h3 className="text-[10px] uppercase font-bold text-[#3bb5ff]/50">Recent</h3></div>
+            <div className="space-y-2">{recentVolumes.map(db => <div key={db} onClick={() => { setSelectedDb(db); setTab('explorer'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl border btn-touch ${selectedDb === db ? 'bg-[#3bb5ff]/15 border-[#3bb5ff]' : 'bg-[#0f1f3a]/40 border-[#1a3a5c]'}`}><span className={selectedDb === db ? 'text-[#3bb5ff]' : 'text-gray-500'}>{Ico.cube}</span><div className="text-sm font-bold truncate text-white">{db.replace('.db', '')}</div></div>)}</div>
+          </section>
+        )}
+        <section>
+          <div className="flex items-center justify-between mb-3"><div className="flex items-center gap-2"><span className="text-[#3bb5ff]/50">{Ico.cube}</span><h3 className="text-[10px] uppercase font-bold text-[#3bb5ff]/50">Available</h3></div><button onClick={() => setModal({ title: 'Add External Volume', content: <RemoteFolderPicker showFiles onSelect={p => { if (p.endsWith('.db')) { setExternalVolumes(prev => { const u = [...new Set([...prev, p])]; localStorage.setItem('mob_externalVolumes', JSON.stringify(u)); return u; }); fetchDbs(); setModal(null); showToast('Volume added', 'success'); } else showToast('Must be .db', 'error'); }} onCancel={() => setModal(null)} /> })} className="text-[10px] text-[#3bb5ff] font-bold btn-touch uppercase">+ External</button></div>
+          <div className="space-y-2">{dbs.map(db => <div key={db} onClick={() => { setSelectedDb(db); setTab('explorer'); }} className={`flex items-center justify-between px-4 py-3 rounded-xl border btn-touch ${selectedDb === db ? 'bg-[#3bb5ff]/15 border-[#3bb5ff]' : 'bg-[#0f1f3a]/40 border-[#1a3a5c]'}`}><div className="flex items-center gap-3"><span className={selectedDb === db ? 'text-[#3bb5ff]' : 'text-gray-500'}>{Ico.cube}</span><span className="text-sm font-bold text-white">{db.replace('.db', '')}</span></div><button onClick={(e) => { e.stopPropagation(); setModal({ title: 'Volume Options', content: <div className="space-y-2"><button onClick={() => { setModal(null); setSelectedDb(db); setTab('explorer'); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.folderOpen} Open</button><button onClick={() => { setModal({ title: 'Rename Volume', content: <RenameVolumeModalContent db={db} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.rename} Rename</button><button onClick={async () => { try { await fetch('/api/dbs/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ db_name: db }) }); showToast('Packaged', 'success'); setModal(null); } catch (e) { showToast(e.message, 'error'); } }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.share} Package</button><button onClick={() => { setModal(null); setModal({ title: '☢️ NUKE', content: <NukeModalContent db={db} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/10 border border-red-900/20 rounded-xl text-sm text-red-500 font-bold btn-touch">☢️ NUKE</button><button onClick={() => { setExternalVolumes(prev => prev.filter(p => p !== db)); localStorage.setItem('mob_externalVolumes', JSON.stringify(externalVolumes.filter(p => p !== db))); setDbs(prev => prev.filter(p => p !== db)); if (selectedDb === db) setSelectedDb(''); setModal(null); showToast('Removed', 'success'); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.close} Remove from List</button><button onClick={() => { setModal({ title: 'Confirm Deletion', content: <div className="space-y-4"><div className="p-4 bg-red-900/20 border border-red-500/30 rounded-xl"><p className="text-sm text-red-400 font-bold">⚠️ PERMANENT DELETE</p><p className="text-xs text-gray-300 mt-1">This will permanently remove <span className="text-white font-mono">{db}</span> from disk. This CANNOT be undone.</p></div><div className="flex gap-3"><button onClick={() => setModal(null)} className="flex-1 py-3 bg-[#0f1f3a] text-gray-300 rounded-xl border border-[#1a3a5c] btn-touch">Cancel</button><button onClick={async () => { try { await fetch('/api/dbs/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ db_name: db }) }); fetchDbs(); if (selectedDb === db) setSelectedDb(''); showToast('Deleted', 'success'); setModal(null); } catch (e) { showToast(e.message, 'error'); } }} className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold btn-touch">Delete</button></div></div> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/20 border border-red-900/30 rounded-xl text-sm text-red-400 btn-touch">{Ico.trash} Delete Permanently</button></div> }); }} className="p-2 text-gray-500 hover:text-white btn-touch">{Ico.menu}</button></div>)}</div>
+        </section>
+        <button onClick={() => setModal({ title: 'Import .vov Package', content: <div className="space-y-3"><RemoteFolderPicker showFiles onSelect={async p => { if (p.endsWith('.vov')) { try { await fetch('/api/dbs/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vov_path: p }) }); fetchDbs(); showToast('Imported', 'success'); setModal(null); } catch (e) { showToast(e.message, 'error'); } } else showToast('Must select .vov', 'error'); }} onCancel={() => setModal(null)} /></div> })} className="w-full py-4 bg-[#0f1f3a] border border-[#1a3a5c] rounded-2xl text-xs text-gray-300 font-bold uppercase btn-touch flex items-center justify-center gap-2">{Ico.import} Import VOV Package</button>
+      </div>
+    </div>
+  );
+
+  const renderQueue = () => (
+    <div className="flex flex-col h-full">
+      <div className="px-4 py-3 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between"><h2 className="text-lg font-bold text-white">Queue</h2><button onClick={() => setQueue([])} className="text-xs text-gray-400 btn-touch">Clear All</button></div>
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">{queue.length === 0 ? <div className="text-center py-20 text-gray-500 text-sm">No active tasks</div> : queue.slice().reverse().map(item => (<div key={item.id} className="flex items-center gap-3 px-3 py-2 bg-[#0a1628] border border-[#1a3a5c] rounded-xl"><div className={`w-2 h-2 rounded-full ${item.status === 'completed' ? 'bg-green-400' : item.status === 'failed' ? 'bg-red-400' : item.status === 'running' ? 'bg-[#3bb5ff] animate-pulse' : 'bg-gray-500'}`} /><div className="flex-1"><div className="text-xs text-gray-200 truncate">{item.name}</div><div className="text-[10px] text-gray-500 capitalize">{item.status}</div></div>{item.progress > 0 && <div className="text-xs text-[#3bb5ff]">{item.progress}%</div>}</div>))}</div>
+    </div>
+  );
+
+  const renderTerminal = () => (
+    <div className="flex flex-col h-full">
+      <div className="px-4 py-3 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between"><h2 className="text-lg font-bold text-white">Terminal</h2><button onClick={() => setTerminalOutput('')} className="text-xs text-gray-400 btn-touch">Clear</button></div>
+      <div className="flex-1 overflow-y-auto p-3 bg-[#060d1a]"><pre className="text-xs text-green-400 font-mono whitespace-pre-wrap break-all">{terminalOutput || 'No output yet'}</pre></div>
+    </div>
+  );
+
+  const SettingsTabContent = () => {
+    const [localConfig, setLocalConfig] = useState(null);
+    const [downloadFolder, setDownloadFolder] = useState(localStorage.getItem('VAULT_OPUS_download_folder') || './downloads');
+    const [showPicker, setShowPicker] = useState(false);
+    useEffect(() => { if (config) setLocalConfig(JSON.parse(JSON.stringify(config))); }, [config]);
+    const saveSettings = async () => {
+      if (localConfig) {
+        await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(localConfig) });
+        localStorage.setItem('VAULT_OPUS_download_folder', downloadFolder);
+        showToast('Settings saved', 'success');
+        await fetchConfig();
+      }
+    };
+    if (showPicker) return <RemoteFolderPicker initialPath={downloadFolder} onSelect={p => { setDownloadFolder(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />;
+    if (!localConfig) return <div className="flex items-center justify-center h-full text-gray-500">Loading config...</div>;
+
+    const handleFieldChange = (path, value) => {
+      setLocalConfig(prev => {
+        const upd = JSON.parse(JSON.stringify(prev));
+        let obj = upd;
+        for (let i = 0; i < path.length - 1; i++) obj = obj[path[i]];
+        obj[path[path.length - 1]] = value;
+        return upd;
+      });
+    };
+
+    const renderField = (key, value, path) => {
+      const isSecret = key.toLowerCase().includes('token') || key.toLowerCase().includes('salt');
+      const fieldPath = [...path, key];
+
+      if (typeof value === 'boolean') {
+        return (
+          <label key={key} className="flex items-center justify-between p-3 bg-[#060d1a] border border-[#1a3a5c] rounded-xl active:bg-[#1a3a5c]/50 transition-all">
+            <span className="text-sm text-gray-300">{key.replace(/_/g, ' ')}</span>
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={value}
+                onChange={e => handleFieldChange(fieldPath, e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-[#1a3a5c] rounded-full peer peer-checked:bg-[#3bb5ff] transition-colors" />
+              <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5" />
+            </div>
+          </label>
+        );
+      }
+
+      return (
+        <div key={key} className="space-y-1">
+          <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-wider font-bold ml-1">{key.replace(/_/g, ' ')}</label>
+          <input
+            type={isSecret ? 'password' : (typeof value === 'number' ? 'number' : 'text')}
+            value={value ?? ''}
+            onChange={e => handleFieldChange(fieldPath, typeof value === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
+            className="w-full bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none transition-colors"
+            placeholder={`Enter ${key.replace(/_/g, ' ')}...`}
+          />
+        </div>
+      );
+    };
+
+    const renderSection = (title, data, path = []) => {
+      if (data === null || data === undefined || typeof data !== 'object' || Array.isArray(data)) {
+        return renderField(title, data, path);
+      }
+      return (
+        <div key={title} className="bg-[#0a1628] p-4 rounded-2xl border border-[#1a3a5c] space-y-4">
+          <h3 className="text-xs font-bold text-[#3bb5ff] uppercase tracking-wider">{title.replace(/_/g, ' ')}</h3>
+          {Object.entries(data).map(([k, v]) => {
+            if (v !== null && v !== undefined && typeof v === 'object' && !Array.isArray(v)) {
+              return renderSection(k, v, [...path, k]);
+            }
+            return renderField(k, v, [...path]);
+          })}
+        </div>
+      );
+    };
+
+    return (
+      <div className="flex flex-col h-full overflow-y-auto p-4 pb-32">
+        <div className="space-y-4">
+          <div className="bg-[#0a1628] p-4 rounded-2xl border border-[#1a3a5c] space-y-3">
+            <h3 className="text-xs font-bold text-[#3bb5ff] uppercase tracking-wider">Interface</h3>
+            <div className="space-y-1">
+              <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-wider font-bold ml-1">Download Destination</label>
+              <div className="flex gap-2">
+                <input type="text" value={downloadFolder} onChange={e => setDownloadFolder(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none transition-colors" />
+                <button onClick={() => setShowPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">Browse</button>
+              </div>
+            </div>
+          </div>
+          {Object.entries(localConfig)
+            .filter(([_, d]) => d !== null && typeof d === 'object' && !Array.isArray(d))
+            .map(([section, data]) =>
+              renderSection(section, data, [section])
+            )}
+        </div>
+        <div className="fixed bottom-24 left-4 right-4"><button onClick={saveSettings} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold shadow-xl">Commit Settings</button></div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full safe-top bg-[#060d1a]">
-      <header className="flex items-center justify-between px-6 py-4 bg-[#0a1628] border-b border-[#1a3a5c] shadow-lg z-30">
+      <header className="flex items-center justify-between px-6 py-4 bg-[#0a1628] border-b border-[#1a3a5c] shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <img src="/logo/image.png" alt="Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(59,181,255,0.4)]" />
-            <div className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-[#0a1628] ${connectionStatus === 'connected' ? 'bg-green-500' : connectionStatus === 'connecting' ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'}`} />
-          </div>
-          <div>
-            <h1 className="text-lg font-black text-white tracking-tighter leading-none">VAULT_OPUS</h1>
-            {selectedDb && <p className="text-[10px] text-[#3bb5ff] font-bold uppercase tracking-widest mt-1 opacity-80">{selectedDb.replace('.db', '')}</p>}
-          </div>
+          <img src="/logo/image.png" alt="Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(59,181,255,0.4)]" onError={(e) => e.target.style.display = 'none'} />
+          <div><h1 className="text-lg font-black text-white tracking-tighter">VAULT_OPUS</h1>{selectedDb && <p className="text-[10px] text-[#3bb5ff] font-bold uppercase mt-1">{selectedDb.replace('.db', '')}</p>}</div>
         </div>
         <div className="flex items-center gap-2">
-          {connectionStatus === 'disconnected' && (
-            <button onClick={connectWS} className="p-2 text-red-500 btn-touch" title="Reconnect">{Ico.alert}</button>
-          )}
-          {promptData && <button onClick={() => setModal({ title: 'Input Required', content: <PromptForm /> })} className="px-4 py-2 text-xs bg-yellow-500/20 border border-yellow-500/40 text-yellow-400 rounded-2xl animate-pulse btn-touch font-bold uppercase tracking-widest">Action</button>}
+          {connectionStatus === 'disconnected' && <button onClick={connectWS} className="p-2 text-red-500 btn-touch">{Ico.alert}</button>}
         </div>
       </header>
 
@@ -1570,49 +1489,30 @@ export default function App() {
         {tab === 'volumes' && renderVolumes()}
         {tab === 'queue' && renderQueue()}
         {tab === 'terminal' && renderTerminal()}
-        {tab === 'settings' && <SettingsTab config={config} fetchConfig={fetchConfig} connectionStatus={connectionStatus} connectWS={connectWS} showToast={showToast} />}
+        {tab === 'settings' && <SettingsTabContent />}
       </div>
 
-      <nav className="flex items-center justify-around bg-[#0a1628] border-t border-[#1a3a5c] py-4 safe-bottom z-30 shadow-[0_-10px_30px_rgba(0,0,0,0.4)]">
+      <nav className="flex items-center justify-around bg-[#0a1628] border-t border-[#1a3a5c] py-4 safe-bottom shadow-[0_-10px_30px_rgba(0,0,0,0.4)]">
         {[
           { id: 'explorer', label: 'Files', icon: Ico.folder },
-          { id: 'volumes', label: 'Volumes', icon: Ico.cube },
+          { id: 'volumes', label: 'Volumes', icon: Ico.cube, badge: 0 },
           { id: 'queue', label: 'Queue', icon: Ico.clock, badge: queue.filter(q => q.status === 'running' || q.status === 'queued').length },
           { id: 'terminal', label: 'Terminal', icon: Ico.terminal },
           { id: 'settings', label: 'Settings', icon: Ico.settings }
         ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} className={`flex flex-col items-center gap-2 px-2 py-1 rounded-3xl btn-touch relative transition-all active:scale-90 ${tab === t.id ? 'text-[#3bb5ff]' : 'text-gray-500'}`}>
-            <div className={`p-2 rounded-2xl transition-all duration-300 [&>svg]:w-8 [&>svg]:h-8 ${tab === t.id ? 'bg-[#3bb5ff]/15 shadow-[0_0_15px_rgba(59,181,255,0.2)]' : 'bg-transparent'}`}>
-              {t.icon}
-            </div>
+          <button key={t.id} onClick={() => setTab(t.id)} className={`flex flex-col items-center gap-2 px-2 py-1 rounded-3xl btn-touch transition-all ${tab === t.id ? 'text-[#3bb5ff]' : 'text-gray-500'}`}>
+            <div className={`p-2 rounded-2xl transition-all ${tab === t.id ? 'bg-[#3bb5ff]/15 shadow-[0_0_15px_rgba(59,181,255,0.2)]' : ''}`}>{t.icon}</div>
             <span className={`text-[9px] font-black uppercase tracking-[0.1em] ${tab === t.id ? 'opacity-100' : 'opacity-40'}`}>{t.label}</span>
             {t.badge > 0 && <span className="absolute top-0 right-0 w-6 h-6 bg-[#3bb5ff] text-[10px] text-[#0a1628] rounded-full flex items-center justify-center font-black border-[3px] border-[#0a1628] shadow-lg">{t.badge}</span>}
           </button>
         ))}
       </nav>
 
-
-
       {bottomSheet && <Sheet open onClose={() => setBottomSheet(null)} title={bottomSheet.title}>{bottomSheet.content}</Sheet>}
       {modal && <Modal open onClose={() => setModal(null)} title={modal.title} wide={modal.wide}>{modal.content}</Modal>}
-
-      {showCreateVolume && (
-        <Modal open onClose={() => setShowCreateVolume(false)} title="Create Volume">
-          <div className="space-y-4">
-            <input type="text" value={newDbName} onChange={e => setNewDbName(e.target.value)} placeholder="Volume name" autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" />
-            <button onClick={async () => { try { await fetch('/api/dbs/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ db_name: newDbName }) }); fetchDbs(); setShowCreateVolume(false); setSelectedDb(newDbName); setTab('explorer') } catch (e) { showToast(e.message, 'error') } }} disabled={!newDbName.trim()} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Create</button>
-          </div>
-        </Modal>
-      )}
-
+      {showCreateVolume && <Modal open onClose={() => setShowCreateVolume(false)} title="Create Volume"><div className="space-y-4"><input type="text" value={newDbName} onChange={e => setNewDbName(e.target.value)} placeholder="Volume name" autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" /><button onClick={async () => { try { await fetch('/api/dbs/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ db_name: newDbName }) }); fetchDbs(); setShowCreateVolume(false); setSelectedDb(newDbName); setTab('explorer'); } catch (e) { showToast(e.message, 'error'); } }} disabled={!newDbName.trim()} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold">Create</button></div></Modal>}
+      {promptData && <Modal open onClose={() => setPromptData(null)} title="Input Required"><div className="space-y-4"><p className="text-sm text-gray-400">{promptData.text}</p><input type={promptData.isPassword ? 'password' : 'text'} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" onKeyDown={e => { if (e.key === 'Enter') { if (ws) ws.send(JSON.stringify({ action: 'input', data: e.target.value, task_id: promptData.taskId })); setPromptData(null); } }} /><button onClick={() => { if (ws) ws.send(JSON.stringify({ action: 'input', data: '', task_id: promptData.taskId })); setPromptData(null); }} className="w-full py-3 bg-[#3bb5ff] text-[#060d1a] rounded-xl font-bold">Submit</button></div></Modal>}
       {toast && <Toast key={toast.key} message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-      {promptData && <PromptForm promptData={promptData} ws={ws} onClose={() => setPromptData(null)} />}
     </div>
-  )
-}
-
-function PromptForm({ promptData, ws, onClose }) {
-  const [val, setVal] = useState('')
-  return <Modal open onClose={onClose} title={promptData?.text || 'Input Required'}><div className="space-y-4"><p className="text-sm text-gray-400">{promptData?.text}</p><input type={promptData?.isPassword ? 'password' : 'text'} value={val} onChange={e => setVal(e.target.value)} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={() => { if (ws) ws.send(JSON.stringify({ action: 'input', data: val, task_id: promptData.taskId })); onClose() }} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch">Submit</button></div></Modal>
+  );
 }
