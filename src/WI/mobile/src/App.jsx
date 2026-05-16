@@ -261,6 +261,7 @@ export default function App() {
   });
   const [toast, setToast] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('connecting');
+  const [volumeError, setVolumeError] = useState(null);
   const reconnectTimeoutRef = useRef(null);
   const reconnectAttemptsRef = useRef(0);
 
@@ -338,13 +339,35 @@ export default function App() {
   const fetchConfig = async () => { try { const r = await fetch('/api/config'); setConfig(await r.json()); } catch (e) { } };
   const fetchFiles = async (path, version = currentVersion) => {
     if (!selectedDb) return;
+    setVolumeError(null);
     try {
       let url = `/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(path)}`;
       if (version) url += `&version=${encodeURIComponent(version)}`;
       const r = await fetch(url);
+      if (!r.ok) {
+        setVolumeError("This volume doesn't exist");
+        setTree(null);
+        return;
+      }
       const data = await r.json();
+      if (data.error || (data.results && Object.keys(data.results).length === 0 && path === '.')) {
+        // Check if this is truly empty or the volume file doesn't exist
+        try {
+          const checkR = await fetch(`/api/dbs`);
+          const checkData = await checkR.json();
+          const availableDbs = checkData.dbs || [];
+          if (!availableDbs.includes(selectedDb)) {
+            setVolumeError("This volume doesn't exist");
+            setTree(null);
+            return;
+          }
+        } catch (_) { /* ignore check errors */ }
+      }
       setTree(data);
-    } catch (e) { showToast('Failed to fetch files', 'error'); }
+    } catch (e) {
+      setVolumeError("This volume doesn't exist");
+      setTree(null);
+    }
   };
   useEffect(() => { fetchDbs(); fetchConfig(); }, []);
   useEffect(() => {
@@ -998,7 +1021,7 @@ export default function App() {
       showToast(`${localPaths.length} upload(s) queued`, 'success');
     };
 
-    if (showPicker) return <RemoteFolderPicker initialPath="" showFiles multiSelect onSelect={p => { setLocalPaths(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />;
+    if (showPicker) return <RemoteFolderPicker initialPath="" showFiles multiSelect onSelect={p => { setLocalPaths(p); if (p.length > 1) setUploadName(''); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />;
     return (
       <div className="space-y-4">
         <div className="flex gap-2">
@@ -1037,8 +1060,10 @@ export default function App() {
             )}
           </div>
         )}
-        <div className="grid grid-cols-2 gap-3">
-          <input type="text" value={uploadName} onChange={e => setUploadName(e.target.value)} placeholder="Custom name" className="bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+        <div className={`grid ${localPaths.length <= 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
+          {localPaths.length <= 1 && (
+            <input type="text" value={uploadName} onChange={e => setUploadName(e.target.value)} placeholder="Custom name" className="bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
+          )}
           <input type="text" value={newVersionString} onChange={e => setNewVersionString(e.target.value)} placeholder="Version string" className="bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
         </div>
         <input type="number" step="0.1" value={chunkSize} onChange={e => setChunkSize(e.target.value)} placeholder="Chunk size MB (auto)" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" />
@@ -1273,7 +1298,13 @@ export default function App() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
-        {items.length === 0 ? (
+        {volumeError ? (
+          <div className="flex flex-col items-center justify-center h-full py-20">
+            <div className="mb-6 scale-150 text-red-500">{Ico.alert}</div>
+            <p className="text-sm font-bold uppercase tracking-widest text-red-400">{volumeError}</p>
+            <p className="text-xs text-gray-600 mt-2">Select a valid volume from the Volumes tab</p>
+          </div>
+        ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-600 opacity-40 py-20">
             <div className="mb-6 scale-150">{Ico.folder}</div>
             <p className="text-sm font-bold uppercase tracking-widest">Folder is empty</p>
@@ -1343,7 +1374,7 @@ export default function App() {
         {recentVolumes.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-3"><span className="text-[#3bb5ff]/50">{Ico.clock}</span><h3 className="text-[10px] uppercase font-bold text-[#3bb5ff]/50">Recent</h3></div>
-            <div className="space-y-2">{recentVolumes.map(db => <div key={db} onClick={() => { setSelectedDb(db); setTab('explorer'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl border btn-touch ${selectedDb === db ? 'bg-[#3bb5ff]/15 border-[#3bb5ff]' : 'bg-[#0f1f3a]/40 border-[#1a3a5c]'}`}><span className={selectedDb === db ? 'text-[#3bb5ff]' : 'text-gray-500'}>{Ico.cube}</span><div className="text-sm font-bold truncate text-white">{db.replace('.db', '')}</div></div>)}</div>
+            <div className="space-y-2">{recentVolumes.map(db => <div key={db} onClick={() => { setSelectedDb(db); setTab('explorer'); }} className={`flex items-center gap-3 px-4 py-3 rounded-xl border btn-touch ${selectedDb === db ? 'bg-[#3bb5ff]/15 border-[#3bb5ff]' : 'bg-[#0f1f3a]/40 border-[#1a3a5c]'}`}><span className={selectedDb === db ? 'text-[#3bb5ff]' : 'text-gray-500'}>{Ico.cube}</span><div className="text-sm font-bold truncate text-white flex-1">{db.replace('.db', '')}</div><button onClick={(e) => { e.stopPropagation(); setRecentVolumes(prev => { const u = prev.filter(d => d !== db); localStorage.setItem('mob_recentVolumes', JSON.stringify(u)); return u; }); }} className="p-1.5 text-gray-600 hover:text-red-400 rounded-lg transition-colors flex-shrink-0">{Ico.close}</button></div>)}</div>
           </section>
         )}
         <section>
@@ -1421,7 +1452,7 @@ export default function App() {
         <div key={key} className="space-y-1">
           <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-wider font-bold ml-1">{key.replace(/_/g, ' ')}</label>
           <input
-            type={isSecret ? 'password' : (typeof value === 'number' ? 'number' : 'text')}
+            type={typeof value === 'number' ? 'number' : 'text'}
             value={value ?? ''}
             onChange={e => handleFieldChange(fieldPath, typeof value === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
             className="w-full bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none transition-colors"

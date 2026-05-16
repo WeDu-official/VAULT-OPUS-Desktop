@@ -19,12 +19,11 @@ const ConfigField = ({ label, value, path, onChange }) => {
   }
 
   if (typeof value === 'number' || typeof value === 'string') {
-    const isSecret = label.toLowerCase().includes('token') || label.toLowerCase().includes('salt');
     return (
       <div className="space-y-2">
         <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-widest font-bold ml-1">{label}</label>
         <input
-          type={isSecret ? "password" : (typeof value === 'number' ? "number" : "text")}
+          type={typeof value === 'number' ? "number" : "text"}
           value={value}
           onChange={(e) => onChange(path, typeof value === 'number' ? parseFloat(e.target.value) : e.target.value)}
           className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-4 py-2.5 text-sm focus:border-[#3bb5ff] focus:ring-1 focus:ring-[#3bb5ff]/20 outline-none transition-all text-gray-200 placeholder-gray-600"
