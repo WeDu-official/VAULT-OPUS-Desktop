@@ -171,7 +171,7 @@ export default function App() {
 
     setConnectionStatus('connecting');
     const socket = new WebSocket(`${proto}//${host}/ws/cli`);
-    
+
     socket.onopen = () => {
       setWs(socket);
       setConnectionStatus('connected');
@@ -245,7 +245,7 @@ export default function App() {
       setWs(null);
       setConnectionStatus('disconnected');
       setTerminalOutput(prev => prev + '\n[Disconnected from VAULT_OPUS CLI]\n');
-      
+
       // Retry logic: up to 3 times, then stop
       if (reconnectAttemptsRef.current < 3) {
         reconnectAttemptsRef.current += 1;

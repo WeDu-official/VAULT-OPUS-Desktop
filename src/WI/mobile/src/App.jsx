@@ -105,13 +105,24 @@ const RemoteFolderPicker = ({ initialPath, onSelect, onCancel, showFiles = false
 
   const handleItemClick = (item) => {
     if (item.name === '..') { fetchDirectory(item.path); return; }
-    if (item.is_dir) { fetchDirectory(item.path); }
-    else if (showFiles) {
-      if (multiSelect) {
-        setSelectedPaths(prev => prev.includes(item.path) ? prev.filter(p => p !== item.path) : [...prev, item.path]);
-      } else {
+    if (multiSelect) {
+      setSelectedPaths(prev => prev.includes(item.path) ? prev.filter(p => p !== item.path) : [...prev, item.path]);
+    } else {
+      if (showFiles && !item.is_dir) {
         onSelect(item.path);
+      } else {
+        setSelectedPaths([item.path]);
       }
+    }
+  };
+
+  const handleItemDoubleClick = (item) => {
+    if (item.name === '..') { fetchDirectory(item.path); return; }
+    if (item.is_dir) {
+      setSelectedPaths([]);
+      fetchDirectory(item.path);
+    } else if (showFiles && !multiSelect) {
+      onSelect(item.path);
     }
   };
 
@@ -128,12 +139,15 @@ const RemoteFolderPicker = ({ initialPath, onSelect, onCancel, showFiles = false
         {loading ? <p className="text-center p-8 text-gray-500 animate-pulse">Scanning...</p> : error ? <p className="text-red-400 p-4 text-center">{error}</p> : items.map(item => {
           const isSel = selectedPaths.includes(item.path);
           return (
-            <button key={item.path} onClick={() => handleItemClick(item)} className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl border btn-touch transition-all ${isSel ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : item.is_dir ? 'text-[#3bb5ff] bg-[#0f1f3a]/40 border-[#1a3a5c]' : 'text-gray-300 bg-[#060d1a] border-[#1a3a5c]'}`}>
+            <button key={item.path} onClick={() => handleItemClick(item)} onDoubleClick={() => handleItemDoubleClick(item)} className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl border btn-touch transition-all ${isSel ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : item.is_dir ? 'text-[#3bb5ff] bg-[#0f1f3a]/40 border-[#1a3a5c]' : 'text-gray-300 bg-[#060d1a] border-[#1a3a5c]'}`}>
               <span className={isSel ? 'text-white' : item.is_dir ? 'text-[#3bb5ff]' : 'text-gray-500'}>
                 {isSel ? Ico.check : item.is_dir ? Ico.folder : Ico.file}
               </span>
-              <span className="text-sm font-medium truncate flex-1 text-left">{item.name === '..' ? 'Parent Directory' : item.name}</span>
-              {multiSelect && !item.is_dir && item.name !== '..' && (
+              <div className="flex-1 flex flex-col items-start min-w-0">
+                <span className="text-sm font-medium truncate w-full text-left">{item.name === '..' ? 'Parent Directory' : item.name}</span>
+                {item.is_dir && item.name !== '..' && <span className="text-[9px] text-[#3bb5ff]/50 uppercase tracking-widest">Double-tap to open</span>}
+              </div>
+              {multiSelect && item.name !== '..' && (
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSel ? 'bg-[#3bb5ff] border-[#3bb5ff]' : 'border-gray-600'}`}>
                   {isSel && <div className="w-2 h-2 bg-white rounded-full" />}
                 </div>
@@ -146,7 +160,7 @@ const RemoteFolderPicker = ({ initialPath, onSelect, onCancel, showFiles = false
         {multiSelect ? (
           <button onClick={() => onSelect(selectedPaths)} disabled={selectedPaths.length === 0} className="flex-1 py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 disabled:opacity-40 uppercase tracking-widest text-xs">Confirm ({selectedPaths.length})</button>
         ) : !showFiles ? (
-          <button onClick={() => onSelect(currentPath)} className="flex-1 py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 uppercase tracking-widest text-xs">Select Folder</button>
+          <button onClick={() => onSelect(selectedPaths.length > 0 ? selectedPaths[0] : currentPath)} className="flex-1 py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 uppercase tracking-widest text-xs">Select Folder</button>
         ) : null}
         <button onClick={onCancel} className="px-8 py-4 bg-[#0f1f3a] text-white rounded-2xl border border-[#1a3a5c] btn-touch font-bold uppercase tracking-widest text-xs">Cancel</button>
       </div>
@@ -248,6 +262,7 @@ function SettingsTab({ config, fetchConfig, connectionStatus, connectWS, showToa
   const [downloadFolder, setDownloadFolder] = useState(localStorage.getItem('VAULT_OPUS_download_folder') || './downloads');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     if (config) {
@@ -313,16 +328,26 @@ function SettingsTab({ config, fetchConfig, connectionStatus, connectWS, showToa
               </div>
               <div className="space-y-1.5 pt-2">
                 <label className="text-[10px] text-gray-500 uppercase tracking-widest font-black ml-1">Download Destination</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={downloadFolder}
-                    onChange={(e) => setDownloadFolder(e.target.value)}
-                    className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-2xl px-4 py-4 text-sm focus:border-[#3bb5ff] outline-none text-gray-200"
-                    placeholder="./downloads"
-                  />
-                  <button className="p-4 bg-[#0f1f3a] border border-[#1a3a5c] rounded-2xl text-[#3bb5ff] btn-touch">{Ico.folderOpen}</button>
-                </div>
+                {showPicker ? (
+                  <div className="h-[50vh] border border-[#1a3a5c] rounded-2xl overflow-hidden mt-2 bg-[#060d1a]">
+                    <RemoteFolderPicker
+                      initialPath={downloadFolder}
+                      onSelect={p => { setDownloadFolder(p); setShowPicker(false); }}
+                      onCancel={() => setShowPicker(false)}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      type="text"
+                      value={downloadFolder}
+                      onChange={(e) => setDownloadFolder(e.target.value)}
+                      className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-2xl px-4 py-4 text-sm focus:border-[#3bb5ff] outline-none text-gray-200"
+                      placeholder="./downloads"
+                    />
+                    <button onClick={() => setShowPicker(true)} className="p-4 bg-[#0f1f3a] border border-[#1a3a5c] rounded-2xl text-[#3bb5ff] btn-touch">{Ico.folderOpen}</button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -381,7 +406,6 @@ export default function App() {
   });
   const [newDbName, setNewDbName] = useState('')
   const [toast, setToast] = useState(null)
-  const lastClickIdxRef = useRef(null)
 
   const showToast = (msg, type = 'info') => setToast({ message: msg, type, key: Date.now() })
 
@@ -516,11 +540,10 @@ export default function App() {
   }
 
   const handleItemClick = (item, e) => {
-    if (e?.metaKey || e?.ctrlKey) setSelectedItems(p => p.find(i => i.itemid === item.itemid) ? p.filter(i => i.itemid !== item.itemid) : [...p, item])
-    else if (e?.shiftKey && lastClickIdxRef.current !== null) {
-      const ci = items.findIndex(i => i.itemid === item.itemid)
-      if (ci !== -1) { const s = Math.min(lastClickIdxRef.current, ci), en = Math.max(lastClickIdxRef.current, ci); const r = items.slice(s, en + 1); setSelectedItems(p => { const n = [...p]; r.forEach(x => { if (!n.find(i => i.itemid === x.itemid)) n.push(x) }); return n }) }
-    } else { setSelectedItems(p => p.find(i => i.itemid === item.itemid) && p.length === 1 ? [] : [item]); lastClickIdxRef.current = items.findIndex(i => i.itemid === item.itemid) }
+    setSelectedItems(p => {
+      const exists = p.find(i => i.itemid === item.itemid);
+      return exists ? p.filter(i => i.itemid !== item.itemid) : [...p, item];
+    });
   }
   const handleItemDoubleClick = (item) => { if (item.type === 'folder') { const t = item.db_name || item.name; handleNavigate(currentPath === '.' ? t : `${currentPath}/${t}`) } }
 
@@ -540,23 +563,23 @@ export default function App() {
       </div>
 
       <div className="flex gap-2 px-3 py-3 bg-[#0a1628] border-b border-[#1a3a5c] overflow-x-auto no-scrollbar shadow-inner items-center">
-        <button onClick={() => setBottomSheet({ title: 'Upload Files', content: <UploadForm /> })} className="flex items-center justify-center p-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl btn-touch shadow-lg shadow-[#3bb5ff]/20 min-w-[52px]">
-          {React.cloneElement(Ico.upload, { className: 'w-8 h-8' })}
+        <button onClick={() => setBottomSheet({ title: 'Upload Files', content: <UploadForm /> })} className="flex items-center justify-center p-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl btn-touch shadow-lg shadow-[#3bb5ff]/20 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
+          {Ico.upload}
         </button>
-        <button onClick={() => { if (selectedItems.length) setBottomSheet({ title: 'Download Options', content: <DownloadForm /> }) }} disabled={!selectedItems.length} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px]">
-          {React.cloneElement(Ico.download, { className: 'w-8 h-8' })}
+        <button onClick={() => { if (selectedItems.length) setBottomSheet({ title: 'Download Options', content: <DownloadForm /> }) }} disabled={!selectedItems.length} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
+          {Ico.download}
         </button>
-        <button onClick={() => { if (selectedItems.length) setBottomSheet({ title: 'Delete Items', content: <DeleteForm /> }) }} disabled={!selectedItems.length} className="flex items-center justify-center p-3 bg-red-900/20 border border-red-900/40 text-red-400 rounded-xl btn-touch disabled:opacity-40 min-w-[52px]">
-          {React.cloneElement(Ico.trash, { className: 'w-8 h-8' })}
+        <button onClick={() => { if (selectedItems.length) setBottomSheet({ title: 'Delete Items', content: <DeleteForm /> }) }} disabled={!selectedItems.length} className="flex items-center justify-center p-3 bg-red-900/20 border border-red-900/40 text-red-400 rounded-xl btn-touch disabled:opacity-40 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
+          {Ico.trash}
         </button>
-        <button onClick={() => setBottomSheet({ title: 'New Folder', content: <MakeFolderForm /> })} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch min-w-[52px]">
-          {React.cloneElement(Ico.newFolder, { className: 'w-8 h-8' })}
+        <button onClick={() => setBottomSheet({ title: 'New Folder', content: <MakeFolderForm /> })} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
+          {Ico.newFolder}
         </button>
-        <button onClick={() => { setSelectedItems([...items]); lastClickIdxRef.current = null }} disabled={!items.length} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px]">
-          {React.cloneElement(Ico.selectAll, { className: 'w-8 h-8' })}
+        <button onClick={() => setSelectedItems([...items])} disabled={!items.length} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
+          {Ico.selectAll}
         </button>
-        <button onClick={() => { if (selectedItems.length) setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu /> }) }} disabled={!selectedItems.length} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px]">
-          {React.cloneElement(Ico.menu, { className: 'w-8 h-8' })}
+        <button onClick={() => { if (selectedItems.length === 1) setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu /> }) }} disabled={selectedItems.length !== 1} className="flex items-center justify-center p-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-300 rounded-xl btn-touch disabled:opacity-40 min-w-[52px] [&>svg]:w-6 [&>svg]:h-6">
+          {Ico.menu}
         </button>
       </div>
 
@@ -568,19 +591,19 @@ export default function App() {
             <p className="text-[10px] mt-2 font-mono">TAP UPLOAD TO ADD CONTENT</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-3">
             {items.map((item, idx) => {
               const isSelected = selectedItems.find(i => i.itemid === item.itemid)
               const isFolder = item.type === 'folder'
               return (
                 <div key={idx} onClick={() => handleItemClick(item)} onDoubleClick={() => handleItemDoubleClick(item)}
-                  className={`flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-200 btn-touch aspect-square relative
+                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200 btn-touch aspect-square relative
                     ${isSelected ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] shadow-lg shadow-[#3bb5ff]/10 scale-[0.98]' : 'bg-[#0a1628]/60 border-[#1a3a5c] hover:border-[#3bb5ff]/40'}`}>
-                  {isSelected && <div className="absolute top-3 right-3 w-6 h-6 bg-[#3bb5ff] text-[#0a1628] rounded-full flex items-center justify-center border-2 border-[#0a1628] z-10">{Ico.check}</div>}
-                  <div className={`mb-3 transition-transform ${isSelected ? 'scale-110' : ''}`}>
-                    {isFolder ? React.cloneElement(Ico.folder, { className: 'w-16 h-16' }) : React.cloneElement(Ico.file, { className: 'w-16 h-16' })}
+                  {isSelected && <div className="absolute top-2 right-2 w-5 h-5 bg-[#3bb5ff] text-[#0a1628] rounded-full flex items-center justify-center border-2 border-[#0a1628] z-10">{Ico.check}</div>}
+                  <div className={`mb-2 transition-transform ${isSelected ? 'scale-110' : ''}`}>
+                    {isFolder ? React.cloneElement(Ico.folder, { className: 'w-12 h-12' }) : React.cloneElement(Ico.file, { className: 'w-12 h-12' })}
                   </div>
-                  <div className={`text-xs font-bold text-center truncate w-full px-2 ${isSelected ? 'text-white' : 'text-gray-400'}`}>{item.displayName}</div>
+                  <div className={`text-[10px] font-bold text-center truncate w-full px-1 ${isSelected ? 'text-white' : 'text-gray-400'}`}>{item.displayName}</div>
                 </div>
               )
             })}
@@ -596,7 +619,7 @@ export default function App() {
           <div className="flex gap-4">
             <button onClick={() => setBottomSheet({ title: 'Download Options', content: <DownloadForm /> })} className="p-3 bg-[#3bb5ff]/10 text-[#3bb5ff] rounded-xl btn-touch border border-[#3bb5ff]/20">{Ico.download}</button>
             <button onClick={() => setBottomSheet({ title: 'Delete Items', content: <DeleteForm /> })} className="p-3 bg-red-900/20 text-red-400 rounded-xl btn-touch border border-red-500/30">{Ico.trash}</button>
-            <button onClick={() => setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu /> })} className="p-3 bg-[#0f1f3a] text-gray-300 rounded-xl btn-touch border border-[#1a3a5c]">{Ico.menu}</button>
+            <button onClick={() => { if (selectedItems.length === 1) setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu /> }) }} disabled={selectedItems.length !== 1} className="p-3 bg-[#0f1f3a] text-gray-300 rounded-xl btn-touch border border-[#1a3a5c] disabled:opacity-40">{Ico.menu}</button>
             <button onClick={() => setSelectedItems([])} className="p-3 text-gray-500 btn-touch hover:text-white">{Ico.close}</button>
           </div>
         </div>
@@ -718,6 +741,7 @@ export default function App() {
   // ─────────────────── FORMS ───────────────────
   const UploadForm = () => {
     const [localPaths, setLocalPaths] = useState([])
+    const [showPicker, setShowPicker] = useState(false)
     const [encryption, setEncryption] = useState('automatic')
     const [password, setPassword] = useState('')
     const [randomSeed, setRandomSeed] = useState(false)
@@ -770,6 +794,14 @@ export default function App() {
       showToast(`${localPaths.length} upload(s) queued`, 'success')
     }
 
+    if (showPicker) {
+      return (
+        <div className="h-[70vh] flex flex-col animate-in slide-in-from-right-4 duration-200">
+          <RemoteFolderPicker initialPath="" showFiles multiSelect onSelect={p => { setLocalPaths(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-5 pb-6">
         <div>
@@ -778,7 +810,7 @@ export default function App() {
             <div className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-2xl px-4 py-4 text-sm text-gray-400 italic truncate overflow-hidden">
               {localPaths.length > 0 ? localPaths.map(p => p.split(/[/\\]/).pop()).join(', ') : 'No files selected'}
             </div>
-            <button onClick={() => setBottomSheet({ title: 'Browse Files', content: <RemoteFolderPicker initialPath="" showFiles multiSelect onSelect={p => { setLocalPaths(p); setBottomSheet(null); }} onCancel={() => setBottomSheet(null)} /> })} className="p-4 bg-[#0f1f3a] border border-[#1a3a5c] rounded-2xl text-[#3bb5ff] btn-touch shadow-lg">{Ico.folderOpen}</button>
+            <button onClick={() => setShowPicker(true)} className="p-4 bg-[#0f1f3a] border border-[#1a3a5c] rounded-2xl text-[#3bb5ff] btn-touch shadow-lg">{Ico.folderOpen}</button>
           </div>
         </div>
 
@@ -939,20 +971,34 @@ export default function App() {
 
   const MoveCopyForm = ({ type }) => {
     const [dest, setDest] = useState('.')
+    const [copyMode, setCopyMode] = useState(type === 'copy')
+    const [nameCheck, setNameCheck] = useState(true)
+
     const execute = () => {
       selectedItems.forEach(item => {
-        const a = [type === 'move' ? 'move' : 'copy', '-db', selectedDb]
+        const a = [copyMode ? 'copy' : 'move', '-db', selectedDb]
         if (item.itemid) a.push(item.itemid, '--id_based')
         else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`)
         a.push(dest)
-        runCmd(a, item.displayName, type)
+        if (!nameCheck) a.push('--no_name_check')
+        runCmd(a, item.displayName, copyMode ? 'copy' : 'move')
       })
       setBottomSheet(null); setSelectedItems([])
     }
     return (
       <div className="space-y-4">
         <div><label className="text-xs text-gray-500 uppercase mb-1 block">Destination</label><div className="flex gap-2"><input type="text" value={dest} onChange={e => setDest(e.target.value)} placeholder="Path or . for root" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={() => setBottomSheet({ title: 'Folders', content: <ArchiveFolderPicker selectedDb={selectedDb} onSelect={p => { setDest(p); setBottomSheet({ title: 'Move / Copy', content: <MoveCopyForm type={type} /> }) }} onCancel={() => setBottomSheet({ title: 'Move / Copy', content: <MoveCopyForm type={type} /> })} /> })} className="px-3 py-2 bg-[#0f1f3a] border border-[#1a3a5c] rounded-lg text-xs text-gray-300 btn-touch">{Ico.folderOpen}</button></div></div>
-        <button onClick={execute} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch uppercase">{type}</button>
+        <div className="flex items-center justify-between gap-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" checked={copyMode} onChange={e => setCopyMode(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" />
+            <span className="text-xs text-gray-300 font-medium">Copy Mode</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" />
+            <span className="text-xs text-gray-300 font-medium">Name Check</span>
+          </label>
+        </div>
+        <button onClick={execute} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch uppercase">{copyMode ? 'Copy' : 'Move'}</button>
       </div>
     )
   }
@@ -975,24 +1021,53 @@ export default function App() {
 
   const RenameItemForm = ({ item }) => {
     const [name, setName] = useState(item.displayName)
+    const [nameMode, setNameMode] = useState('D')
+    const [nameCheck, setNameCheck] = useState(true)
+
     const execute = () => {
       const a = ['modify', '--rename', name, '-db', selectedDb]
+      if (nameMode !== 'D') a.push('--rename_mode', nameMode)
+      if (!nameCheck) a.push('--no_name_check')
       if (item.itemid) a.push(item.itemid, '--id_based')
       else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`)
       runCmd(a, item.displayName, 'rename')
       setModal(null)
     }
+
     return (
-      <div className="space-y-3">
-        <label className="text-xs text-gray-500 uppercase">New Name</label>
-        <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#3bb5ff]" />
-        <button onClick={execute} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20">Confirm Rename</button>
+      <div className="space-y-4">
+        <div>
+          <label className="text-xs text-gray-500 uppercase">New Name</label>
+          <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#3bb5ff] mt-1" />
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 uppercase mb-2 block">Rename Mode</label>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { id: 'D', label: 'Default', desc: 'Nickname if exists, else both' },
+              { id: 'N', label: 'Nickname', desc: 'Only if nicknamed' },
+              { id: 'B', label: 'Original', desc: 'Only original name' },
+              { id: 'A', label: 'All', desc: 'Update both' },
+            ].map(mode => (
+              <button key={mode.id} onClick={() => setNameMode(mode.id)} className={`p-3 text-left rounded-xl border transition-all ${nameMode === mode.id ? 'bg-[#3bb5ff]/20 border-[#3bb5ff] text-white' : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400'}`}>
+                <div className="text-sm font-bold">{mode.label}</div>
+                <div className="text-[10px] opacity-70 mt-1">{mode.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+        <label className="flex items-center gap-3 cursor-pointer mt-2">
+          <input type="checkbox" checked={nameCheck} onChange={e => setNameCheck(e.target.checked)} className="w-5 h-5 accent-[#3bb5ff]" />
+          <span className="text-xs text-gray-300 font-medium">Name Check</span>
+        </label>
+        <button onClick={execute} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch shadow-lg shadow-[#3bb5ff]/20 mt-2">Confirm Rename</button>
       </div>
     )
   }
 
   const NewVersionForm = ({ item }) => {
     const [localPath, setLocalPath] = useState('')
+    const [showPicker, setShowPicker] = useState(false)
     const [mode, setMode] = useState('addition')
     const [encryption, setEncryption] = useState('automatic')
     const [password, setPassword] = useState('')
@@ -1068,6 +1143,14 @@ export default function App() {
       showToast('Update queued', 'success')
     }
 
+    if (showPicker) {
+      return (
+        <div className="h-[70vh] flex flex-col animate-in slide-in-from-right-4 duration-200">
+          <RemoteFolderPicker initialPath={localPath} showFiles onSelect={p => { setLocalPath(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-4 pb-4">
         <div className="bg-[#3bb5ff]/10 border border-[#3bb5ff]/30 p-3 rounded-xl">
@@ -1079,7 +1162,7 @@ export default function App() {
           <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block">Local Source File</label>
           <div className="flex gap-2">
             <input type="text" value={localPath} onChange={e => setLocalPath(e.target.value)} placeholder="/path/to/new/version" className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none focus:border-[#3bb5ff]" />
-            <button onClick={() => setBottomSheet({ title: 'Browse Files', content: <RemoteFolderPicker initialPath={localPath} showFiles onSelect={p => { setLocalPath(p); setBottomSheet(null); }} onCancel={() => setBottomSheet(null)} /> })} className="p-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">{Ico.folderOpen}</button>
+            <button onClick={() => setShowPicker(true)} className="p-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">{Ico.folderOpen}</button>
           </div>
         </div>
 
@@ -1172,7 +1255,21 @@ export default function App() {
           <>
             <div><label className="text-xs text-gray-500 uppercase mb-1 block">Parent</label><div className="flex gap-2"><input type="text" value={parent} onChange={e => setParent(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={() => setShowPicker(true)} className="px-3 py-2 bg-[#0f1f3a] border border-[#1a3a5c] rounded-lg text-xs text-gray-300 btn-touch">{Ico.folderOpen}</button></div></div>
             <div><label className="text-xs text-gray-500 uppercase mb-1 block">Folder Name</label><input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name" maxLength={60} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /></div>
-            <button onClick={() => { if (name.trim()) { runCmd(['modify', 'makefolder', name.trim(), '-db', selectedDb, '--parent', parent], name, 'makefolder'); setBottomSheet(null); showToast('Folder created', 'success') } }} disabled={!name.trim()} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Create</button>
+            <button onClick={async () => {
+              if (name.trim()) {
+                try {
+                  const res = await fetch('/api/folders/make', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ db_name: selectedDb, folder_name: name.trim(), parent_path: parent || '.', id_based: false })
+                  });
+                  if (!res.ok) throw new Error('Failed to create folder');
+                  showToast('Folder created', 'success');
+                  setBottomSheet(null);
+                  fetchFiles(currentPath);
+                } catch (e) { showToast(e.message, 'error'); }
+              }
+            }} disabled={!name.trim()} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Create</button>
           </>
         )}
       </div>
@@ -1337,7 +1434,37 @@ export default function App() {
 
   const ImportForm = () => {
     const [vovPath, setVovPath] = useState('')
-    return <div className="space-y-4"><p className="text-sm text-gray-400">Import a .vov package file</p><input type="text" value={vovPath} onChange={e => setVovPath(e.target.value)} placeholder="/path/to/package.vov" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={async () => { try { await fetch('/api/dbs/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vov_path: vovPath }) }); fetchDbs(); showToast('Package imported!', 'success'); setModal(null) } catch (e) { showToast(e.message, 'error') } }} disabled={!vovPath.trim()} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Import</button></div>
+    const [showPicker, setShowPicker] = useState(false)
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-400">Import a .vov package file</p>
+        {showPicker ? (
+          <div className="h-[50vh] border border-[#1a3a5c] rounded-2xl overflow-hidden bg-[#060d1a]">
+            <RemoteFolderPicker
+              initialPath={vovPath || '.'}
+              showFiles
+              onSelect={p => {
+                if (p.endsWith('.vov')) {
+                  setVovPath(p);
+                  setShowPicker(false);
+                } else {
+                  showToast('Must select a .vov file', 'error')
+                }
+              }}
+              onCancel={() => setShowPicker(false)}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="flex gap-2">
+              <input type="text" value={vovPath} onChange={e => setVovPath(e.target.value)} placeholder="/path/to/package.vov" className="flex-1 w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" />
+              <button onClick={() => setShowPicker(true)} className="px-3 py-2 bg-[#0f1f3a] border border-[#1a3a5c] rounded-lg text-[#3bb5ff] btn-touch">{Ico.folderOpen}</button>
+            </div>
+            <button onClick={async () => { try { await fetch('/api/dbs/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ vov_path: vovPath }) }); fetchDbs(); showToast('Package imported!', 'success'); setModal(null) } catch (e) { showToast(e.message, 'error') } }} disabled={!vovPath.trim()} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch disabled:opacity-40">Import</button>
+          </>
+        )}
+      </div>
+    )
   }
 
   const FullNameInfo = ({ item }) => (
@@ -1455,8 +1582,8 @@ export default function App() {
           { id: 'settings', label: 'Settings', icon: Ico.settings }
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} className={`flex flex-col items-center gap-2 px-2 py-1 rounded-3xl btn-touch relative transition-all active:scale-90 ${tab === t.id ? 'text-[#3bb5ff]' : 'text-gray-500'}`}>
-            <div className={`p-2 rounded-2xl transition-all duration-300 ${tab === t.id ? 'bg-[#3bb5ff]/15 shadow-[0_0_15px_rgba(59,181,255,0.2)]' : 'bg-transparent'}`}>
-              {React.cloneElement(t.icon, { className: 'w-8 h-8' })}
+            <div className={`p-2 rounded-2xl transition-all duration-300 [&>svg]:w-8 [&>svg]:h-8 ${tab === t.id ? 'bg-[#3bb5ff]/15 shadow-[0_0_15px_rgba(59,181,255,0.2)]' : 'bg-transparent'}`}>
+              {t.icon}
             </div>
             <span className={`text-[9px] font-black uppercase tracking-[0.1em] ${tab === t.id ? 'opacity-100' : 'opacity-40'}`}>{t.label}</span>
             {t.badge > 0 && <span className="absolute top-0 right-0 w-6 h-6 bg-[#3bb5ff] text-[10px] text-[#0a1628] rounded-full flex items-center justify-center font-black border-[3px] border-[#0a1628] shadow-lg">{t.badge}</span>}
@@ -1480,11 +1607,12 @@ export default function App() {
 
       {toast && <Toast key={toast.key} message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      {promptData && <PromptForm />}
+      {promptData && <PromptForm promptData={promptData} ws={ws} onClose={() => setPromptData(null)} />}
     </div>
   )
-  function PromptForm() {
-    const [val, setVal] = useState('')
-    return <Modal open onClose={() => setPromptData(null)} title={promptData?.text || 'Input Required'}><div className="space-y-4"><p className="text-sm text-gray-400">{promptData?.text}</p><input type={promptData?.isPassword ? 'password' : 'text'} value={val} onChange={e => setVal(e.target.value)} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={() => { sendWS('input', { data: val, task_id: promptData.taskId }); setPromptData(null) }} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch">Submit</button></div></Modal>
-  }
+}
+
+function PromptForm({ promptData, ws, onClose }) {
+  const [val, setVal] = useState('')
+  return <Modal open onClose={onClose} title={promptData?.text || 'Input Required'}><div className="space-y-4"><p className="text-sm text-gray-400">{promptData?.text}</p><input type={promptData?.isPassword ? 'password' : 'text'} value={val} onChange={e => setVal(e.target.value)} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 text-sm text-gray-200" /><button onClick={() => { if (ws) ws.send(JSON.stringify({ action: 'input', data: val, task_id: promptData.taskId })); onClose() }} className="w-full py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold btn-touch">Submit</button></div></Modal>
 }
