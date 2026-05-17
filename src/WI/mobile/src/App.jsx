@@ -1,4 +1,5 @@
-// ==================== FULL MOBILE App.jsx (Mirror of Desktop) ====================
+// ==================== FULL MOBILE GUI App.jsx(NOT ANDROID FUNCTIONAL...) (Mirror of Desktop) ====================
+// IF YOU WANT AN ANDROID FUNCTIONAL VERSION OF IT GO TO https://github.com/WeDu-official/VAULT-OPUS-Android
 import React, { useState, useEffect, useRef } from 'react';
 
 // ---------- Icon Set (same as your original) ----------
@@ -279,7 +280,7 @@ export default function App() {
       setWs(socket);
       setConnectionStatus('connected');
       reconnectAttemptsRef.current = 0;
-      setTerminalOutput(p => p + '\n[Connected to VAULT_OPUS CLI]\n');
+      setTerminalOutput(p => p + '\n[Connected to VAULT OPUS CLI]\n');
     };
     socket.onmessage = e => {
       const msg = JSON.parse(e.data);
@@ -311,7 +312,7 @@ export default function App() {
     socket.onclose = () => {
       setWs(null);
       setConnectionStatus('disconnected');
-      setTerminalOutput(p => p + '\n[Disconnected from VAULT_OPUS CLI]\n');
+      setTerminalOutput(p => p + '\n[Disconnected from VAULT OPUS CLI]\n');
       if (reconnectAttemptsRef.current < 3) {
         reconnectAttemptsRef.current++;
         reconnectTimeoutRef.current = setTimeout(connectWS, 3000);
@@ -1508,7 +1509,7 @@ export default function App() {
       <header className="flex items-center justify-between px-6 py-4 bg-[#0a1628] border-b border-[#1a3a5c] shadow-lg">
         <div className="flex items-center gap-3">
           <img src="/logo/image.png" alt="Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(59,181,255,0.4)]" onError={(e) => e.target.style.display = 'none'} />
-          <div><h1 className="text-lg font-black text-white tracking-tighter">VAULT_OPUS</h1>{selectedDb && <p className="text-[10px] text-[#3bb5ff] font-bold uppercase mt-1">{selectedDb.replace('.db', '')}</p>}</div>
+          <div><h1 className="text-lg font-black text-white tracking-tighter">VAULT OPUS</h1>{selectedDb && <p className="text-[10px] text-[#3bb5ff] font-bold uppercase mt-1">{selectedDb.replace('.db', '')}</p>}</div>
         </div>
         <div className="flex items-center gap-2">
           {connectionStatus === 'disconnected' && <button onClick={connectWS} className="p-2 text-red-500 btn-touch">{Ico.alert}</button>}
