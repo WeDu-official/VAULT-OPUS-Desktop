@@ -79,7 +79,7 @@ async def lifespan(app: FastAPI):
                         logger.error(f"Error vacuuming {f} on startup: {e}")
     else:
         logger.info("Vacuum on startup is disabled.")
-    
+
     yield
 
 app = FastAPI(title="VAULT_OPUS Web GUI API", lifespan=lifespan)
@@ -466,13 +466,13 @@ async def nuke_db(payload: dict = Body(...)):
     import shutil
 
     def _do_nuke():
-        # CRITICAL: Use a completely separate connection with isolation level=None 
+        # CRITICAL: Use a completely separate connection with isolation level=None
         # for autocommit mode, avoiding any transaction conflicts
         conn = None
         try:
             conn = sqlite3.connect(db_path, timeout=1.0, isolation_level=None)
             cursor = conn.cursor()
-            
+
             # Check if table exists
             cursor.execute(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name='file_metadata_table'"
@@ -489,17 +489,17 @@ async def nuke_db(payload: dict = Body(...)):
             # Fast delete - in autocommit mode this is immediate
             cursor.execute("DELETE FROM file_metadata_table")
             deleted = cursor.rowcount
-            
+
             # Checkpoint WAL if in WAL mode (harmless if not)
             try:
                 cursor.execute("PRAGMA wal_checkpoint(TRUNCATE)")
             except:
                 pass
-                
+
             return deleted
-            
+
         except sqlite3.OperationalError as e:
-            # If we get "database is locked" even with 1s timeout, 
+            # If we get "database is locked" even with 1s timeout,
             # it means another connection has a transaction open
             logger.error(f"[NUKE] Database locked: {e}")
             raise RuntimeError(f"Database is locked by another connection: {e}")
@@ -515,7 +515,7 @@ async def nuke_db(payload: dict = Body(...)):
 
     try:
         db_deleted = await asyncio.to_thread(_do_nuke)
-        
+
         return {
             "status": "success",
             "message": f"Database '{db_name}' wiped. {db_deleted} entries destroyed.",
@@ -556,8 +556,8 @@ async def browse_directory(path: Optional[str] = Query(None)):
 
                 is_dir = item.is_dir()
                 items.append({
-                    "name": item.name, 
-                    "path": str(item.resolve()), 
+                    "name": item.name,
+                    "path": str(item.resolve()),
                     "is_dir": is_dir
                 })
             except (PermissionError, OSError):
