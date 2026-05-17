@@ -161,7 +161,21 @@ async def update_config(new_config: Dict[str, Any]):
     """Updates the configuration in config.json."""
     config = get_config(os.path.join(VAULT_OPUS_SRC_DIR, "config.json"))
     config._config = config._deep_merge(config._config, new_config)
-    config._save_config()
+    try:
+        config._save_config()
+    except PermissionError as e:
+        logger.error(f"Permission denied writing to config file: {e}")
+        raise HTTPException(
+            status_code=403,
+            detail=f"Permission denied writing to config file. Please check file ownership and permissions "
+                   f"(e.g., run 'sudo chown weduofficial:weduofficial {config.config_path}')."
+        )
+    except Exception as e:
+        logger.error(f"Failed to save configuration: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to save configuration: {str(e)}"
+        )
     # Refresh TaskManager to pick up new concurrency limits
     task_manager.refresh()
     return {"status": "success", "config": config._config}

@@ -1,16 +1,38 @@
 //SettingsModal.jsx
 import React, { useState, useEffect } from 'react';
 import FolderPicker from './FolderPicker';
-import { Settings, Save, X, ChevronRight, Hash, Shield, Globe, Terminal, Database, Upload, Download, FolderOpen } from 'lucide-react';
+import { Settings, Save, X, ChevronRight, Globe, Shield, Upload, Download, Database, Terminal, FolderOpen } from 'lucide-react';
 
-const ConfigField = ({ label, value, path, onChange }) => {
-  if (typeof value === 'boolean') {
+// ---------- Type Casting Helper for Config Settings ----------
+const castConfigTypes = (base, override) => {
+  const result = JSON.parse(JSON.stringify(override));
+  const traverse = (b, o) => {
+    for (const key in o) {
+      if (b && key in b) {
+        if (typeof b[key] === 'object' && b[key] !== null && typeof o[key] === 'object' && o[key] !== null) {
+          traverse(b[key], o[key]);
+        } else if (typeof b[key] === 'number') {
+          o[key] = parseFloat(o[key]);
+          if (isNaN(o[key])) o[key] = 0;
+        } else if (typeof b[key] === 'boolean') {
+          o[key] = Boolean(o[key]);
+        }
+      }
+    }
+  };
+  traverse(base, result);
+  return result;
+};
+
+const ConfigField = ({ label, value, path, onChange, isBoolean }) => {
+  if (isBoolean) {
+    const isChecked = value === 'true' || value === true;
     return (
       <label className="flex items-center justify-between p-3 bg-[#060d1a] border border-[#1a3a5c] rounded-xl cursor-pointer hover:border-[#3bb5ff]/30 transition-all group">
         <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{label}</span>
         <input
           type="checkbox"
-          checked={value}
+          checked={isChecked}
           onChange={(e) => onChange(path, e.target.checked)}
           className="w-4 h-4 accent-[#3bb5ff]"
         />
@@ -18,25 +40,21 @@ const ConfigField = ({ label, value, path, onChange }) => {
     );
   }
 
-  if (typeof value === 'number' || typeof value === 'string') {
-    return (
-      <div className="space-y-2">
-        <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-widest font-bold ml-1">{label}</label>
-        <input
-          type={typeof value === 'number' ? "number" : "text"}
-          value={value}
-          onChange={(e) => onChange(path, typeof value === 'number' ? parseFloat(e.target.value) : e.target.value)}
-          className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-4 py-2.5 text-sm focus:border-[#3bb5ff] focus:ring-1 focus:ring-[#3bb5ff]/20 outline-none transition-all text-gray-200 placeholder-gray-600"
-          placeholder={`Enter ${label}...`}
-        />
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div className="space-y-2">
+      <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-widest font-bold ml-1">{label}</label>
+      <input
+        type="text"
+        value={value ?? ''}
+        onChange={(e) => onChange(path, e.target.value)}
+        className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-4 py-2.5 text-sm focus:border-[#3bb5ff] focus:ring-1 focus:ring-[#3bb5ff]/20 outline-none transition-all text-gray-200 placeholder-gray-600"
+        placeholder={`Enter ${label}...`}
+      />
+    </div>
+  );
 };
 
-const ConfigSection = ({ title, data, path = [], onChange }) => {
+const ConfigSection = ({ title, data, path = [], onChange, config }) => {
   const getIcon = (name) => {
     switch (name.toLowerCase()) {
       case 'discord': return <Globe size={16} />;
@@ -56,19 +74,33 @@ const ConfigSection = ({ title, data, path = [], onChange }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {Object.entries(data).map(([key, val]) => {
+          const fieldPath = [...path, key];
           if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
             return (
               <div key={key} className="col-span-full mt-4">
-                <ConfigSection title={key} data={val} path={[...path, key]} onChange={onChange} />
+                <ConfigSection title={key} data={val} path={fieldPath} onChange={onChange} config={config} />
               </div>
             );
           }
+
+          const getOriginalVal = (p) => {
+            let current = config;
+            for (const step of p) {
+              if (current && typeof current === 'object') current = current[step];
+              else return undefined;
+            }
+            return current;
+          };
+          const originalVal = getOriginalVal(fieldPath);
+          const isBoolean = typeof originalVal === 'boolean';
+
           return (
             <ConfigField
               key={key}
               label={key.replace(/_/g, ' ')}
               value={val}
-              path={[...path, key]}
+              path={fieldPath}
+              isBoolean={isBoolean}
               onChange={onChange}
             />
           );
@@ -85,7 +117,20 @@ export default function SettingsModal({ isOpen, onClose, config, onSave }) {
 
   useEffect(() => {
     if (config) {
-      setLocalConfig(JSON.parse(JSON.stringify(config)));
+      const mapToStrings = (obj) => {
+        const result = {};
+        for (const k in obj) {
+          if (obj[k] !== null && typeof obj[k] === 'object' && !Array.isArray(obj[k])) {
+            result[k] = mapToStrings(obj[k]);
+          } else if (typeof obj[k] === 'boolean') {
+            result[k] = obj[k];
+          } else {
+            result[k] = obj[k] === null || obj[k] === undefined ? '' : String(obj[k]);
+          }
+        }
+        return result;
+      };
+      setLocalConfig(mapToStrings(config));
       setDownloadFolder(localStorage.getItem('VAULT_OPUS_download_folder') || './downloads');
     }
   }, [config, isOpen]);
@@ -109,9 +154,12 @@ export default function SettingsModal({ isOpen, onClose, config, onSave }) {
   };
 
   const handleSave = () => {
-    localStorage.setItem('VAULT_OPUS_download_folder', downloadFolder);
-    onSave(localConfig);
-    onClose();
+    if (localConfig && config) {
+      const castedConfig = castConfigTypes(config, localConfig);
+      localStorage.setItem('VAULT_OPUS_download_folder', downloadFolder);
+      onSave(castedConfig);
+      onClose();
+    }
   };
 
   return (
@@ -190,6 +238,8 @@ export default function SettingsModal({ isOpen, onClose, config, onSave }) {
                     key={section}
                     title={section}
                     data={data}
+                    path={[section]}
+                    config={config}
                     onChange={handleFieldChange}
                   />
                 ))}

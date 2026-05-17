@@ -233,6 +233,183 @@ function ArchiveFolderPicker({ selectedDb, onSelect, onCancel, initialPath = '.'
   );
 }
 
+// ---------- Type Casting Helper for Config Settings ----------
+const castConfigTypes = (base, override) => {
+  const result = JSON.parse(JSON.stringify(override));
+  const traverse = (b, o) => {
+    for (const key in o) {
+      if (b && key in b) {
+        if (typeof b[key] === 'object' && b[key] !== null && typeof o[key] === 'object' && o[key] !== null) {
+          traverse(b[key], o[key]);
+        } else if (typeof b[key] === 'number') {
+          o[key] = parseFloat(o[key]);
+          if (isNaN(o[key])) o[key] = 0;
+        } else if (typeof b[key] === 'boolean') {
+          o[key] = Boolean(o[key]);
+        }
+      }
+    }
+  };
+  traverse(base, result);
+  return result;
+};
+
+function SettingsTabContent({ config, fetchConfig, showToast }) {
+  const [localConfig, setLocalConfig] = useState(null);
+  const [downloadFolder, setDownloadFolder] = useState(localStorage.getItem('VAULT_OPUS_download_folder') || './downloads');
+  const [showPicker, setShowPicker] = useState(false);
+
+  useEffect(() => {
+    if (config) {
+      const mapToStrings = (obj) => {
+        const result = {};
+        for (const k in obj) {
+          if (obj[k] !== null && typeof obj[k] === 'object' && !Array.isArray(obj[k])) {
+            result[k] = mapToStrings(obj[k]);
+          } else {
+            result[k] = obj[k] === null || obj[k] === undefined ? '' : String(obj[k]);
+          }
+        }
+        return result;
+      };
+      setLocalConfig(mapToStrings(config));
+    }
+  }, [config]);
+
+  const saveSettings = async () => {
+    if (localConfig && config) {
+      const castedConfig = castConfigTypes(config, localConfig);
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(castedConfig)
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Failed to save config');
+        }
+        localStorage.setItem('VAULT_OPUS_download_folder', downloadFolder);
+        showToast('Settings saved', 'success');
+        await fetchConfig();
+      } catch (e) {
+        showToast(e.message, 'error');
+      }
+    }
+  };
+
+  if (showPicker) {
+    return (
+      <RemoteFolderPicker
+        initialPath={downloadFolder}
+        onSelect={p => {
+          setDownloadFolder(p);
+          setShowPicker(false);
+        }}
+        onCancel={() => setShowPicker(false)}
+      />
+    );
+  }
+
+  if (!localConfig) return <div className="flex items-center justify-center h-full text-gray-500">Loading config...</div>;
+
+  const handleFieldChange = (path, value) => {
+    setLocalConfig(prev => {
+      const upd = JSON.parse(JSON.stringify(prev));
+      let obj = upd;
+      for (let i = 0; i < path.length - 1; i++) obj = obj[path[i]];
+      obj[path[path.length - 1]] = value;
+      return upd;
+    });
+  };
+
+  const renderField = (key, value, path) => {
+    const fieldPath = [...path, key];
+    const getOriginalVal = (p) => {
+      let current = config;
+      for (const step of p) {
+        if (current && typeof current === 'object') current = current[step];
+        else return undefined;
+      }
+      return current;
+    };
+    const originalVal = getOriginalVal(fieldPath);
+    const isBoolean = typeof originalVal === 'boolean';
+
+    if (isBoolean) {
+      const isChecked = value === 'true' || value === true;
+      return (
+        <label key={key} className="flex items-center justify-between p-3 bg-[#060d1a] border border-[#1a3a5c] rounded-xl active:bg-[#1a3a5c]/50 transition-all">
+          <span className="text-sm text-gray-300">{key.replace(/_/g, ' ')}</span>
+          <div className="relative">
+            <input
+              type="checkbox"
+              checked={isChecked}
+              onChange={e => handleFieldChange(fieldPath, e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-[#1a3a5c] rounded-full peer peer-checked:bg-[#3bb5ff] transition-colors" />
+            <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5" />
+          </div>
+        </label>
+      );
+    }
+
+    return (
+      <div key={key} className="space-y-1">
+        <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-wider font-bold ml-1">{key.replace(/_/g, ' ')}</label>
+        <input
+          type="text"
+          value={value ?? ''}
+          onChange={e => handleFieldChange(fieldPath, e.target.value)}
+          className="w-full bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none transition-colors"
+          placeholder={`Enter ${key.replace(/_/g, ' ')}...`}
+        />
+      </div>
+    );
+  };
+
+  const renderSection = (title, data, path = []) => {
+    if (data === null || data === undefined || typeof data !== 'object' || Array.isArray(data)) {
+      return renderField(title, data, path);
+    }
+    return (
+      <div key={title} className="bg-[#0a1628] p-4 rounded-2xl border border-[#1a3a5c] space-y-4">
+        <h3 className="text-xs font-bold text-[#3bb5ff] uppercase tracking-wider">{title.replace(/_/g, ' ')}</h3>
+        {Object.entries(data).map(([k, v]) => {
+          if (v !== null && v !== undefined && typeof v === 'object' && !Array.isArray(v)) {
+            return renderSection(k, v, [...path, k]);
+          }
+          return renderField(k, v, [...path]);
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-y-auto p-4 pb-32">
+      <div className="space-y-4">
+        <div className="bg-[#0a1628] p-4 rounded-2xl border border-[#1a3a5c] space-y-3">
+          <h3 className="text-xs font-bold text-[#3bb5ff] uppercase tracking-wider">Interface</h3>
+          <div className="space-y-1">
+            <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-wider font-bold ml-1">Download Destination</label>
+            <div className="flex gap-2">
+              <input type="text" value={downloadFolder} onChange={e => setDownloadFolder(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none transition-colors" />
+              <button onClick={() => setShowPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">Browse</button>
+            </div>
+          </div>
+        </div>
+        {Object.entries(localConfig)
+          .filter(([_, d]) => d !== null && typeof d === 'object' && !Array.isArray(d))
+          .map(([section, data]) =>
+            renderSection(section, data, [section])
+          )}
+      </div>
+      <div className="fixed bottom-24 left-4 right-4"><button onClick={saveSettings} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold shadow-xl">Commit Settings</button></div>
+    </div>
+  );
+}
+
 // ---------- Main App ----------
 export default function App() {
   // State
@@ -1402,109 +1579,6 @@ export default function App() {
     </div>
   );
 
-  const SettingsTabContent = () => {
-    const [localConfig, setLocalConfig] = useState(null);
-    const [downloadFolder, setDownloadFolder] = useState(localStorage.getItem('VAULT_OPUS_download_folder') || './downloads');
-    const [showPicker, setShowPicker] = useState(false);
-    useEffect(() => { if (config) setLocalConfig(JSON.parse(JSON.stringify(config))); }, [config]);
-    const saveSettings = async () => {
-      if (localConfig) {
-        await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(localConfig) });
-        localStorage.setItem('VAULT_OPUS_download_folder', downloadFolder);
-        showToast('Settings saved', 'success');
-        await fetchConfig();
-      }
-    };
-    if (showPicker) return <RemoteFolderPicker initialPath={downloadFolder} onSelect={p => { setDownloadFolder(p); setShowPicker(false); }} onCancel={() => setShowPicker(false)} />;
-    if (!localConfig) return <div className="flex items-center justify-center h-full text-gray-500">Loading config...</div>;
-
-    const handleFieldChange = (path, value) => {
-      setLocalConfig(prev => {
-        const upd = JSON.parse(JSON.stringify(prev));
-        let obj = upd;
-        for (let i = 0; i < path.length - 1; i++) obj = obj[path[i]];
-        obj[path[path.length - 1]] = value;
-        return upd;
-      });
-    };
-
-    const renderField = (key, value, path) => {
-      const isSecret = key.toLowerCase().includes('token') || key.toLowerCase().includes('salt');
-      const fieldPath = [...path, key];
-
-      if (typeof value === 'boolean') {
-        return (
-          <label key={key} className="flex items-center justify-between p-3 bg-[#060d1a] border border-[#1a3a5c] rounded-xl active:bg-[#1a3a5c]/50 transition-all">
-            <span className="text-sm text-gray-300">{key.replace(/_/g, ' ')}</span>
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={value}
-                onChange={e => handleFieldChange(fieldPath, e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-[#1a3a5c] rounded-full peer peer-checked:bg-[#3bb5ff] transition-colors" />
-              <div className="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform peer-checked:translate-x-5" />
-            </div>
-          </label>
-        );
-      }
-
-      return (
-        <div key={key} className="space-y-1">
-          <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-wider font-bold ml-1">{key.replace(/_/g, ' ')}</label>
-          <input
-            type={typeof value === 'number' ? 'number' : 'text'}
-            value={value ?? ''}
-            onChange={e => handleFieldChange(fieldPath, typeof value === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
-            className="w-full bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none transition-colors"
-            placeholder={`Enter ${key.replace(/_/g, ' ')}...`}
-          />
-        </div>
-      );
-    };
-
-    const renderSection = (title, data, path = []) => {
-      if (data === null || data === undefined || typeof data !== 'object' || Array.isArray(data)) {
-        return renderField(title, data, path);
-      }
-      return (
-        <div key={title} className="bg-[#0a1628] p-4 rounded-2xl border border-[#1a3a5c] space-y-4">
-          <h3 className="text-xs font-bold text-[#3bb5ff] uppercase tracking-wider">{title.replace(/_/g, ' ')}</h3>
-          {Object.entries(data).map(([k, v]) => {
-            if (v !== null && v !== undefined && typeof v === 'object' && !Array.isArray(v)) {
-              return renderSection(k, v, [...path, k]);
-            }
-            return renderField(k, v, [...path]);
-          })}
-        </div>
-      );
-    };
-
-    return (
-      <div className="flex flex-col h-full overflow-y-auto p-4 pb-32">
-        <div className="space-y-4">
-          <div className="bg-[#0a1628] p-4 rounded-2xl border border-[#1a3a5c] space-y-3">
-            <h3 className="text-xs font-bold text-[#3bb5ff] uppercase tracking-wider">Interface</h3>
-            <div className="space-y-1">
-              <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-wider font-bold ml-1">Download Destination</label>
-              <div className="flex gap-2">
-                <input type="text" value={downloadFolder} onChange={e => setDownloadFolder(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none transition-colors" />
-                <button onClick={() => setShowPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">Browse</button>
-              </div>
-            </div>
-          </div>
-          {Object.entries(localConfig)
-            .filter(([_, d]) => d !== null && typeof d === 'object' && !Array.isArray(d))
-            .map(([section, data]) =>
-              renderSection(section, data, [section])
-            )}
-        </div>
-        <div className="fixed bottom-24 left-4 right-4"><button onClick={saveSettings} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold shadow-xl">Commit Settings</button></div>
-      </div>
-    );
-  };
-
   return (
     <div className="flex flex-col h-full safe-top bg-[#060d1a]">
       <header className="flex items-center justify-between px-6 py-4 bg-[#0a1628] border-b border-[#1a3a5c] shadow-lg">
@@ -1522,7 +1596,7 @@ export default function App() {
         {tab === 'volumes' && renderVolumes()}
         {tab === 'queue' && renderQueue()}
         {tab === 'terminal' && renderTerminal()}
-        {tab === 'settings' && <SettingsTabContent />}
+        {tab === 'settings' && <SettingsTabContent config={config} fetchConfig={fetchConfig} showToast={showToast} />}
       </div>
 
       <nav className="flex items-center justify-around bg-[#0a1628] border-t border-[#1a3a5c] py-4 safe-bottom shadow-[0_-10px_30px_rgba(0,0,0,0.4)]">

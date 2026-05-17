@@ -279,7 +279,7 @@ export default function App() {
         externalVolumes.forEach(ext => {
           if (!all.includes(ext)) all.push(ext);
         });
-        return all;
+          return all;
       });
 
       // Validate stored selection from localStorage
@@ -495,7 +495,7 @@ export default function App() {
   const handleOpenVolumes = (selectedDbs) => {
     // Determine which are external (have absolute path indicators)
     const newExternal = selectedDbs.filter(path =>
-      path.includes('/') || path.includes('\\')
+    path.includes('/') || path.includes('\\')
     );
 
     if (newExternal.length > 0) {
@@ -504,8 +504,8 @@ export default function App() {
         newExternal.forEach(ext => {
           if (!updated.includes(ext)) updated.push(ext);
         });
-        localStorage.setItem('externalVolumes', JSON.stringify(updated));
-        return updated;
+          localStorage.setItem('externalVolumes', JSON.stringify(updated));
+          return updated;
       });
     }
 
@@ -712,123 +712,123 @@ export default function App() {
     if (selectedDb) {
       // First, get the item details to find its itemid
       fetch(`http://localhost:8000/api/listfiles?db=${encodeURIComponent(selectedDb)}&path=${encodeURIComponent(itemPath)}`)
-        .then(res => res.json())
-        .then(pathData => {
-          // Check for errors
-          if (pathData.error) {
-            throw new Error(pathData.error);
-          }
+      .then(res => res.json())
+      .then(pathData => {
+        // Check for errors
+        if (pathData.error) {
+          throw new Error(pathData.error);
+        }
 
-          // Find the itemid from the results
-          let itemid = null;
-          if (pathData.results) {
-            // The itemid is the key in the results object
-            const resultKeys = Object.keys(pathData.results);
-            if (resultKeys.length > 0) {
-              itemid = resultKeys[0];
+        // Find the itemid from the results
+        let itemid = null;
+        if (pathData.results) {
+          // The itemid is the key in the results object
+          const resultKeys = Object.keys(pathData.results);
+          if (resultKeys.length > 0) {
+            itemid = resultKeys[0];
+          }
+        }
+
+        if (!itemid) {
+          // Try to get itemid from nested structure
+          if (pathData.results && typeof pathData.results === 'object') {
+            const firstKey = Object.keys(pathData.results)[0];
+            if (firstKey && pathData.results[firstKey].itemid) {
+              itemid = pathData.results[firstKey].itemid;
             }
           }
+        }
 
-          if (!itemid) {
-            // Try to get itemid from nested structure
-            if (pathData.results && typeof pathData.results === 'object') {
-              const firstKey = Object.keys(pathData.results)[0];
-              if (firstKey && pathData.results[firstKey].itemid) {
-                itemid = pathData.results[firstKey].itemid;
-              }
-            }
-          }
+        if (!itemid) {
+          throw new Error('Could not find item identifier for path: ' + itemPath);
+        }
 
-          if (!itemid) {
-            throw new Error('Could not find item identifier for path: ' + itemPath);
-          }
+        // Now fetch all versions using the itemid
+        return fetch(`http://localhost:8000/api/listfiles?db=${encodeURIComponent(selectedDb)}&itemid=${encodeURIComponent(itemid)}`);
+      })
+      .then(res => res.json())
+      .then(versionsData => {
+        // Check for errors
+        if (versionsData.error) {
+          throw new Error(versionsData.error);
+        }
 
-          // Now fetch all versions using the itemid
-          return fetch(`http://localhost:8000/api/listfiles?db=${encodeURIComponent(selectedDb)}&itemid=${encodeURIComponent(itemid)}`);
-        })
-        .then(res => res.json())
-        .then(versionsData => {
-          // Check for errors
-          if (versionsData.error) {
-            throw new Error(versionsData.error);
-          }
+        const versionData = [];
 
-          const versionData = [];
-
-          // Handle different response formats
-          if (versionsData.results) {
-            // If results is an object with versions as keys
-            if (typeof versionsData.results === 'object' && !Array.isArray(versionsData.results)) {
-              // Check if it's a version-keyed object
-              const keys = Object.keys(versionsData.results);
-              if (keys.length > 0 && keys[0].includes('.')) {
-                // Version-keyed format
-                keys.forEach(version => {
-                  if (version.includes('.')) {
-                    versionData.push({
-                      version: version,
-                      upload_timestamp: versionsData.results[version].upload_timestamp || ''
-                    });
-                  }
-                });
-              } else {
-                // Standard format with itemid as keys
-                Object.values(versionsData.results).forEach(item => {
-                  if (item.version) {
-                    versionData.push({
-                      version: item.version,
-                      upload_timestamp: item.upload_timestamp || ''
-                    });
-                  }
-                  // Also check contents for versions
-                  if (item.contents) {
-                    Object.values(item.contents).forEach(subItem => {
-                      if (subItem.version) {
-                        versionData.push({
-                          version: subItem.version,
-                          upload_timestamp: subItem.upload_timestamp || ''
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-            }
-          }
-
-          // If no versions found, try to get from stats
-          if (versionData.length === 0 && versionsData.stats && versionsData.stats.total_versions > 0) {
-            console.warn('Found versions in stats but could not extract them from results');
-          }
-
-          // Sort versions by upload_timestamp (newest first)
-          const sortedVersions = versionData
-            .sort((a, b) => {
-              // Sort by upload_timestamp, newest first
-              if (a.upload_timestamp && b.upload_timestamp) {
-                return new Date(b.upload_timestamp) - new Date(a.upload_timestamp);
-              }
-              // If no timestamp, fallback to version number sorting
-              const aParts = a.version.split('.').map(Number);
-              const bParts = b.version.split('.').map(Number);
-              for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-                const aVal = aParts[i] || 0;
-                const bVal = bParts[i] || 0;
-                if (aVal !== bVal) {
-                  return bVal - aVal;
+        // Handle different response formats
+        if (versionsData.results) {
+          // If results is an object with versions as keys
+          if (typeof versionsData.results === 'object' && !Array.isArray(versionsData.results)) {
+            // Check if it's a version-keyed object
+            const keys = Object.keys(versionsData.results);
+            if (keys.length > 0 && keys[0].includes('.')) {
+              // Version-keyed format
+              keys.forEach(version => {
+                if (version.includes('.')) {
+                  versionData.push({
+                    version: version,
+                    upload_timestamp: versionsData.results[version].upload_timestamp || ''
+                  });
                 }
-              }
-              return 0;
-            })
-            .map(v => v.version);
+              });
+            } else {
+              // Standard format with itemid as keys
+              Object.values(versionsData.results).forEach(item => {
+                if (item.version) {
+                  versionData.push({
+                    version: item.version,
+                    upload_timestamp: item.upload_timestamp || ''
+                  });
+                }
+                // Also check contents for versions
+                if (item.contents) {
+                  Object.values(item.contents).forEach(subItem => {
+                    if (subItem.version) {
+                      versionData.push({
+                        version: subItem.version,
+                        upload_timestamp: subItem.upload_timestamp || ''
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          }
+        }
 
-          console.log('Available versions for', itemPath, ':', sortedVersions);
-          setAvailableVersions(sortedVersions);
+        // If no versions found, try to get from stats
+        if (versionData.length === 0 && versionsData.stats && versionsData.stats.total_versions > 0) {
+          console.warn('Found versions in stats but could not extract them from results');
+        }
+
+        // Sort versions by upload_timestamp (newest first)
+        const sortedVersions = versionData
+        .sort((a, b) => {
+          // Sort by upload_timestamp, newest first
+          if (a.upload_timestamp && b.upload_timestamp) {
+            return new Date(b.upload_timestamp) - new Date(a.upload_timestamp);
+          }
+          // If no timestamp, fallback to version number sorting
+          const aParts = a.version.split('.').map(Number);
+          const bParts = b.version.split('.').map(Number);
+          for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+            const aVal = aParts[i] || 0;
+            const bVal = bParts[i] || 0;
+            if (aVal !== bVal) {
+              return bVal - aVal;
+            }
+          }
+          return 0;
         })
-        .catch(err => {
-          console.error('Failed to fetch versions:', err);
-          setAvailableVersions([]);
-        });
+        .map(v => v.version);
+
+        console.log('Available versions for', itemPath, ':', sortedVersions);
+        setAvailableVersions(sortedVersions);
+      })
+      .catch(err => {
+        console.error('Failed to fetch versions:', err);
+        setAvailableVersions([]);
+      });
     }
     setShowDownloadVersionModal(true);
   };
@@ -940,14 +940,25 @@ export default function App() {
 
   const handleSaveConfig = async (newConfig) => {
     try {
-      await fetch('http://localhost:8000/api/config', {
+      const res = await fetch('http://localhost:8000/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newConfig)
       });
+      if (!res.ok) {
+        let errMsg = 'Failed to save configuration.';
+        try {
+          const errData = await res.json();
+          errMsg = errData.detail || errMsg;
+        } catch (_) { }
+        showAlert(errMsg, 'Settings Save Error', 'error');
+        return;
+      }
+      showAlert('Settings saved successfully.', 'Settings Saved', 'success');
       await fetchConfig();
     } catch (e) {
       console.error('Failed to save config:', e);
+      showAlert(`Network or Server error: ${e.message}`, 'Settings Save Error', 'error');
     }
   };
 
@@ -957,339 +968,339 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-[#060d1a] text-gray-100 overflow-hidden relative">
-      {showSidebar && (
-        <Sidebar
-          dbs={dbs}
-          recentVolumes={recentVolumes}
-          selectedDb={selectedDb}
-          onSelectDb={setSelectedDb}
-          onRenameVolume={(db) => {
-            setDbToRename(db);
-            setShowRenameModal(true);
-          }}
-          onOpenVolume={() => setShowOpenVolumeModal(true)}
-          onDeleteVolume={handleDeleteVolume}
-          onRemoveFromList={handleRemoveFromList}
-          onShareVolume={handleShareVolume}
-          onOpenSharables={() => setShowSharablesModal(true)}
-          onRefreshDbs={fetchDbs}
-          onClose={() => setShowSidebar(false)}
-          onNukeVolume={handleNukeVolume}
-        />
-      )}
+    {showSidebar && (
+      <Sidebar
+      dbs={dbs}
+      recentVolumes={recentVolumes}
+      selectedDb={selectedDb}
+      onSelectDb={setSelectedDb}
+      onRenameVolume={(db) => {
+        setDbToRename(db);
+        setShowRenameModal(true);
+      }}
+      onOpenVolume={() => setShowOpenVolumeModal(true)}
+      onDeleteVolume={handleDeleteVolume}
+      onRemoveFromList={handleRemoveFromList}
+      onShareVolume={handleShareVolume}
+      onOpenSharables={() => setShowSharablesModal(true)}
+      onRefreshDbs={fetchDbs}
+      onClose={() => setShowSidebar(false)}
+      onNukeVolume={handleNukeVolume}
+      />
+    )}
 
-      {!showSidebar && (
-        <button
-          onClick={() => setShowSidebar(true)}
-          className="absolute left-4 top-4 z-50 p-2 bg-[#0a1628] border border-[#1a3a5c] rounded-lg text-[#3bb5ff] hover:bg-[#0f1f3a] transition-all active:scale-95 shadow-xl"
-          title="Show Sidebar"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-      )}
+    {!showSidebar && (
+      <button
+      onClick={() => setShowSidebar(true)}
+      className="absolute left-4 top-4 z-50 p-2 bg-[#0a1628] border border-[#1a3a5c] rounded-lg text-[#3bb5ff] hover:bg-[#0f1f3a] transition-all active:scale-95 shadow-xl"
+      title="Show Sidebar"
+      >
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </button>
+    )}
 
-      <div className="flex flex-col flex-1 min-w-0">
-        <ActionBar
-          onUpload={handleUpload}
-          onDownload={handleDownload}
-          onDeleteRequest={openDeleteModal}
-          selectedItems={selectedItems}
-          selectedDb={selectedDb}
-          currentPath={currentPath}
-          onAlert={showAlert}
-        />
+    <div className="flex flex-col flex-1 min-w-0">
+    <ActionBar
+    onUpload={handleUpload}
+    onDownload={handleDownload}
+    onDeleteRequest={openDeleteModal}
+    selectedItems={selectedItems}
+    selectedDb={selectedDb}
+    currentPath={currentPath}
+    onAlert={showAlert}
+    />
 
-        <div className="flex flex-1 min-h-0">
-          <div className="flex-1 p-6 overflow-y-auto">
-            <FileExplorer
-              tree={tree}
-              selectedDb={selectedDb}
-              currentPath={currentPath}
-              onNavigate={handleNavigate}
-              selectedItems={selectedItems}
-              onSelect={setSelectedItems}
-              onNewVersionRequest={handleNewVersionRequest}
-              onSeeVersions={handleSeeVersions}
-              onDownloadVersion={handleDownloadVersion}
-              onDeleteVersionsRequest={() => openDeleteModal({ showVersionControls: true })}
-              onShowFullName={handleShowFullName}
-              onRefresh={handleRefresh}
-              currentVersion={currentVersion}
-              onExitVersionView={() => {
-                setCurrentVersion(null);
-                fetchFiles(currentPath, null);
-              }}
-              onMoveRequest={(item) => {
-                setModifyOptions({ type: 'move', item });
-                setShowModifyModal(true);
-              }}
-              onRenameRequest={(item) => {
-                setModifyOptions({ type: 'rename', item });
-                setShowModifyModal(true);
-              }}
-              onMakeFolder={() => setShowMakeFolderModal(true)}
-            />
-          </div>
+    <div className="flex flex-1 min-h-0">
+    <div className="flex-1 p-6 overflow-y-auto">
+    <FileExplorer
+    tree={tree}
+    selectedDb={selectedDb}
+    currentPath={currentPath}
+    onNavigate={handleNavigate}
+    selectedItems={selectedItems}
+    onSelect={setSelectedItems}
+    onNewVersionRequest={handleNewVersionRequest}
+    onSeeVersions={handleSeeVersions}
+    onDownloadVersion={handleDownloadVersion}
+    onDeleteVersionsRequest={() => openDeleteModal({ showVersionControls: true })}
+    onShowFullName={handleShowFullName}
+    onRefresh={handleRefresh}
+    currentVersion={currentVersion}
+    onExitVersionView={() => {
+      setCurrentVersion(null);
+      fetchFiles(currentPath, null);
+    }}
+    onMoveRequest={(item) => {
+      setModifyOptions({ type: 'move', item });
+      setShowModifyModal(true);
+    }}
+    onRenameRequest={(item) => {
+      setModifyOptions({ type: 'rename', item });
+      setShowModifyModal(true);
+    }}
+    onMakeFolder={() => setShowMakeFolderModal(true)}
+    />
+    </div>
 
-          {/* Terminal Panel - Collapsible */}
-          {showTerminal && (
-            <div className="w-96 border-l border-[#1a3a5c] bg-[#060d1a] flex flex-col transition-all duration-300">
-              {/* Terminal Header with Controls */}
-              <div className="px-4 py-2 border-b border-[#1a3a5c] flex items-center justify-between bg-[#0a1628]">
-                <span className="text-xs font-semibold text-[#3bb5ff]/70 uppercase tracking-wider">
-                  Terminal Output
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={handleClearTerminal}
-                    className="p-1.5 hover:bg-[#1a3a5c] rounded text-gray-500 hover:text-[#3bb5ff] transition-all duration-150 active:scale-95"
-                    title="Clear logs"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setShowTerminal(false)}
-                    className="p-1.5 hover:bg-[#1a3a5c] rounded text-gray-500 hover:text-[#3bb5ff] transition-all duration-150 active:scale-95"
-                    title="Hide terminal"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <Terminal output={terminalOutput} />
-              </div>
-            </div>
-          )}
-
-          {/* Show Terminal Toggle Button (when hidden) */}
-          {!showTerminal && (
-            <button
-              onClick={() => setShowTerminal(true)}
-              className="absolute right-4 top-20 z-40 p-2 bg-[#0a1628] border border-[#1a3a5c] rounded-lg text-[#3bb5ff] hover:bg-[#0f1f3a] hover:border-[#3bb5ff]/50 transition-all duration-200 shadow-lg active:scale-95"
-              title="Show terminal"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-            </button>
-          )}
-        </div>
-
-        <QueuePanel
-          queue={queue}
-          onClear={() => setQueue([])}
-        />
+    {/* Terminal Panel - Collapsible */}
+    {showTerminal && (
+      <div className="w-96 border-l border-[#1a3a5c] bg-[#060d1a] flex flex-col transition-all duration-300">
+      {/* Terminal Header with Controls */}
+      <div className="px-4 py-2 border-b border-[#1a3a5c] flex items-center justify-between bg-[#0a1628]">
+      <span className="text-xs font-semibold text-[#3bb5ff]/70 uppercase tracking-wider">
+      Terminal Output
+      </span>
+      <div className="flex items-center gap-1">
+      <button
+      onClick={handleClearTerminal}
+      className="p-1.5 hover:bg-[#1a3a5c] rounded text-gray-500 hover:text-[#3bb5ff] transition-all duration-150 active:scale-95"
+      title="Clear logs"
+      >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+      </svg>
+      </button>
+      <button
+      onClick={() => setShowTerminal(false)}
+      className="p-1.5 hover:bg-[#1a3a5c] rounded text-gray-500 hover:text-[#3bb5ff] transition-all duration-150 active:scale-95"
+      title="Hide terminal"
+      >
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+      </button>
       </div>
+      </div>
+      <div className="flex-1 overflow-hidden">
+      <Terminal output={terminalOutput} />
+      </div>
+      </div>
+    )}
 
-      {showSettings && (
-        <SettingsModal
-          isOpen={showSettings}
-          onClose={() => setShowSettings(false)}
-          config={config}
-          onSave={handleSaveConfig}
-        />
-      )}
+    {/* Show Terminal Toggle Button (when hidden) */}
+    {!showTerminal && (
+      <button
+      onClick={() => setShowTerminal(true)}
+      className="absolute right-4 top-20 z-40 p-2 bg-[#0a1628] border border-[#1a3a5c] rounded-lg text-[#3bb5ff] hover:bg-[#0f1f3a] hover:border-[#3bb5ff]/50 transition-all duration-200 shadow-lg active:scale-95"
+      title="Show terminal"
+      >
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+      </svg>
+      </button>
+    )}
+    </div>
 
-      {showVolumeModal && (
-        <VolumeCreationModal
-          isOpen={showVolumeModal}
-          onClose={() => {
-            setShowVolumeModal(false);
-            setPendingUpload(null);
-          }}
-          onConfirm={handleCreateVolume}
-          uploadFiles={pendingUpload?.files}
-          uploadOptions={pendingUpload?.options}
-        />
-      )}
+    <QueuePanel
+    queue={queue}
+    onClear={() => setQueue([])}
+    />
+    </div>
 
-      {/* New Version Upload Modal */}
-      {showNewVersionModal && (
-        <NewVersionUploadModal
-          targetItemPath={newVersionTargetPath}
-          selectedDb={selectedDb}
-          onUpload={handleUpload}
-          onClose={() => {
-            setShowNewVersionModal(false);
-            setNewVersionTargetPath('');
-          }}
-          onAlert={showAlert}
-        />
-      )}
-
-      {/* See Versions Modal */}
-      {showSeeVersionsModal && (
-        <SeeVersionsModal
-          itemPath={seeVersionsItemPath}
-          onClose={() => setShowSeeVersionsModal(false)}
-          onVersionSelect={handleVersionView}
-        />
-      )}
-
-      {/* Download Version Modal */}
-      {showDownloadVersionModal && (
-        <DownloadVersionModal
-          itemPath={downloadVersionItemPath}
-          selectedItem={downloadVersionItem}
-          selectedDb={selectedDb}
-          onClose={() => {
-            setShowDownloadVersionModal(false);
-            setAvailableVersions([]);
-          }}
-          onDownload={(args) => {
-            const taskId = `download-version-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-            // Add to queue and send command
-            const queueItem = {
-              id: taskId,
-              name: downloadVersionItemPath.split('/').pop() || 'item',
-              status: 'queued',
-              progress: 0,
-              error: null
-            };
-            setQueue(prev => [...prev, queueItem]);
-
-            if (ws && ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ action: 'run', args, task_id: taskId }));
-            }
-            setShowDownloadVersionModal(false);
-            setAvailableVersions([]);
-          }}
-          availableVersions={availableVersions}
-        />
-      )}
-
-      {promptData && (
-        <PromptModal
-          promptText={promptData.text}
-          isPassword={promptData.isPassword}
-          onSubmit={(input) => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ action: 'input', data: input, task_id: promptData.taskId }));
-            }
-            setPromptData(null);
-          }}
-          onCancel={() => setPromptData(null)}
-        />
-      )}
-
-      {passwordPromptItems && (
-        <PasswordPromptModal
-          items={passwordPromptItems}
-          onSubmit={(passwords) => {
-            setPasswordPromptItems(null);
-            if (pendingDownloadItems) {
-              const items = pendingDownloadItems.items || pendingDownloadItems;
-              const strictnessMode = pendingDownloadItems.strictnessMode || 'NA';
-              executeDownload(items, passwords, strictnessMode);
-              setPendingDownloadItems(null);
-            }
-          }}
-          onCancel={() => {
-            setPasswordPromptItems(null);
-            setPendingDownloadItems(null);
-          }}
-        />
-      )}
-
-      <DownloadModal
-        isOpen={showDownloadModal}
-        onClose={() => setShowDownloadModal(false)}
-        onConfirm={proceedWithDownload}
-        selectedItems={selectedItems}
+    {showSettings && (
+      <SettingsModal
+      isOpen={showSettings}
+      onClose={() => setShowSettings(false)}
+      config={config}
+      onSave={handleSaveConfig}
       />
+    )}
 
-      <AlertModal
-        isOpen={alertState.isOpen}
-        onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
-        title={alertState.title}
-        message={alertState.message}
-        type={alertState.type}
-        action={alertState.action}
+    {showVolumeModal && (
+      <VolumeCreationModal
+      isOpen={showVolumeModal}
+      onClose={() => {
+        setShowVolumeModal(false);
+        setPendingUpload(null);
+      }}
+      onConfirm={handleCreateVolume}
+      uploadFiles={pendingUpload?.files}
+      uploadOptions={pendingUpload?.options}
       />
+    )}
 
-      {showRenameModal && (
-        <RenameVolumeModal
-          isOpen={showRenameModal}
-          onClose={() => setShowRenameModal(false)}
-          currentName={dbToRename}
-          onConfirm={handleRenameVolume}
-        />
-      )}
-
-      {showDeleteModal && (
-        <DeleteModal
-          isOpen={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          onConfirm={handleDelete}
-          itemName={selectedItems.length === 1 ? selectedItems[0].displayName : (selectedItems.length > 1 ? `${selectedItems.length} items` : "")}
-          selectedItems={selectedItems}
-          selectedDb={selectedDb}
-          currentPath={currentPath}
-          onAlert={showAlert}
-          showVersionControls={deleteModalOptions.showVersionControls}
-        />
-      )}
-
-      {showFullNameModal && (
-        <FullNameModal
-          isOpen={showFullNameModal}
-          onClose={() => {
-            setShowFullNameModal(false);
-            setFullNameItem(null);
-          }}
-          item={fullNameItem}
-        />
-      )}
-
-      <OpenVolumeModal
-        isOpen={showOpenVolumeModal}
-        onClose={() => setShowOpenVolumeModal(false)}
-        onOpenVolumes={handleOpenVolumes}
-        onImportPackage={handleImportPackage}
+    {/* New Version Upload Modal */}
+    {showNewVersionModal && (
+      <NewVersionUploadModal
+      targetItemPath={newVersionTargetPath}
+      selectedDb={selectedDb}
+      onUpload={handleUpload}
+      onClose={() => {
+        setShowNewVersionModal(false);
+        setNewVersionTargetPath('');
+      }}
+      onAlert={showAlert}
       />
+    )}
 
-      <SharablesModal
-        isOpen={showSharablesModal}
-        onClose={() => setShowSharablesModal(false)}
-        onImportPackage={handleImportPackage}
+    {/* See Versions Modal */}
+    {showSeeVersionsModal && (
+      <SeeVersionsModal
+      itemPath={seeVersionsItemPath}
+      onClose={() => setShowSeeVersionsModal(false)}
+      onVersionSelect={handleVersionView}
       />
+    )}
 
-      {showModifyModal && (
-        <ModifyModal
-          type={modifyOptions.type}
-          item={modifyOptions.item}
-          selectedDb={selectedDb}
-          onConfirm={handleModifyConfirm}
-          onCancel={() => setShowModifyModal(false)}
-        />
-      )}
+    {/* Download Version Modal */}
+    {showDownloadVersionModal && (
+      <DownloadVersionModal
+      itemPath={downloadVersionItemPath}
+      selectedItem={downloadVersionItem}
+      selectedDb={selectedDb}
+      onClose={() => {
+        setShowDownloadVersionModal(false);
+        setAvailableVersions([]);
+      }}
+      onDownload={(args) => {
+        const taskId = `download-version-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+        // Add to queue and send command
+        const queueItem = {
+          id: taskId,
+          name: downloadVersionItemPath.split('/').pop() || 'item',
+                                  status: 'queued',
+                                  progress: 0,
+                                  error: null
+        };
+        setQueue(prev => [...prev, queueItem]);
 
-      {showMakeFolderModal && (
-        <MakeFolderModal
-          selectedDb={selectedDb}
-          currentPath={currentPath}
-          onConfirm={handleMakeFolder}
-          onCancel={() => setShowMakeFolderModal(false)}
-        />
-      )}
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ action: 'run', args, task_id: taskId }));
+        }
+        setShowDownloadVersionModal(false);
+        setAvailableVersions([]);
+      }}
+      availableVersions={availableVersions}
+      />
+    )}
 
-      {/* NUKE Modal */}
-      {showNukeModal && (
-        <NukeModal
-          isOpen={showNukeModal}
-          onClose={() => {
-            setShowNukeModal(false);
-            setDbToNuke('');
-          }}
-          dbName={dbToNuke}
-          onConfirm={executeNuke}
-        />
-      )}
+    {promptData && (
+      <PromptModal
+      promptText={promptData.text}
+      isPassword={promptData.isPassword}
+      onSubmit={(input) => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ action: 'input', data: input, task_id: promptData.taskId }));
+        }
+        setPromptData(null);
+      }}
+      onCancel={() => setPromptData(null)}
+      />
+    )}
+
+    {passwordPromptItems && (
+      <PasswordPromptModal
+      items={passwordPromptItems}
+      onSubmit={(passwords) => {
+        setPasswordPromptItems(null);
+        if (pendingDownloadItems) {
+          const items = pendingDownloadItems.items || pendingDownloadItems;
+          const strictnessMode = pendingDownloadItems.strictnessMode || 'NA';
+          executeDownload(items, passwords, strictnessMode);
+          setPendingDownloadItems(null);
+        }
+      }}
+      onCancel={() => {
+        setPasswordPromptItems(null);
+        setPendingDownloadItems(null);
+      }}
+      />
+    )}
+
+    <DownloadModal
+    isOpen={showDownloadModal}
+    onClose={() => setShowDownloadModal(false)}
+    onConfirm={proceedWithDownload}
+    selectedItems={selectedItems}
+    />
+
+    <AlertModal
+    isOpen={alertState.isOpen}
+    onClose={() => setAlertState(prev => ({ ...prev, isOpen: false }))}
+    title={alertState.title}
+    message={alertState.message}
+    type={alertState.type}
+    action={alertState.action}
+    />
+
+    {showRenameModal && (
+      <RenameVolumeModal
+      isOpen={showRenameModal}
+      onClose={() => setShowRenameModal(false)}
+      currentName={dbToRename}
+      onConfirm={handleRenameVolume}
+      />
+    )}
+
+    {showDeleteModal && (
+      <DeleteModal
+      isOpen={showDeleteModal}
+      onClose={() => setShowDeleteModal(false)}
+      onConfirm={handleDelete}
+      itemName={selectedItems.length === 1 ? selectedItems[0].displayName : (selectedItems.length > 1 ? `${selectedItems.length} items` : "")}
+      selectedItems={selectedItems}
+      selectedDb={selectedDb}
+      currentPath={currentPath}
+      onAlert={showAlert}
+      showVersionControls={deleteModalOptions.showVersionControls}
+      />
+    )}
+
+    {showFullNameModal && (
+      <FullNameModal
+      isOpen={showFullNameModal}
+      onClose={() => {
+        setShowFullNameModal(false);
+        setFullNameItem(null);
+      }}
+      item={fullNameItem}
+      />
+    )}
+
+    <OpenVolumeModal
+    isOpen={showOpenVolumeModal}
+    onClose={() => setShowOpenVolumeModal(false)}
+    onOpenVolumes={handleOpenVolumes}
+    onImportPackage={handleImportPackage}
+    />
+
+    <SharablesModal
+    isOpen={showSharablesModal}
+    onClose={() => setShowSharablesModal(false)}
+    onImportPackage={handleImportPackage}
+    />
+
+    {showModifyModal && (
+      <ModifyModal
+      type={modifyOptions.type}
+      item={modifyOptions.item}
+      selectedDb={selectedDb}
+      onConfirm={handleModifyConfirm}
+      onCancel={() => setShowModifyModal(false)}
+      />
+    )}
+
+    {showMakeFolderModal && (
+      <MakeFolderModal
+      selectedDb={selectedDb}
+      currentPath={currentPath}
+      onConfirm={handleMakeFolder}
+      onCancel={() => setShowMakeFolderModal(false)}
+      />
+    )}
+
+    {/* NUKE Modal */}
+    {showNukeModal && (
+      <NukeModal
+      isOpen={showNukeModal}
+      onClose={() => {
+        setShowNukeModal(false);
+        setDbToNuke('');
+      }}
+      dbName={dbToNuke}
+      onConfirm={executeNuke}
+      />
+    )}
     </div>
   );
 }

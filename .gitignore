@@ -12,7 +12,7 @@ dist/
 
 # Databases
 *.db
-
+VOLUMES_CONFIGS/*
 # IDEs
 .vscode/
 .idea/

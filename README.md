@@ -31,6 +31,8 @@ install.bat
 > [!NOTE]
 > Uses `winget` for automatic dependency bootstrapping.
 
+IF YOU GOT ANY INSTALLATION ISSUES OR QUESTIONS EVEN IF SIMPLE CONTACT [ME](mailto:fplu.the.founder@gmail.com) OR JOIN OUR [DISCORD SERVER](https://discord.gg/mnduzx6yUg)
+
 ---
 
 ## ✨ Features
