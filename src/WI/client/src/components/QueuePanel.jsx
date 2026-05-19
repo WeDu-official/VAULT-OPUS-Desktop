@@ -1,4 +1,4 @@
-// QueuePanel.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-3-release
+// QueuePanel.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-4
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React from 'react';
 

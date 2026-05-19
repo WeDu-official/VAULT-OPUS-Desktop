@@ -1,4 +1,4 @@
-// App.jsx (FOR MOBILE) from the VAULT OPUS PROJECT version 1-beta-3-release
+// App.jsx (FOR MOBILE) from the VAULT OPUS PROJECT version 1-beta-release-4
 // ==================== FULL MOBILE GUI App.jsx(NOT ANDROID FUNCTIONAL...) (Mirror of Desktop) ====================
 // IF YOU WANT AN ANDROID FUNCTIONAL VERSION OF IT GO TO https://github.com/WeDu-official/VAULT-OPUS-Android
 import React, { useState, useEffect, useRef } from 'react';
@@ -1698,25 +1698,25 @@ export default function App() {
       {showCreateVolume && <Modal open onClose={() => setShowCreateVolume(false)} title="Create Volume"><div className="space-y-4"><input type="text" value={newDbName} onChange={e => setNewDbName(e.target.value)} placeholder="Volume name" autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" /><button onClick={async () => { try { await fetch('/api/dbs/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ db_name: newDbName }) }); fetchDbs(); setShowCreateVolume(false); setSelectedDb(newDbName); setTab('explorer'); } catch (e) { showToast(e.message, 'error'); } }} disabled={!newDbName.trim()} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold">Create</button></div></Modal>}
       {promptData && <Modal open onClose={() => setPromptData(null)} title="Input Required"><div className="space-y-4"><p className="text-sm text-gray-400">{promptData.text}</p><input type={promptData.isPassword ? 'password' : 'text'} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" onKeyDown={e => { if (e.key === 'Enter') { if (ws) ws.send(JSON.stringify({ action: 'input', data: e.target.value, task_id: promptData.taskId })); setPromptData(null); } }} /><button onClick={() => { if (ws) ws.send(JSON.stringify({ action: 'input', data: '', task_id: promptData.taskId })); setPromptData(null); }} className="w-full py-3 bg-[#3bb5ff] text-[#060d1a] rounded-xl font-bold">Submit</button></div></Modal>}
       {showSetupModal && (
-        <Modal open onClose={() => {}} title="First Time Setup" wide>
+        <Modal open onClose={() => { }} title="First Time Setup" wide>
           <div className="space-y-4">
             <p className="text-sm text-gray-300">Welcome to Vault Opus! Please configure your backend connection to continue.</p>
             {!setupStatus.has_valid_token && (
               <div>
                 <label className="text-xs text-gray-500 uppercase">Discord Bot Token</label>
-                <input type="password" value={setupData.token} onChange={e => setSetupData({...setupData, token: e.target.value})} placeholder="Token" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
+                <input type="password" value={setupData.token} onChange={e => setSetupData({ ...setupData, token: e.target.value })} placeholder="Token" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
               </div>
             )}
             {!setupStatus.has_valid_channel && (
               <div>
                 <label className="text-xs text-gray-500 uppercase">Discord Channel ID</label>
-                <input type="text" value={setupData.channel_id} onChange={e => setSetupData({...setupData, channel_id: e.target.value})} placeholder="Channel ID" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
+                <input type="text" value={setupData.channel_id} onChange={e => setSetupData({ ...setupData, channel_id: e.target.value })} placeholder="Channel ID" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
               </div>
             )}
             {!setupStatus.has_valid_volume && (
               <div>
                 <label className="text-xs text-gray-500 uppercase">First Volume Name</label>
-                <input type="text" value={setupData.db_name} onChange={e => setSetupData({...setupData, db_name: e.target.value})} placeholder="e.g. main" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
+                <input type="text" value={setupData.db_name} onChange={e => setSetupData({ ...setupData, db_name: e.target.value })} placeholder="e.g. main" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
               </div>
             )}
             <button onClick={async () => {
@@ -1724,7 +1724,7 @@ export default function App() {
               if (!setupStatus.has_valid_channel && !setupData.channel_id) { showToast('Please enter a Discord Channel ID', 'error'); return; }
               if (!setupStatus.has_valid_volume && !setupData.db_name) { showToast('Please enter a Volume Name', 'error'); return; }
               try {
-                const r = await fetch('/api/setup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(setupData) });
+                const r = await fetch('/api/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(setupData) });
                 if (!r.ok) throw new Error((await r.json()).detail || 'Setup failed');
                 const res = await r.json();
                 setShowSetupModal(false);
@@ -1733,7 +1733,7 @@ export default function App() {
                 setSelectedDb(res.db_name);
                 setTab('explorer');
                 showToast('Setup complete!', 'success');
-              } catch(e) { showToast(e.message, 'error'); }
+              } catch (e) { showToast(e.message, 'error'); }
             }} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold mt-2">Finish Setup</button>
           </div>
         </Modal>
