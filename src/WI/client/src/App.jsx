@@ -1,4 +1,4 @@
-// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-5
+// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-6
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
@@ -511,7 +511,7 @@ export default function App() {
       else if (options.scope === 'specific' && options.version) {
         args.push('--version', options.version);
       } else if (options.scope === 'range' && options.startVersion && options.endVersion) {
-        args.push('--start_version', options.startVersion, '--end_version', options.endVersion);
+        args.push('--st_version', options.startVersion, '--en_version', options.endVersion);
       }
 
       const taskId = `delete-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;

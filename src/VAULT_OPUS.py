@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#VAULT_OPUS.py (AL-MALIK AL- A'LA) from the VAULT OPUS PROJECT version 1-beta-release-5
+#VAULT_OPUS.py (AL-MALIK AL- A'LA) from the VAULT OPUS PROJECT version 1-beta-release-6
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -274,8 +274,8 @@ if __name__ == "__main__":
         delete_parser.add_argument("target_path", type=str)
         delete_parser.add_argument("-db", "--database_file", type=str, required=True)
         delete_parser.add_argument("--version", type=str, default=None)
-        delete_parser.add_argument("--start_version", type=str, default=None)
-        delete_parser.add_argument("--end_version", type=str, default=None)
+        delete_parser.add_argument("--st_version", type=str, default=None)
+        delete_parser.add_argument("--en_version", type=str, default=None)
         delete_parser.add_argument("--inputfile", type=str)
         delete_parser.add_argument("--all_versions", choices=["yes", "no"], default="no")
         delete_parser.add_argument("--skip_confirmation", choices=["yes", "no"], default="no")
