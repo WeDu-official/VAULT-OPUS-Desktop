@@ -1,4 +1,4 @@
-// ModifyModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-4
+// ModifyModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-5
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState } from 'react';
 import ArchiveFolderPicker from './ArchiveFolderPicker';
@@ -130,8 +130,8 @@ export default function ModifyModal({ type, item, onConfirm, onCancel, selectedD
                       type="button"
                       onClick={() => setNameMode(mode.id)}
                       className={`p-3 text-left rounded-lg border transition-all duration-150 ${nameMode === mode.id
-                          ? 'bg-[#3bb5ff]/10 border-[#3bb5ff] text-white shadow-[0_0_10px_rgba(59,181,255,0.1)]'
-                          : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'
+                        ? 'bg-[#3bb5ff]/10 border-[#3bb5ff] text-white shadow-[0_0_10px_rgba(59,181,255,0.1)]'
+                        : 'bg-[#0f1f3a] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'
                         }`}
                     >
                       <div className="text-sm font-bold">{mode.label}</div>

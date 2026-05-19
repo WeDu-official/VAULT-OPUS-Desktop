@@ -1,4 +1,4 @@
-// DeleteModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-4
+// DeleteModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-5
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect } from 'react';
 
@@ -152,8 +152,8 @@ export default function DeleteModal({ isOpen, onClose, onConfirm, itemName, sele
                 <button
                   onClick={() => setScope('all')}
                   className={`px-4 py-3 rounded-xl border text-left transition-all duration-200 ${scope === 'all'
-                      ? 'bg-[#1a3a5c]/40 border-[#3bb5ff] text-white shadow-[0_0_15px_rgba(59,181,255,0.2)]'
-                      : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'
+                    ? 'bg-[#1a3a5c]/40 border-[#3bb5ff] text-white shadow-[0_0_15px_rgba(59,181,255,0.2)]'
+                    : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'
                     }`}
                 >
                   <div className="font-medium">All Versions</div>
@@ -163,8 +163,8 @@ export default function DeleteModal({ isOpen, onClose, onConfirm, itemName, sele
                 <button
                   onClick={() => setScope('specific')}
                   className={`px-4 py-3 rounded-xl border text-left transition-all duration-200 ${scope === 'specific'
-                      ? 'bg-[#1a3a5c]/40 border-[#3bb5ff] text-white shadow-[0_0_15px_rgba(59,181,255,0.2)]'
-                      : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'
+                    ? 'bg-[#1a3a5c]/40 border-[#3bb5ff] text-white shadow-[0_0_15px_rgba(59,181,255,0.2)]'
+                    : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'
                     }`}
                 >
                   <div className="font-medium">Specific Version</div>
@@ -195,8 +195,8 @@ export default function DeleteModal({ isOpen, onClose, onConfirm, itemName, sele
                 <button
                   onClick={() => setScope('range')}
                   className={`px-4 py-3 rounded-xl border text-left transition-all duration-200 ${scope === 'range'
-                      ? 'bg-[#1a3a5c]/40 border-[#3bb5ff] text-white shadow-[0_0_15px_rgba(59,181,255,0.2)]'
-                      : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'
+                    ? 'bg-[#1a3a5c]/40 border-[#3bb5ff] text-white shadow-[0_0_15px_rgba(59,181,255,0.2)]'
+                    : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-[#3bb5ff]/50'
                     }`}
                 >
                   <div className="font-medium">Version Range</div>
@@ -258,8 +258,8 @@ export default function DeleteModal({ isOpen, onClose, onConfirm, itemName, sele
                   onChange={() => setType('soft')}
                 />
                 <div className={`p-3 rounded-xl border text-center transition-all duration-200 ${type === 'soft'
-                    ? 'bg-green-500/10 border-green-500/50 text-green-400'
-                    : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-green-500/30'
+                  ? 'bg-green-500/10 border-green-500/50 text-green-400'
+                  : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-green-500/30'
                   }`}>
                   <div className="text-sm font-bold">SOFT DELETE</div>
                   <div className="text-[10px] opacity-70">Database only</div>
@@ -275,8 +275,8 @@ export default function DeleteModal({ isOpen, onClose, onConfirm, itemName, sele
                   onChange={() => setType('hard')}
                 />
                 <div className={`p-3 rounded-xl border text-center transition-all duration-200 ${type === 'hard'
-                    ? 'bg-red-500/10 border-red-500/50 text-red-400'
-                    : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-red-500/30'
+                  ? 'bg-red-500/10 border-red-500/50 text-red-400'
+                  : 'bg-[#0d1b2e] border-[#1a3a5c] text-gray-400 hover:border-red-500/30'
                   }`}>
                   <div className="text-sm font-bold">HARD DELETE</div>
                   <div className="text-[10px] opacity-70">Remove attachments</div>
@@ -297,8 +297,8 @@ export default function DeleteModal({ isOpen, onClose, onConfirm, itemName, sele
             onClick={handleConfirm}
             disabled={loadingVersions && scope !== 'all'}
             className={`px-6 py-2 rounded-lg text-sm font-bold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${type === 'hard'
-                ? 'bg-red-500 hover:bg-red-600 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]'
-                : 'bg-[#3bb5ff] hover:bg-[#2e9ee6] text-[#060d1a] shadow-[0_0_20px_rgba(59,181,255,0.3)]'
+              ? 'bg-red-500 hover:bg-red-600 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+              : 'bg-[#3bb5ff] hover:bg-[#2e9ee6] text-[#060d1a] shadow-[0_0_20px_rgba(59,181,255,0.3)]'
               }`}
           >
             Confirm Deletion

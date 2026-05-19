@@ -1,4 +1,4 @@
-// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-4
+// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-5
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
@@ -18,7 +18,6 @@ import RenameVolumeModal from './components/RenameVolumeModal';
 import DeleteModal from './components/DeleteModal';
 import DownloadModal from './components/DownloadModal';
 import FullNameModal from './components/FullNameModal';
-import OpenVolumeModal from './components/OpenVolumeModal';
 import ModifyModal from './components/ModifyModal';
 import MakeFolderModal from './components/MakeFolderModal';
 import SharablesModal from './components/SharablesModal';
@@ -91,7 +90,6 @@ export default function App() {
   // Full Name Modal state
   const [showFullNameModal, setShowFullNameModal] = useState(false);
   const [fullNameItem, setFullNameItem] = useState(null);
-  const [showOpenVolumeModal, setShowOpenVolumeModal] = useState(false);
 
   // Modify Modal state
   const [showModifyModal, setShowModifyModal] = useState(false);
@@ -541,50 +539,6 @@ export default function App() {
     setNewVersionTargetPath(itemPath);
     setShowNewVersionModal(true);
   };
-  const handleOpenVolumes = (selectedDbs) => {
-    // Determine which are external (have absolute path indicators)
-    const newExternal = selectedDbs.filter(path =>
-      path.includes('/') || path.includes('\\')
-    );
-
-    if (newExternal.length > 0) {
-      setExternalVolumes(prev => {
-        const updated = [...prev];
-        newExternal.forEach(ext => {
-          if (!updated.includes(ext)) updated.push(ext);
-        });
-        localStorage.setItem('externalVolumes', JSON.stringify(updated));
-        return updated;
-      });
-    }
-
-    // Add to dbs list immediately
-    setDbs(prev => {
-      const newDbs = [...prev];
-      selectedDbs.forEach(dbName => {
-        if (!newDbs.includes(dbName)) {
-          newDbs.push(dbName);
-        }
-      });
-      return newDbs;
-    });
-
-    // Also mark as recent
-    updateRecentVolumes(prev => {
-      const newRecent = [...prev];
-      selectedDbs.forEach(dbName => {
-        if (!newRecent.includes(dbName)) {
-          newRecent.unshift(dbName);
-        }
-      });
-      return newRecent.slice(0, 10);
-    });
-
-    // Select the first one if none selected
-    if (!selectedDb && selectedDbs.length > 0) {
-      setSelectedDb(selectedDbs[0]);
-    }
-  };
 
   const handleRemoveFromList = (dbPath) => {
     // Also remove from recent volumes
@@ -1005,7 +959,6 @@ export default function App() {
             setDbToRename(db);
             setShowRenameModal(true);
           }}
-          onOpenVolume={() => setShowOpenVolumeModal(true)}
           onDeleteVolume={handleDeleteVolume}
           onRemoveFromList={handleRemoveFromList}
           onShareVolume={handleShareVolume}
@@ -1283,12 +1236,6 @@ export default function App() {
         />
       )}
 
-      <OpenVolumeModal
-        isOpen={showOpenVolumeModal}
-        onClose={() => setShowOpenVolumeModal(false)}
-        onOpenVolumes={handleOpenVolumes}
-        onImportPackage={handleImportPackage}
-      />
 
       <SharablesModal
         isOpen={showSharablesModal}
