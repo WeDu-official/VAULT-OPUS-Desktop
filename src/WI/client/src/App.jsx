@@ -1,4 +1,5 @@
-//App.jsx
+// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-3-release
+// ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import ActionBar from './components/ActionBar';
@@ -22,6 +23,7 @@ import ModifyModal from './components/ModifyModal';
 import MakeFolderModal from './components/MakeFolderModal';
 import SharablesModal from './components/SharablesModal';
 import NukeModal from './components/NukeModal';
+import Modal from './components/Modal';
 
 export default function App() {
   const [dbs, setDbs] = useState([]);
@@ -101,6 +103,15 @@ export default function App() {
   const [showNukeModal, setShowNukeModal] = useState(false);
   const [dbToNuke, setDbToNuke] = useState('');
 
+  // Setup Modal State
+  const [showSetupModal, setShowSetupModal] = useState(false);
+  const [setupData, setSetupData] = useState({ token: '', channel_id: '', db_name: '' });
+  const [setupStatus, setSetupStatus] = useState({
+    has_valid_token: false,
+    has_valid_channel: false,
+    has_valid_volume: false
+  });
+
   const showAlert = (message, title = 'Attention', type = 'error', action = null) => {
     setAlertState({
       isOpen: true,
@@ -115,6 +126,21 @@ export default function App() {
   useEffect(() => {
     fetchDbs();
     fetchConfig();
+    fetchRecentVolumes();
+
+    const fetchSetupStatus = async () => {
+      try {
+        const r = await fetch('/api/setup_status');
+        const data = await r.json();
+        setSetupStatus({
+          has_valid_token: data.has_valid_token,
+          has_valid_channel: data.has_valid_channel,
+          has_valid_volume: data.has_valid_volume
+        });
+        if (data.setup_complete === 0) setShowSetupModal(true);
+      } catch (e) { console.error('Setup status check failed', e); }
+    };
+    fetchSetupStatus();
 
     const handleCreateVolumeClick = (e) => {
       // If there's a pending upload, the modal will handle it via pendingUpload state
@@ -140,11 +166,7 @@ export default function App() {
       localStorage.setItem('selectedDb', selectedDb);
 
       // Update recent volumes
-      setRecentVolumes(prev => {
-        const updated = [selectedDb, ...prev.filter(db => db !== selectedDb)].slice(0, 10);
-        localStorage.setItem('recentVolumes', JSON.stringify(updated));
-        return updated;
-      });
+      updateRecentVolumes(prev => [selectedDb, ...prev.filter(db => db !== selectedDb)].slice(0, 10));
 
       setCurrentVersion(null);
       fetchFiles(currentPath, null);
@@ -236,8 +258,10 @@ export default function App() {
           return item;
         }));
 
-        // Refresh file list after operations
-        fetchFiles(currentPath);
+        // Refresh file list after operations with a tiny delay to allow SQLite disk flush
+        setTimeout(() => {
+          fetchFiles(currentPath);
+        }, 300);
       }
     };
 
@@ -307,6 +331,31 @@ export default function App() {
     } catch (e) {
       console.error('Failed to fetch config:', e);
     }
+  };
+
+  const fetchRecentVolumes = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/recent_volumes');
+      const data = await res.json();
+      const recent = data.recent || [];
+      setRecentVolumes(recent);
+      localStorage.setItem('recentVolumes', JSON.stringify(recent));
+    } catch (e) {
+      console.error('Failed to fetch recent volumes:', e);
+    }
+  };
+
+  const updateRecentVolumes = (updater) => {
+    setRecentVolumes(prev => {
+      const nextRecent = typeof updater === 'function' ? updater(prev) : updater;
+      localStorage.setItem('recentVolumes', JSON.stringify(nextRecent));
+      fetch('http://localhost:8000/api/recent_volumes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recent: nextRecent })
+      }).catch(err => console.error('Failed to save recent volumes:', err));
+      return nextRecent;
+    });
   };
 
   const fetchFiles = async (path, version = currentVersion) => {
@@ -521,16 +570,14 @@ export default function App() {
     });
 
     // Also mark as recent
-    setRecentVolumes(prev => {
+    updateRecentVolumes(prev => {
       const newRecent = [...prev];
       selectedDbs.forEach(dbName => {
         if (!newRecent.includes(dbName)) {
           newRecent.unshift(dbName);
         }
       });
-      const trimmed = newRecent.slice(0, 10);
-      localStorage.setItem('recentVolumes', JSON.stringify(trimmed));
-      return trimmed;
+      return newRecent.slice(0, 10);
     });
 
     // Select the first one if none selected
@@ -540,22 +587,8 @@ export default function App() {
   };
 
   const handleRemoveFromList = (dbPath) => {
-    // Remove from external volumes list
-    setExternalVolumes(prev => {
-      const updated = prev.filter(p => p !== dbPath);
-      localStorage.setItem('externalVolumes', JSON.stringify(updated));
-      return updated;
-    });
-
-    // Remove from active dbs list
-    setDbs(prev => prev.filter(p => p !== dbPath));
-
     // Also remove from recent volumes
-    setRecentVolumes(prev => {
-      const updated = prev.filter(p => p !== dbPath);
-      localStorage.setItem('recentVolumes', JSON.stringify(updated));
-      return updated;
-    });
+    updateRecentVolumes(prev => prev.filter(p => p !== dbPath));
 
     // Clear selection if it was the removed one
     if (selectedDb === dbPath) {
@@ -833,12 +866,6 @@ export default function App() {
     setShowDownloadVersionModal(true);
   };
 
-  const handleVersionView = (version) => {
-    setCurrentVersion(version);
-    setShowSeeVersionsModal(false);
-    setCurrentPath(seeVersionsItemPath);
-    fetchFiles(seeVersionsItemPath, version);
-  };
 
   const handleCreateVolume = async (dbName, files, options) => {
     try {
@@ -1138,7 +1165,6 @@ export default function App() {
         <SeeVersionsModal
           itemPath={seeVersionsItemPath}
           onClose={() => setShowSeeVersionsModal(false)}
-          onVersionSelect={handleVersionView}
         />
       )}
 
@@ -1301,6 +1327,45 @@ export default function App() {
           onConfirm={executeNuke}
         />
       )}
+      {/* First Time Setup Modal */}
+      <Modal isOpen={showSetupModal} onClose={() => { }} title="First Time Setup" size="medium">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-300">Welcome to Vault Opus! Please configure your backend connection to continue.</p>
+          {!setupStatus.has_valid_token && (
+            <div>
+              <label className="text-xs text-gray-500 uppercase">Discord Bot Token</label>
+              <input type="password" value={setupData.token} onChange={e => setSetupData({ ...setupData, token: e.target.value })} placeholder="Token" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
+            </div>
+          )}
+          {!setupStatus.has_valid_channel && (
+            <div>
+              <label className="text-xs text-gray-500 uppercase">Discord Channel ID</label>
+              <input type="text" value={setupData.channel_id} onChange={e => setSetupData({ ...setupData, channel_id: e.target.value })} placeholder="Channel ID" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
+            </div>
+          )}
+          {!setupStatus.has_valid_volume && (
+            <div>
+              <label className="text-xs text-gray-500 uppercase">First Volume Name</label>
+              <input type="text" value={setupData.db_name} onChange={e => setSetupData({ ...setupData, db_name: e.target.value })} placeholder="e.g. main" className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm mt-1" />
+            </div>
+          )}
+          <button onClick={async () => {
+            if (!setupStatus.has_valid_token && !setupData.token) { showAlert('Please enter a Discord Bot Token'); return; }
+            if (!setupStatus.has_valid_channel && !setupData.channel_id) { showAlert('Please enter a Discord Channel ID'); return; }
+            if (!setupStatus.has_valid_volume && !setupData.db_name) { showAlert('Please enter a Volume Name'); return; }
+            try {
+              const r = await fetch('/api/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(setupData) });
+              if (!r.ok) throw new Error((await r.json()).detail || 'Setup failed');
+              const res = await r.json();
+              setShowSetupModal(false);
+              fetchDbs();
+              fetchConfig();
+              setSelectedDb(res.db_name);
+              showAlert('Setup complete!', 'Success', 'success');
+            } catch (e) { showAlert(e.message); }
+          }} className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold mt-2 hover:brightness-110 transition-all">Finish Setup</button>
+        </div>
+      </Modal>
     </div>
   );
 }

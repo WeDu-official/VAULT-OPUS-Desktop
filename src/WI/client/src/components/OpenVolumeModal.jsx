@@ -1,4 +1,5 @@
-//OpenVolumeModal.jsx
+// OpenVolumeModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-3-release
+// ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect } from 'react';
 import { X, Database, CheckSquare, Square, Search, Loader2, FolderOpen, ChevronRight, Folder, File, Home, ArrowLeft, Package } from 'lucide-react';
 
@@ -129,7 +130,7 @@ export default function OpenVolumeModal({ isOpen, onClose, onOpenVolumes, onImpo
         {/* Browser Navigation */}
         {viewMode === 'browse' && (
           <div className="px-6 py-3 bg-[#060d1a]/50 border-b border-[#1a3a5c] flex items-center gap-3 shrink-0">
-            <button 
+            <button
               onClick={() => fetchDirectory('')}
               className="p-1.5 hover:bg-[#1a3a5c] rounded text-[#3bb5ff]"
               title="Home"
@@ -169,7 +170,7 @@ export default function OpenVolumeModal({ isOpen, onClose, onOpenVolumes, onImpo
               {items.map((item) => {
                 const isSelected = selectedPaths.includes(item.path);
                 const isSelectable = !item.is_dir && item.is_db;
-                
+
                 return (
                   <div
                     key={item.path}
@@ -188,7 +189,7 @@ export default function OpenVolumeModal({ isOpen, onClose, onOpenVolumes, onImpo
                         <File className="w-5 h-5 text-gray-700" />
                       )}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className={`text-sm truncate ${isSelected ? 'text-white font-medium' : 'text-gray-300'}`}>
                         {item.name}
@@ -215,7 +216,7 @@ export default function OpenVolumeModal({ isOpen, onClose, onOpenVolumes, onImpo
               {selectedPaths.length} <span className="opacity-50">Volume(s) Selected</span>
             </span>
             {selectedPaths.length > 0 && (
-              <button 
+              <button
                 onClick={() => setSelectedPaths([])}
                 className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors"
               >

@@ -1,4 +1,5 @@
-//Terminal.jsx
+// Terminal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-3-release
+// ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useEffect, useRef } from 'react';
 
 export default function Terminal({ output }) {

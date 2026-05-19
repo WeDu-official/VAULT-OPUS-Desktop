@@ -1,4 +1,5 @@
-//MakeFolderModal.jsx
+// MakeFolderModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-3-release
+// ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState } from 'react';
 import ArchiveFolderPicker from './ArchiveFolderPicker';
 

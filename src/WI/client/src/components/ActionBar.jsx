@@ -1,4 +1,5 @@
-//Actionbar.jsx
+// ActionBar.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-3-release
+// ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useRef } from 'react';
 import FolderPicker from './FolderPicker';
 import GeneratedPasswordModal from './GeneratedPasswordModal';

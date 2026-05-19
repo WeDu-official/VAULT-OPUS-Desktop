@@ -1,4 +1,5 @@
-//DeleteModal.jsx
+// DeleteModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-3-release
+// ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect } from 'react';
 
 export default function DeleteModal({ isOpen, onClose, onConfirm, itemName, selectedItems = [], selectedDb, currentPath, onAlert, showVersionControls = false }) {
