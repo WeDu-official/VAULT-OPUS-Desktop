@@ -491,6 +491,27 @@ export default function App() {
     });
   };
 
+  const executeDownloadWithArgs = (args, displayName, passwords = {}) => {
+    const taskId = `download-version-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+    const queueItem = {
+      id: taskId,
+      name: displayName,
+      status: 'queued',
+      progress: 0,
+      error: null
+    };
+    setQueue(prev => [...prev, queueItem]);
+
+    const finalArgs = [...args];
+    if (Object.keys(passwords).length > 0) {
+      finalArgs.push('--passwords', JSON.stringify(passwords));
+    }
+
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ action: 'run', args: finalArgs, task_id: taskId }));
+    }
+  };
+
   const handleDelete = (options) => {
     if (selectedItems.length === 0) return;
 
@@ -1132,19 +1153,18 @@ export default function App() {
             setAvailableVersions([]);
           }}
           onDownload={(args) => {
-            const taskId = `download-version-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-            // Add to queue and send command
-            const queueItem = {
-              id: taskId,
-              name: downloadVersionItemPath.split('/').pop() || 'item',
-              status: 'queued',
-              progress: 0,
-              error: null
-            };
-            setQueue(prev => [...prev, queueItem]);
-
-            if (ws && ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ action: 'run', args, task_id: taskId }));
+            const isEncrypted = downloadVersionItem && (downloadVersionItem.encryption === 'not_automatic' || downloadVersionItem.encryption_mode === 'not_automatic');
+            if (isEncrypted) {
+              setPasswordPromptItems([{
+                id: downloadVersionItem.itemid,
+                name: downloadVersionItem.displayName || downloadVersionItem.name
+              }]);
+              setPendingDownloadItems({
+                args: args,
+                name: downloadVersionItemPath.split('/').pop() || 'item'
+              });
+            } else {
+              executeDownloadWithArgs(args, downloadVersionItemPath.split('/').pop() || 'item');
             }
             setShowDownloadVersionModal(false);
             setAvailableVersions([]);
@@ -1173,9 +1193,13 @@ export default function App() {
           onSubmit={(passwords) => {
             setPasswordPromptItems(null);
             if (pendingDownloadItems) {
-              const items = pendingDownloadItems.items || pendingDownloadItems;
-              const strictnessMode = pendingDownloadItems.strictnessMode || 'NA';
-              executeDownload(items, passwords, strictnessMode);
+              if (pendingDownloadItems.args) {
+                executeDownloadWithArgs(pendingDownloadItems.args, pendingDownloadItems.name, passwords);
+              } else {
+                const items = pendingDownloadItems.items || pendingDownloadItems;
+                const strictnessMode = pendingDownloadItems.strictnessMode || 'NA';
+                executeDownload(items, passwords, strictnessMode);
+              }
               setPendingDownloadItems(null);
             }
           }}
