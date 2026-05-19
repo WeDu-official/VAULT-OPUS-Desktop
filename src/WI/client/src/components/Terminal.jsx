@@ -1,4 +1,4 @@
-// Terminal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-6
+// Terminal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-6-2
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useEffect, useRef } from 'react';
 
