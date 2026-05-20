@@ -24,6 +24,7 @@ from argon2.low_level import hash_secret_raw, Type
 class encrybase:
     def __init__(self, log, db_path: Optional[str] = None):
         self.log = log
+        self.db_path = db_path
         self._HKDF_SALT = None
         self._HKDF_INFO = None
         if db_path:
