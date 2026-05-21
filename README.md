@@ -1,6 +1,6 @@
 <div align="center">
   <img src="VAULT_OPUSlogo.png" alt="VAULT_OPUS Logo" width="400" />
-  <h1>VAULT OPUS (BETA)</h1>
+  <h1>VAULT OPUS (DESKTOP)</h1>
   <p><b>The Infinity Cloud Storage Project — Turn Discord into your personal unlimited vault.</b></p>
 
   [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -11,7 +11,7 @@
 
 ---
 
-## 📌 Version of VAULT OPUS in this readme is **1-beta-release-7**
+## 📌 Version of VAULT OPUS (DESKTOP) in this readme is **1-beta-release-7**
 
 ## 🚀 Quick Start
 
