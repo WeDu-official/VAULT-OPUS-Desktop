@@ -273,6 +273,6 @@ echo
 echo "Run the app with:"
 echo "  - CLI:          source venv/bin/activate && python src/VAULT_OPUS.py"
 echo "  - GUI backend:  source venv/bin/activate && python src/WI/server.py"
-echo "  - Desktop GUI:  cd src/WI/client && npm run dev"
-echo "  - Android GUI:  cd src/WI/mobile && npm run android"
+echo "  - Desktop GUI:  cd src/WI/client && npm install (DO IT FOR ONLY FIRST TIME) && npm run dev"
+echo "  - Mobile GUI:   cd src/WI/mobile && npm install (DO IT FOR ONLY FIRST TIME) && npm run dev"
 echo -e "\n${CYAN}Enjoy!${NC}\n"
