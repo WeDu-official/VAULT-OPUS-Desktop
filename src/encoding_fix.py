@@ -23,9 +23,6 @@ def apply():
             continue
         if not hasattr(stream, 'buffer'):
             continue
-        # CRITICAL: check if buffer is already a TextIOWrapper
-        if isinstance(stream, io.TextIOWrapper):
-            continue  # Already wrapped, don't double-wrap
         try:
             new_stream = io.TextIOWrapper(
                 stream.buffer,
