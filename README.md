@@ -11,6 +11,8 @@
 
 ---
 
+## 📌 Version of VAULT OPUS in this readme is **1-beta-release-7**
+
 ## 🚀 Quick Start
 
 We provide standalone, interactive installers that automatically bootstrap your environment (detecting/installing Python 3 and Node.js) and configure your bot in seconds.

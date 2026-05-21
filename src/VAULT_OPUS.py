@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#VAULT_OPUS.py (AL-MALIK AL- A'LA) from the VAULT OPUS PROJECT version 1-beta-release-6-ESEN-2
+#VAULT_OPUS.py (AL-MALIK AL- A'LA) from the VAULT OPUS PROJECT version 1-beta-release*
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -400,7 +400,7 @@ if __name__ == "__main__":
                 args.random_seed = False
             if args.encryption_mode == "not_automatic" and not args.password_seed and not args.random_seed:
                 args.password_seed = await ph.prompt_input("Enter password seed for this upload: ", is_password=True)
-                if not args.password_seed:
+                if not args.password_seed or not args.password_seed.strip():
                     print("[CLI] Error: Password seed is required for 'not_automatic' encryption.")
                     await bot.close()
                     return
@@ -431,7 +431,7 @@ if __name__ == "__main__":
             if (version == False and st_version == False and en_version == False and all_versions == False): can_apply_version_filters = False
             required_passwords_info = await temp_denc._get_items_requiring_password_for_download(
                 args.database_file, args.target_path,
-                version_param=version, start_version_param=st_version, end_version_param=en_version,
+                version_param=version, st_version_param=st_version, en_version_param=en_version,
                 all_versions_param=all_versions, can_apply_version_filters=can_apply_version_filters
             )
             seed = {}
@@ -469,7 +469,7 @@ if __name__ == "__main__":
                         if not current_user_seed:
                             prompt_text = f"ENTER PASSWORD FOR {display_name}: "
                             current_user_seed = await ph.prompt_input(prompt_text, is_password=True)
-                            if not current_user_seed: print("Password cannot be empty."); continue
+                            if not current_user_seed or not current_user_seed.strip(): print("Password cannot be empty."); continue
                         new_pass, _, errors, all_correct = temp_denc.process_entered_passwords(group_key, items, current_user_seed, benc_instance)
                         if all_correct: seed.update(new_pass); break
                         else:
@@ -478,7 +478,7 @@ if __name__ == "__main__":
                             current_user_seed = None
             from download import DownloadContext
             ctx = DownloadContext(bot,file_table_columns,log, interaction=ph, enc=True)
-            await ctx.downloada(target_path=args.target_path, DB_FILE=args.database_file, download_folder=args.download_folder, decryption_password_seed=seed, version_param=version, start_version_param=st_version, end_version_param=en_version, all_versions_param=all_versions, can_apply_version_filters=can_apply_version_filters, strictness_mode=args.strictness_mode, id_based=args.id_based)
+            await ctx.downloada(target_path=args.target_path, DB_FILE=args.database_file, download_folder=args.download_folder, decryption_password_seed=seed, version_param=version, st_version_param=st_version, en_version_param=en_version, all_versions_param=all_versions, can_apply_version_filters=can_apply_version_filters, strictness_mode=args.strictness_mode, id_based=args.id_based)
             await bot.close()
 
         elif args.command == "delete":
@@ -498,17 +498,17 @@ if __name__ == "__main__":
 
             all_versions_bool = (args.all_versions == "yes")
             can_apply_filters = True
-            version, start_version, end_version = args.version, args.start_version, args.end_version
-            if version: start_version = None; end_version = None; all_versions_bool = False
-            elif start_version and end_version: version = None; all_versions_bool = False
-            elif all_versions_bool: version = None; start_version = None; end_version = None
+            version, st_version, en_version = args.version, args.st_version, args.en_version
+            if version: st_version = None; en_version = None; all_versions_bool = False
+            elif st_version and en_version: version = None; all_versions_bool = False
+            elif all_versions_bool: version = None; st_version = None; en_version = None
             else: can_apply_filters = False
             await ctx.deletea(
                 target_path=args.target_path,
                 DB_FILE=args.database_file,
                 version_param=version,
-                start_version_param=start_version,
-                end_version_param=end_version,
+                st_version_param=st_version,
+                en_version_param=en_version,
                 all_versions_param=all_versions_bool,
                 can_apply_version_filters=can_apply_filters,
                 skip_confirmation=(args.skip_confirmation == "yes"),

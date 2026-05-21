@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#encryption_upload.py (Azazyel) from the VAULT OPUS PROJECT version 1-beta-release-6-ESEN-2
+#encryption_upload.py (Azazyel) from the VAULT OPUS PROJECT version 1-beta-release*
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -221,7 +221,7 @@ class EncryptionManager:
                             f"Your random password seed for new version of '{target_base_filename}': ||`{final_user_seed}`||."
                         )
                     else:
-                        final_user_seed = user_seed
+                        final_user_seed = user_seed.strip()
                     
                     final_encryption_key = self.encryption._derive_key_from_seed(final_user_seed)
                     final_password_hash = self._ph.hash(final_user_seed) if save_hash else ""
@@ -283,6 +283,8 @@ class EncryptionManager:
                         ephemeral=False
                     )
                     raise ValueError("Password seed required")
+                else:
+                    final_user_seed = final_user_seed.strip()
 
                 final_encryption_key = self.encryption._derive_key_from_seed(final_user_seed)
                 if save_hash:

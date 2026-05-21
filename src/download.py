@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#download.py (JEBRAIL) from the VAULT OPUS PROJECT version 1-beta-release-6-ESEN-2
+#download.py (JEBRAIL) from the VAULT OPUS PROJECT version 1-beta-release*
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -59,8 +59,8 @@ class DownloadContext:
         download_folder: str,
         decryption_password_seed: Optional[Dict[Tuple[str, str, str, str], str|bytes]] = None,
         version_param: Optional[str] = None,
-        start_version_param: Optional[str] = None,
-        end_version_param: Optional[str] = None,
+        st_version_param: Optional[str] = None,
+        en_version_param: Optional[str] = None,
         all_versions_param: bool = False,
         can_apply_version_filters: bool = False,
         usrinput: bool = False,
@@ -120,13 +120,13 @@ class DownloadContext:
 
             if id_based:
                 resolved_info = await self.DDB._resolve_id_based_target(
-                    target_path, all_entries, version_param, start_version_param, end_version_param,
+                    target_path, all_entries, version_param, st_version_param, en_version_param,
                     all_versions_param, can_apply_version_filters
                 )
             else:
                 resolved_info = await self._resolve_target_and_version_mode(
-                    normalized_target_path, all_entries, version_param, start_version_param, 
-                    end_version_param, all_versions_param, can_apply_version_filters, target_path
+                    normalized_target_path, all_entries, version_param, st_version_param, 
+                    en_version_param, all_versions_param, can_apply_version_filters, target_path
                 )
 
             if resolved_info is None:
@@ -137,8 +137,8 @@ class DownloadContext:
             multiple_versions = resolved_info['multiple_versions']
 
             files_grouped, total_parts = await self.files._collect_relevant_files(
-                all_entries, resolved_info, version_param, start_version_param, 
-                end_version_param, all_versions_param, can_apply_version_filters, db_path
+                all_entries, resolved_info, version_param, st_version_param, 
+                en_version_param, all_versions_param, can_apply_version_filters, db_path
             )
             
             overall_total_parts = total_parts

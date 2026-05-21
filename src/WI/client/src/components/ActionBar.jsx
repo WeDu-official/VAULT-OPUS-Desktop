@@ -1,4 +1,4 @@
-// ActionBar.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release-6-ESEN-2
+// ActionBar.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release*
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useRef } from 'react';
 import FolderPicker from './FolderPicker';

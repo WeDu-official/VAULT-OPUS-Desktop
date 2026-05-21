@@ -1,4 +1,4 @@
-// App.jsx (FOR MOBILE) from the VAULT OPUS PROJECT version 1-beta-release-6-ESEN-2
+// App.jsx (FOR MOBILE) from the VAULT OPUS PROJECT version 1-beta-release*
 // ==================== FULL MOBILE GUI App.jsx(NOT ANDROID FUNCTIONAL...) (Mirror of Desktop) ====================
 // IF YOU WANT AN ANDROID FUNCTIONAL VERSION OF IT GO TO https://github.com/WeDu-official/VAULT-OPUS-Android
 import React, { useState, useEffect, useRef } from 'react';
