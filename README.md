@@ -1,7 +1,7 @@
 <div align="center">
   <img src="VAULT_OPUSlogo.png" alt="VAULT_OPUS Logo" width="400" />
   <h1>VAULT OPUS (DESKTOP)</h1>
-  <p><b>The Infinity Cloud Storage Project — Turn Discord into your personal unlimited vault.</b></p>
+  <p><b>The Infinity Cloud Storage Project — A locally run, annonymous, secure end to end, feature rich cloud storage,vfs and engine.</b></p>
 
   [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
   [![Node.js](https://img.shields.io/badge/node.js-LTS-green.svg)](https://nodejs.org/)
