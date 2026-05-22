@@ -13,6 +13,14 @@
 
 ## 📌 Version of VAULT OPUS (DESKTOP) in this readme is **1-beta-release-7**
 
+## WANNA DO PRE INSTALL SETUP? <a href="https://youtu.be/i9rnTi9l2ww">
+  <img src="https://img.youtube.com/vi/i9rnTi9l2ww/maxresdefault.jpg" width="500">
+</a>
+
+## WANNA INSTALL? <a href="https://youtu.be/VnMLsNLHVmA">
+  <img src="https://img.youtube.com/vi/VnMLsNLHVmA/maxresdefault.jpg" width="500">
+</a>
+
 ## 🚀 Quick Start
 
 We provide standalone, interactive installers that automatically bootstrap your environment (detecting/installing Python 3 and Node.js) and configure your bot in seconds.
