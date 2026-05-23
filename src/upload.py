@@ -136,7 +136,7 @@ class UPLOAD:
             )
             # Machine-readable sentinel: parsed by Desktop/Mobile frontends to show a dialog.
             # Format: [DIALOG:TYPE_MISMATCH]<local_name>|<target_name>|<fallback_nickname>
-            print(f"[DIALOG:TYPE_MISMATCH]{tmf.local_name}|{tmf.target_name}|{fallback_nickname}")
+            print(f"[DIALOG:TYPE_MISMATCH]{tmf.local_name}|{tmf.target_name}|{fallback_nickname if len(fallback_nickname) <= 30 else fallback_nickname[:27] + '...'}")
             await self.uploada(
                 interaction=interaction,
                 local_path=local_path,
