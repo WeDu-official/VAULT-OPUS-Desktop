@@ -596,15 +596,18 @@ class UploadManager:
         return True
 
     async def _handle_incomplete_upload(
-            self,
-            interaction: discord.Interaction,
-            root_upload_name: str,
-            DATABASE_FILE: str,
-            current_version_for_upload: str,
-            file_table_columns: list[str],
-            uploaded_parts: int,
-            total_parts: int,automatic_removal_or_user_choice:bool=False
-    ):
+        self,
+        interaction: discord.Interaction,
+        root_upload_name: str,
+        DATABASE_FILE: str,
+        current_version_for_upload: str,
+        file_table_columns: list[str],
+        uploaded_parts: int,
+        total_parts: int,
+        automatic_removal_or_user_choice: bool = False,
+        root_itemid: Optional[str] = None,
+        id_based: bool = False
+):
         """
         Sends an interactive message to the user if an upload is incomplete,
         allowing them to remove the incomplete upload or keep it.
@@ -619,13 +622,16 @@ class UploadManager:
             intents=self.bot.intents,
             interaction=interaction
         )
+        delete_target = root_itemid if (id_based and root_itemid) else root_upload_name
+        use_id_based = id_based and bool(root_itemid)
         if automatic_removal_or_user_choice:
             await delete_ctx.deletea(
-                target_path=root_upload_name,
+                target_path=delete_target,
                 DB_FILE=DATABASE_FILE,
                 version_param=current_version_for_upload,
                 all_versions_param=False,
-                skip_confirmation=True
+                skip_confirmation=True,
+                id_based=use_id_based
             )
         else:
             #build the message
@@ -645,11 +651,12 @@ class UploadManager:
             response = await interaction.prompt_input("Do you want to remove the incomplete upload? (yes/no): ")
             if response.lower() in ["y", "yes"]:
                 await delete_ctx.deletea(
-                    target_path=root_upload_name,
+                    target_path=delete_target,
                     DB_FILE=DATABASE_FILE,
                     version_param=current_version_for_upload,
                     all_versions_param=False,
-                    skip_confirmation=True
+                    skip_confirmation=True,
+                    id_based=use_id_based
                 )
                 print("[CLI] Operation completed.")
             else:

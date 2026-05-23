@@ -258,7 +258,10 @@ class UPLOAD:
                     current_version_for_upload,
                     self.file_table_columns,
                     uploaded_parts=overall_uploaded_parts_ref[0],
-                    total_parts=overall_total_parts,automatic_removal_or_user_choice=automatic_removal_or_user_choice
+                    total_parts=overall_total_parts,
+                    automatic_removal_or_user_choice=automatic_removal_or_user_choice,
+                    root_itemid=resolved_itemid,
+                    id_based=True
                 )
             # --- Step 9: Validate upload completion ---
             if overall_uploaded_parts_ref[0] != overall_total_parts:
@@ -292,7 +295,10 @@ class UPLOAD:
                     current_version_for_upload,
                     self.file_table_columns,
                     uploaded_parts=overall_uploaded_parts_ref[0],
-                    total_parts=overall_total_parts, automatic_removal_or_user_choice=automatic_removal_or_user_choice
+                    total_parts=overall_total_parts,
+                    automatic_removal_or_user_choice=automatic_removal_or_user_choice,
+                    root_itemid=resolved_itemid,
+                    id_based=True
                 )
 
             # --- Step 11: Release semaphore and clean up user_uploading state ---

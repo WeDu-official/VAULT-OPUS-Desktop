@@ -424,11 +424,18 @@ if __name__ == "__main__":
             temp_ddb = DDB(temp_version_manager,interaction=None)
             temp_denc = denc(log=bot.log, ddb=temp_ddb, version_manager=temp_version_manager)
             all_versions = (args.all_versions == "yes")
-            can_apply_version_filters = True
-            st_version, en_version, version = args.st_version, args.en_version, args.version
-            if version != '': st_version=False;en_version=False;all_versions=False
-            elif st_version != '' and en_version != '': all_versions = False
-            if (version == False and st_version == False and en_version == False and all_versions == False): can_apply_version_filters = False
+            st_version = args.st_version
+            en_version = args.en_version
+            version = args.version
+
+            if version:
+                st_version = ""
+                en_version = ""
+                all_versions = False
+            elif st_version and en_version:
+                all_versions = False
+
+            can_apply_version_filters = bool(version or (st_version and en_version) or all_versions)
             required_passwords_info = await temp_denc._get_items_requiring_password_for_download(
                 args.database_file, args.target_path,
                 version_param=version, st_version_param=st_version, en_version_param=en_version,
