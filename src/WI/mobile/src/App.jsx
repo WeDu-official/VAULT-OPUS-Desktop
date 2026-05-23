@@ -86,7 +86,7 @@ function Toast({ message, type, onClose }) {
 }
 
 // ---------- Remote Folder Picker (System File Browser) ----------
-function RemoteFolderPicker({ initialPath, onSelect, onCancel, showFiles = false, multiSelect = false }) {
+function RemoteFolderPicker({ initialPath, onSelect, onCancel, showFiles = false, multiSelect = false, singleSelectOnly = false }) {
   const [currentPath, setCurrentPath] = useState(initialPath || '');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -109,6 +109,10 @@ function RemoteFolderPicker({ initialPath, onSelect, onCancel, showFiles = false
   useEffect(() => { fetchDirectory(initialPath); }, [initialPath]);
 
   const toggleSelect = (path) => {
+    if (singleSelectOnly) {
+      setSelectedPaths(prev => prev.includes(path) ? [] : [path]);
+      return;
+    }
     setSelectedPaths(prev => prev.includes(path) ? prev.filter(p => p !== path) : [...prev, path]);
   };
 
@@ -397,7 +401,7 @@ function SettingsTabContent({ config, fetchConfig, showToast }) {
             <label className="text-[10px] text-[#3bb5ff]/70 uppercase tracking-wider font-bold ml-1">Download Destination</label>
             <div className="flex gap-2">
               <input type="text" value={downloadFolder} onChange={e => setDownloadFolder(e.target.value)} className="flex-1 bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-3 py-3 text-sm text-gray-200 outline-none transition-colors" />
-              <button onClick={() => setShowPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">Browse</button>
+              <button onClick={() => setShowPicker(true)} className="px-4 py-3 bg-[#0f1f3a] border border-[#1a3a5c] rounded-xl text-[#3bb5ff] btn-touch">Choose another</button>
             </div>
           </div>
         </div>
@@ -1043,7 +1047,7 @@ export default function App() {
     }
 
     if (showFolderPicker) {
-      return <RemoteFolderPicker initialPath={uploadPath} showFiles onSelect={p => { setUploadPath(p); setShowFolderPicker(false); }} onCancel={() => setShowFolderPicker(false)} />;
+      return <RemoteFolderPicker initialPath={uploadPath} showFiles multiSelect singleSelectOnly onSelect={p => { setUploadPath(p[0] || ''); setShowFolderPicker(false); }} onCancel={() => setShowFolderPicker(false)} />;
     }
 
     return (

@@ -669,6 +669,8 @@ async def nuke_db(payload: dict = Body(...)):
 async def browse_directory(path: Optional[str] = Query(None)):
     if not path:
         path = str(Path.home())
+    elif path.startswith("./") or path == ".":
+        path = os.path.join(VAULT_OPUS_SRC_DIR, path[2:] if path.startswith("./") else "")
 
     try:
         p = Path(path).resolve()

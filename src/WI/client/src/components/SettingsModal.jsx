@@ -222,10 +222,11 @@ export default function SettingsModal({ isOpen, onClose, config, onSave }) {
                       />
                       <button
                         onClick={() => setShowFolderPicker(true)}
-                        className="p-2.5 bg-[#0f1f3a] hover:bg-[#1a3a5c] text-[#3bb5ff] rounded-xl transition-colors border border-[#1a3a5c] active:scale-95"
+                        className="flex items-center gap-2 p-2.5 bg-[#0f1f3a] hover:bg-[#1a3a5c] text-[#3bb5ff] rounded-xl transition-colors border border-[#1a3a5c] active:scale-95"
                         title="Browse Folders"
                       >
                         <FolderOpen size={20} />
+                        <span className="text-sm font-medium pr-1">Choose another</span>
                       </button>
                     </div>
                   </div>
