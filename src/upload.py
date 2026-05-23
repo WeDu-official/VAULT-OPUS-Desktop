@@ -129,6 +129,14 @@ class UPLOAD:
                 f"[TYPE_MISMATCH_FALLBACK] Re-uploading '{tmf.local_name}' as new_upload "
                 f"with auto-nickname '{fallback_nickname}'."
             )
+            await interaction.send(
+                f"{interaction.user_mention}, The upload for '{tmf.local_name}' has been automatically converted to a NEW UPLOAD due to the type mismatch.\n"
+                f"It will be saved with the auto-generated nickname: `{fallback_nickname}`.",
+                ephemeral=False
+            )
+            # Machine-readable sentinel: parsed by Desktop/Mobile frontends to show a dialog.
+            # Format: [DIALOG:TYPE_MISMATCH]<local_name>|<target_name>|<fallback_nickname>
+            print(f"[DIALOG:TYPE_MISMATCH]{tmf.local_name}|{tmf.target_name}|{fallback_nickname}")
             await self.uploada(
                 interaction=interaction,
                 local_path=local_path,

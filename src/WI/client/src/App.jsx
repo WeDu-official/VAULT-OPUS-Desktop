@@ -206,6 +206,18 @@ export default function App() {
       if (msg.type === 'stdout' || msg.type === 'stderr' || msg.type === 'status') {
         if (msg.type === 'stdout' || msg.type === 'stderr') {
           setTerminalOutput(prev => prev + msg.data);
+
+          // Detect type-mismatch fallback sentinel and show a dialog
+          // Format: [DIALOG:TYPE_MISMATCH]<local_name>|<target_name>|<fallback_nickname>
+          const dialogMatch = (msg.data || '').match(/\[DIALOG:TYPE_MISMATCH\]([^|]+)\|([^|]+)\|(.+)/);
+          if (dialogMatch) {
+            const [, localName, targetName, fallbackNickname] = dialogMatch;
+            showAlert(
+              `The upload for "${localName}" could not be saved as a new version of "${targetName}" because one is a file and the other is a folder.\n\nIt has been automatically re-submitted as a NEW UPLOAD with the auto-generated name:\n\n"${fallbackNickname}"`,
+              '⚠️ Type Mismatch — Converted to New Upload',
+              'warning'
+            );
+          }
         }
 
         // Parse output for queue updates
