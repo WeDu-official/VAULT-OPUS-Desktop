@@ -1,8 +1,8 @@
-// SettingsModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release*
+// SettingsModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R9
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect } from 'react';
 import FolderPicker from './FolderPicker';
-import { Settings, Save, X, ChevronRight, Globe, Shield, Upload, Download, Database, Terminal, FolderOpen } from 'lucide-react';
+import { Settings, Save, X, ChevronRight, Globe, Shield, Upload, Download, Database, Terminal, FolderOpen, Trash } from 'lucide-react';
 
 // ---------- Type Casting Helper for Config Settings ----------
 const castConfigTypes = (base, override) => {
@@ -63,6 +63,7 @@ const ConfigSection = ({ title, data, path = [], onChange, config }) => {
       case 'upload': return <Upload size={16} />;
       case 'download': return <Download size={16} />;
       case 'database': return <Database size={16} />;
+      case 'delete': return <Trash size={16} />;
       default: return <Settings size={16} />;
     }
   };

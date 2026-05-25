@@ -1,13 +1,15 @@
-// SharablesModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release*
+// SharablesModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R9
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect } from 'react';
-import { X, Package, Loader2, Folder, ChevronRight, Search, Home, Database, Download, FileText } from 'lucide-react';
+import { X, Package, Loader2, Folder, ChevronRight, Search, Home, Database, Download, FileText, Lock } from 'lucide-react';
 
 export default function SharablesModal({ isOpen, onClose, onImportPackage }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPath, setCurrentPath] = useState('');
   const [viewMode, setViewMode] = useState('sharables'); // 'sharables', 'browse', 'downloads'
+  // NEW: Password prompt state
+  const [passwordModal, setPasswordModal] = useState({ open: false, path: '', password: '', error: '' });
 
   useEffect(() => {
     if (isOpen) {
@@ -44,7 +46,8 @@ export default function SharablesModal({ isOpen, onClose, onImportPackage }) {
       setCurrentPath(data.current_path);
       setItems(data.items.map(item => ({
         ...item,
-        is_vov: item.name.toLowerCase().endsWith('.vov')
+        is_vov: item.name.toLowerCase().endsWith('.vov'),
+        is_encrypted: item.name.toLowerCase().endsWith('.e.vov')
       })));
     } catch (error) {
       console.error('Error browsing directory:', error);
@@ -57,17 +60,33 @@ export default function SharablesModal({ isOpen, onClose, onImportPackage }) {
     if (item.is_dir) {
       fetchDirectory(item.path);
     } else if (item.is_vov) {
-      handleImport(item.path);
+      if (item.is_encrypted) {
+        handleImport(item.path);  // Only prompt password for encrypted .e.vov
+      } else {
+        doImport(item.path, null);  // Direct import for unencrypted .vov
+      }
     }
   };
-
   const handleImport = async (path) => {
+    // Start with no password
+    setPasswordModal({ open: true, path, password: '', error: '' });
+  };
+
+  const doImport = async (path, password) => {
     try {
       setLoading(true);
-      await onImportPackage(path);
+      await onImportPackage(path, password);  // password will be null for unencrypted
+      setPasswordModal({ open: false, path: '', password: '', error: '' });
       onClose();
     } catch (error) {
       console.error('Import failed:', error);
+      // Only show password retry if it was actually password-protected
+      if (password !== null && error.message && (error.message.includes('401') || error.message.includes('password') || error.message.includes('Incorrect'))) {
+        setPasswordModal(prev => ({ ...prev, error: 'Incorrect password. Try again.', password: '' }));
+      } else {
+        setPasswordModal({ open: false, path: '', password: '', error: '' });
+        alert(`Import failed: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -156,7 +175,14 @@ export default function SharablesModal({ isOpen, onClose, onImportPackage }) {
                     {item.is_dir ? (
                       <Folder className="w-5 h-5 text-[#3bb5ff]/60" />
                     ) : item.is_vov ? (
-                      <Package className="w-5 h-5 text-[#3bb5ff]" />
+                      <div className="relative">
+                        <Package className="w-5 h-5 text-[#3bb5ff]" />
+                        {item.is_encrypted && (
+                          <div className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-[#0a1628]">
+                            <Lock className="w-2 h-2 text-white" />
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <FileText className="w-5 h-5 text-gray-700" />
                     )}
@@ -172,8 +198,9 @@ export default function SharablesModal({ isOpen, onClose, onImportPackage }) {
                   </div>
 
                   {item.is_vov && (
-                    <div className="text-[10px] font-bold text-[#3bb5ff]/40 group-hover:text-[#3bb5ff] transition-colors uppercase tracking-widest px-2 py-1 rounded bg-[#3bb5ff]/5 border border-[#3bb5ff]/10">
-                      Import
+                    <div className="text-[10px] font-bold text-[#3bb5ff]/40 group-hover:text-[#3bb5ff] transition-colors uppercase tracking-widest px-2 py-1 rounded bg-[#3bb5ff]/5 border border-[#3bb5ff]/10 flex items-center gap-1">
+                      {item.is_encrypted && <Lock className="w-3 h-3 text-red-400" />}
+                      {item.is_encrypted ? 'Import' : 'Import'}
                     </div>
                   )}
                   {item.is_dir && <ChevronRight className="w-4 h-4 text-gray-700 group-hover:text-[#3bb5ff] transition-colors" />}
@@ -189,6 +216,60 @@ export default function SharablesModal({ isOpen, onClose, onImportPackage }) {
             Browse and select a .vov package to import it into your workspace.
           </p>
         </div>
+
+        {/* Password Prompt Modal */}
+        {passwordModal.open && (
+          <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+            <div className="bg-[#0a1628] border border-[#1a3a5c] rounded-2xl w-full max-w-md p-6 shadow-2xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Lock className="w-5 h-5 text-red-400" />
+                <h3 className="text-lg font-bold text-white">Password Protected Package</h3>
+              </div>
+              <p className="text-sm text-gray-400 mb-4">This .vov package requires a password to import.</p>
+
+              {passwordModal.error && (
+                <div className="mb-3 p-3 bg-red-900/20 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  {passwordModal.error}
+                </div>
+              )}
+
+              <input
+                type="password"
+                value={passwordModal.password}
+                onChange={(e) => setPasswordModal(prev => ({ ...prev, password: e.target.value }))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && passwordModal.password) {
+                    doImport(passwordModal.path, passwordModal.password);
+                  }
+                }}
+                placeholder="Enter package password..."
+                className="w-full bg-[#060d1a] border border-[#1a3a5c] focus:border-[#3bb5ff] rounded-xl px-4 py-3 text-sm text-white outline-none mb-4"
+                autoFocus
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setPasswordModal({ open: false, path: '', password: '', error: '' })}
+                  className="flex-1 py-3 bg-[#0f1f3a] text-gray-300 rounded-xl font-bold hover:bg-[#1a3a5c] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (passwordModal.password) {
+                      doImport(passwordModal.path, passwordModal.password);
+                    }
+                  }}
+                  disabled={!passwordModal.password || loading}
+                  className="flex-1 py-3 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-xl font-bold disabled:opacity-40 transition-all"
+                >
+                  {loading ? 'Importing...' : 'Import Package'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#volume_manager.py (Karubbiyyun) from the VAULT OPUS PROJECT version 1-beta-release*
+#volume_manager.py (Karubbiyyun) from the VAULT OPUS PROJECT version 1-R9
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -13,15 +13,16 @@ import os
 import json
 import base64
 import secrets
-import zipfile
-import subprocess
+import pyzipper    # <-- REPLACED: pip install pyzipper
+import shutil
 import sys
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Tuple, Optional
 
 # Constants
-SRC_DIR = Path(__file__).resolve().parent # The 'src' folder containing this file
+SRC_DIR = Path(__file__).resolve().parent
 VOLUMES_CONFIGS_DIR = SRC_DIR / "VOLUMES_CONFIGS"
 DATABASES_DIR = SRC_DIR / "DATABASES"
 SHARABLES_DIR = SRC_DIR / "SHARABLES"
@@ -35,8 +36,8 @@ def ensure_dirs():
 
 def validate_volume_name(name: str) -> str:
     """
-    Validates the volume name. 
-    Rejects exactly '.db'. 
+    Validates the volume name.
+    Rejects exactly '.db'.
     Strips '.db' suffix for the stem.
     Ensures only the filename stem is returned, even if a path is provided.
     """
@@ -62,8 +63,6 @@ def create_volume_config(volume_name: str) -> Path:
     stem = validate_volume_name(volume_name)
     cfg_path = get_config_path(stem)
     
-    # Generate 32-character random salt (base64 encoded 24 bytes gives ~32 chars, or 32 bytes gives 44 chars)
-    # User said "32 characters long salt". secrets.token_urlsafe(24) gives 32 chars.
     salt = secrets.token_urlsafe(24) 
     
     config = {
@@ -105,16 +104,16 @@ def get_volume_salt_info(db_path: str) -> Tuple[bytes, bytes]:
         config = json.load(f)
     
     salt_str = config.get("salt")
-    # token_urlsafe doesn't need base64 decode if we just use it as bytes, 
-    # but HKDF usually takes raw bytes. 
     salt_bytes = salt_str.encode('utf-8')
     info_bytes = config.get("info", HARDCODED_INFO).encode('utf-8')
     
     return salt_bytes, info_bytes
 
-def make_package(volume_name: str) -> Path:
+def make_package(volume_name: str, password: Optional[str] = None) -> Path:
     """
     Packages a volume and its config into a .vov file.
+    If password is provided, creates a password-protected ZIP (AES-256).
+    Encrypted packages use .e.vov extension to indicate password protection.
     """
     ensure_dirs()
     stem = validate_volume_name(volume_name)
@@ -126,39 +125,87 @@ def make_package(volume_name: str) -> Path:
     if not cfg_path.exists():
         raise FileNotFoundError(f"Config file not found: {cfg_path}")
     
-    vov_filename = f"{stem}.vov"
+    vov_filename = f"{stem}.e.vov" if password else f"{stem}.vov"
     vov_path = SHARABLES_DIR / vov_filename
     
     # Collision Handling for .vov
     if vov_path.exists():
         timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
-        vov_path = SHARABLES_DIR / f"{stem}_{timestamp}.vov"
+        vov_path = SHARABLES_DIR / f"{stem}_{timestamp}.vov" if not password else SHARABLES_DIR / f"{stem}_{timestamp}.e.vov"
     
-    with zipfile.ZipFile(vov_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        zipf.write(db_path, arcname=f"{stem}.db")
-        zipf.write(cfg_path, arcname=f"{stem}_config.json")
+    # Files to include and their internal names
+    src_files = [str(db_path), str(cfg_path)]
+    arc_names = [f"{stem}.db", f"{stem}_config.json"]
+    
+    if password:
+        # AES-256 encryption with pyzipper
+        with pyzipper.AESZipFile(
+            str(vov_path), 'w',
+            compression=pyzipper.ZIP_DEFLATED,
+            encryption=pyzipper.WZ_AES
+        ) as zf:
+            zf.setpassword(password.encode('utf-8'))
+            zf.setencryption(pyzipper.WZ_AES, nbits=256)
+            for src, arc_name in zip(src_files, arc_names):
+                zf.write(src, arc_name)
+    else:
+        # No password - standard ZIP
+        with pyzipper.AESZipFile(
+            str(vov_path), 'w',
+            compression=pyzipper.ZIP_DEFLATED
+        ) as zf:
+            for src, arc_name in zip(src_files, arc_names):
+                zf.write(src, arc_name)
     
     return vov_path
 
-def open_package(vov_path_str: str) -> Tuple[str, str]:
+def open_package(vov_path_str: str, password: Optional[str] = None) -> Tuple[str, str]:
     """
     Unzips a .vov file and imports the volume and config.
     Handles collisions with timestamp suffix.
+    If password is provided, decrypts the ZIP.
+    Auto-detects .e.vov extension.
+    Raises RuntimeError if password is wrong.
     """
     ensure_dirs()
     vov_path = Path(vov_path_str)
+    
+    # Auto-detect .e.vov vs .vov extension
+    if not vov_path.exists():
+        if vov_path_str.lower().endswith('.vov') and not vov_path_str.lower().endswith('.e.vov'):
+            alt_path = vov_path.with_suffix('').with_suffix('.e.vov')
+            if alt_path.exists():
+                vov_path = alt_path
+        elif not vov_path_str.lower().endswith('.vov'):
+            for ext in ['.vov', '.e.vov']:
+                alt = Path(vov_path_str + ext)
+                if alt.exists():
+                    vov_path = alt
+                    break
+    
     if not vov_path.exists():
         raise FileNotFoundError(f"Package not found: {vov_path}")
     
-    with zipfile.ZipFile(vov_path, 'r') as zipf:
-        namelist = zipf.namelist()
-        db_file = next((f for f in namelist if f.endswith(".db")), None)
-        cfg_file = next((f for f in namelist if f.endswith("_config.json")), None)
+    # Create temp extraction dir
+    import tempfile
+    temp_dir = tempfile.mkdtemp(prefix="vov_extract_")
+    
+    try:
+        # Extract with pyzipper
+        with pyzipper.AESZipFile(str(vov_path), 'r') as zf:
+            if password:
+                zf.setpassword(password.encode('utf-8'))
+            zf.extractall(temp_dir)
+        
+        # Find extracted files
+        extracted_files = list(Path(temp_dir).iterdir())
+        db_file = next((f for f in extracted_files if f.suffix == ".db"), None)
+        cfg_file = next((f for f in extracted_files if f.name.endswith("_config.json")), None)
         
         if not db_file or not cfg_file:
             raise ValueError("Invalid .vov package: Missing .db or _config.json")
         
-        original_stem = Path(db_file).stem
+        original_stem = db_file.stem
         target_stem = original_stem
         
         db_target = DATABASES_DIR / f"{target_stem}.db"
@@ -171,12 +218,20 @@ def open_package(vov_path_str: str) -> Tuple[str, str]:
             db_target = DATABASES_DIR / f"{target_stem}.db"
             cfg_target = VOLUMES_CONFIGS_DIR / f"{target_stem}_config.json"
         
-        # Extract and rename if necessary
-        with open(db_target, "wb") as f:
-            f.write(zipf.read(db_file))
+        # Move files to final location
+        shutil.move(str(db_file), str(db_target))
+        shutil.move(str(cfg_file), str(cfg_target))
         
-        with open(cfg_target, "wb") as f:
-            f.write(zipf.read(cfg_file))
+    except pyzipper.BadZipFile:
+        raise RuntimeError("Invalid or corrupted .vov package")
+    except RuntimeError as e:
+        if "Bad password" in str(e) or "password required" in str(e).lower():
+            raise RuntimeError("Incorrect password or password required for this package")
+        raise
+    
+    finally:
+        # Clean up temp dir
+        shutil.rmtree(temp_dir, ignore_errors=True)
             
     return str(db_target), str(cfg_target)
 

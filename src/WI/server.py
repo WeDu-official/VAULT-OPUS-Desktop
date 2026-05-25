@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#server.py (Sandalphon) from the VAULT OPUS PROJECT version 1-beta-release*
+#server.py (Sandalphon) from the VAULT OPUS PROJECT version 1-R9
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -411,7 +411,7 @@ async def rename_db(old_name: str = Body(..., embed=True), new_name: str = Body(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/dbs/share")
-async def share_db(db_name: str = Body(..., embed=True)):
+async def share_db(db_name: str = Body(..., embed=True), password: Optional[str] = Body(None, embed=True)):
     """Packages a volume into a .vov file."""
     if not db_name.endswith('.db'): db_name += '.db'
     db_path = os.path.join(DB_DIR, db_name)
@@ -420,25 +420,23 @@ async def share_db(db_name: str = Body(..., embed=True)):
         raise HTTPException(status_code=404, detail="Database not found")
 
     try:
-        package_path = volume_manager.make_package(db_path)
+        package_path = volume_manager.make_package(db_path, password)
         return {"status": "success", "package_path": package_path, "filename": os.path.basename(package_path)}
     except Exception as e:
         logger.error(f"Error sharing volume: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 @app.post("/api/dbs/import")
-async def import_db(vov_path: str = Body(..., embed=True)):
+async def import_db(vov_path: str = Body(..., embed=True), password: Optional[str] = Body(None, embed=True)):
     """Opens a .vov package and imports the volume."""
     if not os.path.exists(vov_path):
         raise HTTPException(status_code=404, detail="Package file not found")
 
     try:
-        db_path, cfg_path = volume_manager.open_package(vov_path)
+        db_path, cfg_path = volume_manager.open_package(vov_path, password)
         return {"status": "success", "db_path": db_path, "db_name": os.path.basename(db_path)}
     except Exception as e:
         logger.error(f"Error importing volume: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 @app.get("/api/dbs/list_sharables")
 async def list_sharables():
     """Lists files in the SHARABLES directory."""
@@ -451,13 +449,16 @@ async def list_sharables():
             full_path = os.path.join(volume_manager.SHARABLES_DIR, item)
             is_dir = os.path.isdir(full_path)
             is_vov = item.lower().endswith('.vov')
+            # Detect encrypted: ends with .e.vov
+            is_encrypted = item.lower().endswith('.e.vov')
 
             if is_dir or is_vov:
                 items.append({
                     "name": item,
                     "path": full_path,
                     "is_dir": is_dir,
-                    "is_vov": is_vov
+                    "is_vov": is_vov,
+                    "is_encrypted": is_encrypted
                 })
 
         # Sort folders first, then files

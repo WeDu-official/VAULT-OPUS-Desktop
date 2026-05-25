@@ -1,4 +1,4 @@
-// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-beta-release*
+// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R9
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
@@ -43,7 +43,8 @@ export default function App() {
   const [promptQueue, setPromptQueue] = useState([]);
   const [showVolumeModal, setShowVolumeModal] = useState(false);
   const [pendingUpload, setPendingUpload] = useState(null);
-
+  const [showSharePasswordModal, setShowSharePasswordModal] = useState(false);
+  const [dbToShare, setDbToShare] = useState('');
   // Terminal controls
   const [showTerminal, setShowTerminal] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
@@ -892,12 +893,21 @@ export default function App() {
     }
   };
 
-  const handleShareVolume = async (dbName) => {
+  const handleShareVolume = (dbName) => {
+    setDbToShare(dbName);
+    setShowSharePasswordModal(true);
+  };
+
+  const executeShare = async (password = null) => {
+    setShowSharePasswordModal(false);
     try {
+      const body = { db_name: dbToShare };
+      if (password) body.password = password;
+
       const res = await fetch('http://localhost:8000/api/dbs/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ db_name: dbName })
+        body: JSON.stringify(body)
       });
 
       if (!res.ok) {
@@ -906,9 +916,10 @@ export default function App() {
       }
 
       const data = await res.json();
+      const lockIcon = password ? '🔒 ' : '';
       showAlert(
-        `Volume '${dbName}' packaged successfully!\n📦 Package: ${data.filename}\n📍 Stored in src/SHARABLES folder.`,
-        'Volume Packaged',
+        `Volume '${dbToShare}' packaged successfully!\n${lockIcon}📦 Package: ${data.filename}\n📍 Stored in src/SHARABLES folder.${password ? '\n\nThis package is password-protected.' : ''}`,
+        password ? '🔒 Volume Packaged' : 'Volume Packaged',
         'success',
         {
           label: '📁 Open src/SHARABLES Folder',
@@ -917,9 +928,10 @@ export default function App() {
       );
     } catch (e) {
       showAlert(e.message, 'Share Error', 'error');
+    } finally {
+      setDbToShare('');
     }
   };
-
   const handleOpenSharables = async () => {
     try {
       const res = await fetch('http://localhost:8000/api/dbs/open_sharables', {
@@ -937,13 +949,17 @@ export default function App() {
     }
   };
 
-  const handleImportPackage = async (vovPath) => {
+  const handleImportPackage = async (vovPath, password = null) => {
     try {
+      const body = { vov_path: vovPath };
+      if (password) body.password = password;
+
       const res = await fetch('http://localhost:8000/api/dbs/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vov_path: vovPath })
+        body: JSON.stringify(body)
       });
+
 
       if (!res.ok) {
         const err = await res.json();
@@ -1323,6 +1339,47 @@ export default function App() {
           onConfirm={executeNuke}
         />
       )}
+      {/* Share Password Modal */}
+      {showSharePasswordModal && (
+        <Modal isOpen={true} onClose={() => { setShowSharePasswordModal(false); setDbToShare(''); }} title="Share Volume" size="small">
+          <div className="space-y-4">
+            <p className="text-sm text-gray-300">Choose how to package <b>{dbToShare}</b>:</p>
+
+            <button
+              onClick={() => executeShare(null)}
+              className="w-full py-3 bg-[#0f1f3a] border border-[#1a3a5c] text-gray-200 rounded-xl font-bold hover:bg-[#1a3a5c] transition-all"
+            >
+              📦 Passwordless Package
+            </button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#1a3a5c]"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-[#0a1628] text-gray-500">or</span>
+              </div>
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); const pwd = e.target.password.value; if (pwd) executeShare(pwd); }} className="space-y-3">
+              <input
+                name="password"
+                type="password"
+                placeholder="Enter password..."
+                className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm text-white outline-none focus:border-[#3bb5ff]"
+                autoFocus
+              />
+              <button
+                type="submit"
+                className="w-full py-3 bg-gradient-to-r from-red-600 to-red-400 text-white rounded-xl font-bold hover:brightness-110 transition-all"
+              >
+                🔒 Password-Protected Package
+              </button>
+            </form>
+          </div>
+        </Modal>
+      )}
+
       {/* First Time Setup Modal */}
       <Modal isOpen={showSetupModal} onClose={() => { }} title="First Time Setup" size="medium">
         <div className="space-y-4">
