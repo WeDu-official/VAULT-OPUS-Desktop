@@ -6,12 +6,12 @@
   [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
   [![Node.js](https://img.shields.io/badge/node.js-LTS-green.svg)](https://nodejs.org/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-  [![Status: Beta](https://img.shields.io/badge/Status-Beta-orange.svg)](#)
+  [![Status: Stable](https://img.shields.io/badge/status-stable-success.svg)](#)
 </div>
 
 ---
 
-## 📌 Version of VAULT OPUS (DESKTOP) in this readme is **1-beta-release-7**
+## 📌 Version of VAULT OPUS (DESKTOP) in this readme is **1-R9**
 
 ## WANNA DO PRE INSTALL SETUP? <a href="https://youtu.be/i9rnTi9l2ww">
   <img src="https://img.youtube.com/vi/i9rnTi9l2ww/maxresdefault.jpg" width="500">
