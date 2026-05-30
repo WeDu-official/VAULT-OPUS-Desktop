@@ -56,27 +56,6 @@ IF YOU GOT ANY INSTALLATION ISSUES OR QUESTIONS EVEN IF SIMPLE CONTACT [ME](mail
 
 ---
 
-## 🛠 Technical Requirements
-
-### Python Stack (Core)
-| Dependency | Version | Purpose |
-| :--- | :--- | :--- |
-| **discord.py** | `^2.5.2` | Discord API Connection |
-| **FastAPI** | `Latest` | Web Interface Backend |
-| **PowerDB** | `^2.2.5.3` | High-performance metadata storage |
-| **Cryptography** | `Latest` | File security & Zero-Knowledge |
-| **Uvicorn** | `Latest` | ASGI server for the Web GUI |
-
-### Frontend Stack (UI)
-| Technology | Version | Purpose |
-| :--- | :--- | :--- |
-| **React** | `18.x / 19.x` | UI Framework |
-| **Vite** | `Latest` | Build Tool & Hot Reload |
-| **Tailwind CSS** | `4.0+` | Modern Styling |
-| **Lucide** | `Latest` | Premium Iconography |
-
----
-
 ## 📋 System Requirements
 
 - **Python**: `3.10` or higher (**3.11 recommended** for best compatibility).
@@ -94,7 +73,7 @@ Vault Opus is designed to be **98% platform-independent**. It works seamlessly o
 - 🍎 **macOS** (Manual build supported).
 
 > [!TIP]
-> **Android User?** While the web interface works in mobile browsers, we have a dedicated native Android repository here: **[VAULT-OPUS-Android](https://github.com/WeDu-official/VAULT-OPUS-Android)**.
+> **Android User?** we have a dedicated native Android repository here: **[VAULT-OPUS-Android](https://github.com/WeDu-official/VAULT-OPUS-Android)**.
 
 ---
 
