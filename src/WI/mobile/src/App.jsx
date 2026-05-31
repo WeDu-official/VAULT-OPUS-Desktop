@@ -1,4 +1,4 @@
-// App.jsx (FOR MOBILE) from the VAULT OPUS PROJECT version 1-R9
+// App.jsx (FOR MOBILE) from the VAULT OPUS PROJECT version 1-R10
 // ==================== FULL MOBILE GUI App.jsx(NOT ANDROID FUNCTIONAL...) (Mirror of Desktop) ====================
 // IF YOU WANT AN ANDROID FUNCTIONAL VERSION OF IT GO TO https://github.com/WeDu-official/VAULT-OPUS-Android
 import React, { useState, useEffect, useRef } from 'react';
@@ -416,10 +416,154 @@ function SettingsTabContent({ config, fetchConfig, showToast }) {
   );
 }
 
+// ---------- Onboarding Terms & Markdown Renderer ----------
+const WELCOME_YOUTUBE_VIDEO_URL = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Swap with your actual YouTube setup guide link
+
+const TERMS_AND_CONDITIONS_MARKDOWN = `# VAULT OPUS — TERMS OF SERVICE & PRIVACY POLICY
+
+**Version 1-R10 | Effective Date: 2026**
+
+Welcome to VAULT OPUS, an open-source, self-hosted cloud storage system created by WeDu. By using this software, you agree to the following terms. If you do not agree, do not use the application.
+
+## 1. Acceptance of Terms
+By downloading, installing, accessing, or using VAULT OPUS in any form (Desktop Client, Mobile Web Interface, CLI, or Android Application), you acknowledge that you have read, understood, and agree to be bound by these Terms of Service and Privacy Policy in their entirety.
+
+## 2. Nature of the Software
+- **Open Source**: VAULT OPUS is released under the **MIT License**. You are free to use, modify, merge, publish, distribute, sublicense, and/or sell copies of this software, provided the original copyright notice and permission notice are included.
+- **Self-Hosted**: VAULT OPUS runs entirely on your own infrastructure. There are no centralized servers operated by WeDu. All data processing, storage orchestration, and encryption happen locally on your machine.
+- **No Accounts or Registration**: VAULT OPUS does not require you to create an account, provide personal information, or register with any service operated by WeDu.
+
+## 3. Discord Integration & Third-Party Compliance
+- **Discord as Storage Backend**: VAULT OPUS uses Discord's platform as a file storage backend by uploading encrypted file chunks to Discord channels via your personal Discord Bot Token. This is a core architectural choice of the software.
+- **Your Responsibility**: You are solely and entirely responsible for ensuring that your use of VAULT OPUS complies with **Discord's Terms of Service** ([https://discord.com/terms](https://discord.com/terms)) and **Discord's Community Guidelines**. WeDu has no control over Discord's policies and is not responsible for any actions Discord may take against your account.
+- **Risk of Account Action**: Discord may, at its sole discretion, suspend, terminate, or restrict your Discord account or bot if your usage violates their terms. This includes but is not limited to excessive API usage, storage abuse, or uploading prohibited content. WeDu bears no liability for any such actions taken by Discord.
+- **Bot Token Security**: Your Discord Bot Token is stored locally in your \`config.json\` file. Never share this token with anyone. If compromised, regenerate it immediately via the Discord Developer Portal.
+
+## 4. Data Privacy & No Data Collection
+- **Zero Telemetry**: VAULT OPUS collects absolutely no usage data, analytics, telemetry, crash reports, or personal information. Nothing is transmitted to WeDu or any third party.
+- **Local-Only Operation**: All configuration files (\`config.json\`), databases (\`.db\` volumes), encryption keys, and volume configs are stored exclusively on your local filesystem. WeDu never has access to any of your data.
+- **No Network Calls to WeDu**: The software makes zero network requests to WeDu's servers. The only external network communication is between your machine and the Discord API, initiated entirely by your own Bot Token.
+
+## 5. Encryption & Security
+- **Encryption Architecture**: VAULT OPUS employs a two-layer encryption system: **Argon2id** (memory-hard key derivation) for seed normalization followed by **HKDF-SHA256** for final key derivation, producing **Fernet (AES-128-CBC + HMAC-SHA256)** encrypted data.
+- **Per-Volume Encryption**: Each volume has its own unique cryptographic salt stored in a separate config file. Encryption keys are derived from your chosen seed combined with this volume-specific salt, ensuring complete isolation between volumes.
+- **Your Keys, Your Responsibility**: WeDu does not store, manage, or have access to any of your encryption seeds, keys, or passwords. If you lose your encryption seed or volume configuration file, your data is irrecoverable. There is no recovery mechanism, no master key, and no backdoor.
+- **No Warranty on Security**: While VAULT OPUS uses industry-standard cryptographic libraries (\`cryptography\`, \`argon2-cffi\`), the software is provided without warranty regarding the absolute security of your data. You use the encryption features at your own risk.
+
+## 6. Volume Sharing & Packages
+- **Volume Packages (.vov)**: VAULT OPUS allows you to export volumes as \`.vov\` package files for sharing with others. These packages contain your database and encryption configuration.
+- **Password-Protected Packages (.e.vov)**: You may optionally protect shared packages with AES-256 encryption via password. Unprotected packages (.vov) expose your volume database and encryption config to anyone who receives the file.
+- **Sharing Risks**: When you share a volume package, the recipient gains full access to the data within that volume, including the encryption keys needed to decrypt files. Only share volumes with trusted parties. WeDu is not responsible for any unauthorized access resulting from shared packages.
+
+## 7. Data Loss & Liability
+- **No Guarantee of Data Integrity**: VAULT OPUS is provided "AS IS" without warranty of any kind. WeDu makes no guarantees that your data will remain intact, accessible, or uncorrupted.
+- **Causes of Data Loss May Include**:
+- Discord API changes, outages, or account suspensions
+- Corruption of local SQLite databases or volume config files
+- Loss or misconfiguration of encryption seeds/keys
+- Software bugs, hardware failures, or power loss during uploads
+- Accidental deletion of volumes, chunks, or configuration files
+- **No Recovery Service**: WeDu does not offer any data recovery service. You are solely responsible for maintaining backups of your databases, volume configs, and encryption seeds.
+- **Limitation of Liability**: To the maximum extent permitted by law, WeDu and its contributors shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of data, loss of profits, or business interruption arising from the use of this software.
+
+## 8. Prohibited Uses
+You agree NOT to use VAULT OPUS to:
+- Store, upload, distribute, or facilitate access to illegal content, including but not limited to child exploitation material, malware, ransomware, or stolen data
+- Store or distribute copyrighted material without proper authorization from the rights holder
+- Abuse Discord's infrastructure through excessive automated requests, rate limit circumvention, or storage exploitation beyond reasonable personal use
+- Harass, threaten, or harm any individual or group
+- Circumvent or attempt to circumvent any security measures of Discord or any third-party service
+- Use the software for any purpose that violates applicable local, national, or international law
+
+## 9. Software Updates & Changes
+- **No Automatic Updates**: VAULT OPUS does not automatically update itself. You choose when and whether to update to newer versions.
+- **Breaking Changes**: Future versions may introduce changes to database schemas, encryption methods, or file formats. While we strive for backward compatibility, it is not guaranteed. Always backup your data before updating.
+- **Terms Updates**: We reserve the right to modify these Terms at any time. Updated terms will be included in new releases. Your continued use of the software after updating constitutes acceptance of revised terms.
+
+## 10. Open Source License
+This software is licensed under the **MIT License**:
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## 11. Contact
+- **GitHub**: https://github.com/WeDu-official
+- **Project**: VAULT OPUS (WeDu)
+
+By clicking "I Accept the Terms and Conditions" you confirm that you have read, understood, and agree to all of the above.`;
+
+function parseInlineMarkdown(text) {
+  const parts = [];
+  const regex = /(\*\*.*?\*\*|`.*?`|\[.*?\]\(.*?\))/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    const index = match.index;
+    const matchedText = match[0];
+
+    if (index > lastIndex) {
+      parts.push(text.substring(lastIndex, index));
+    }
+
+    if (matchedText.startsWith('**') && matchedText.endsWith('**')) {
+      parts.push(<strong key={index} className="font-extrabold text-white">{matchedText.slice(2, -2)}</strong>);
+    } else if (matchedText.startsWith('`') && matchedText.endsWith('`')) {
+      parts.push(<code key={index} className="bg-[#060d1a] border border-[#1a3a5c] rounded px-1.5 py-0.5 font-mono text-xs text-amber-400">{matchedText.slice(1, -1)}</code>);
+    } else if (matchedText.startsWith('[') && matchedText.includes('](')) {
+      const closingBracket = matchedText.indexOf(']');
+      const label = matchedText.slice(1, closingBracket);
+      const url = matchedText.slice(closingBracket + 2, -1);
+      parts.push(<a key={index} href={url} target="_blank" rel="noopener noreferrer" className="text-[#3bb5ff] hover:underline font-bold">{label}</a>);
+    }
+
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+}
+
+function MiniMarkdown({ content }) {
+  const lines = content.split('\n');
+  return (
+    <div className="space-y-4 text-sm text-gray-300 leading-relaxed font-sans text-left">
+      {lines.map((line, idx) => {
+        if (line.startsWith('# ')) {
+          return <h1 key={idx} className="text-xl font-black text-white mt-6 mb-3 border-b border-[#1a3a5c] pb-2 uppercase tracking-wide">{line.slice(2)}</h1>;
+        }
+        if (line.startsWith('## ')) {
+          return <h2 key={idx} className="text-base font-bold text-[#3bb5ff] mt-5 mb-2 uppercase tracking-wider">{line.slice(3)}</h2>;
+        }
+        if (line.startsWith('### ')) {
+          return <h3 key={idx} className="text-sm font-bold text-white mt-4 mb-2">{line.slice(4)}</h3>;
+        }
+        if (line.trim().startsWith('- ')) {
+          const text = line.trim().slice(2);
+          return (
+            <div key={idx} className="flex items-start gap-2.5 my-1.5 pl-1">
+              <span className="text-[#3bb5ff] mt-1.5 text-[8px]">•</span>
+              <span className="text-gray-300 text-xs flex-1">{parseInlineMarkdown(text)}</span>
+            </div>
+          );
+        }
+        if (line.trim() === '') {
+          return <div key={idx} className="h-1" />;
+        }
+        return <p key={idx} className="text-xs text-gray-400 font-medium">{parseInlineMarkdown(line)}</p>;
+      })}
+    </div>
+  );
+}
+
 // ---------- Main App ----------
 export default function App() {
   // State
   const [tab, setTab] = useState('explorer');
+  const [showTerms, setShowTerms] = useState(false);
+  const [showWelcomeVideo, setShowWelcomeVideo] = useState(false);
   const [dbs, setDbs] = useState([]);
   const [selectedDb, setSelectedDb] = useState(localStorage.getItem('mob_selectedDb') || '');
   const [tree, setTree] = useState(null);
@@ -640,6 +784,7 @@ export default function App() {
       setTree(null);
     }
   };
+
   const fetchSetupStatus = async () => {
     try {
       const r = await fetch('/api/setup_status');
@@ -652,7 +797,32 @@ export default function App() {
       if (data.setup_complete === 0) setShowSetupModal(true);
     } catch (e) { console.error('Setup status check failed', e); }
   };
-  useEffect(() => { fetchDbs(); fetchConfig(); fetchRecentVolumes(); fetchSetupStatus(); }, []);
+
+  const fetchTermsStatus = async () => {
+    try {
+      const r = await fetch('/api/terms_status');
+      const data = await r.json();
+      if (data.terms_accepted === 0) {
+        setShowTerms(true);
+      }
+    } catch (e) {
+      console.error('Failed to fetch terms status', e);
+    }
+  };
+
+  const handleAcceptTerms = async () => {
+    try {
+      const res = await fetch('/api/accept_terms', { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to update terms acceptance');
+      setShowTerms(false);
+      setShowWelcomeVideo(true);
+    } catch (e) {
+      showToast('Error saving terms acceptance. Please try again.', 'error');
+    }
+  };
+
+  useEffect(() => { fetchDbs(); fetchConfig(); fetchRecentVolumes(); fetchSetupStatus(); fetchTermsStatus(); }, []);
+
   useEffect(() => {
     if (selectedDb) {
       localStorage.setItem('mob_selectedDb', selectedDb);
@@ -1221,9 +1391,10 @@ export default function App() {
   };
 
   // Modify Modal (Move / Copy & Rename)
-  const ModifyModalContent = ({ type, item, onConfirm }) => {
+  const ModifyModalContent = ({ type, items, item, onConfirm }) => {
+    const currentItems = items || (item ? [item] : []);
     const [destination, setDestination] = useState('.');
-    const [newName, setNewName] = useState(item.displayName);
+    const [newName, setNewName] = useState(currentItems.length === 1 ? currentItems[0].displayName : '');
     const [copyMode, setCopyMode] = useState(false);
     const [nameMode, setNameMode] = useState('D');
     const [nameCheck, setNameCheck] = useState(true);
@@ -1241,21 +1412,20 @@ export default function App() {
       if (type === 'move') {
         onConfirm({
           type: 'move',
-          src: item.itemid || (currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`),
+          items: currentItems,
           dst: destination,
           copyMode,
           nameCheck,
-          srcIdBased: !!item.itemid,
           dstIdBased: false
         });
       } else {
         onConfirm({
           type: 'rename',
-          item: item.itemid || (currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`),
+          item: currentItems[0],
           newName,
           nameMode,
           nameCheck,
-          idBased: !!item.itemid
+          idBased: !!currentItems[0].itemid
         });
       }
     };
@@ -1263,8 +1433,10 @@ export default function App() {
     return (
       <div className="space-y-4">
         <div className="bg-[#060d1a] p-3 rounded-lg border border-[#1a3a5c]">
-          <p className="text-xs text-gray-500">Source:</p>
-          <p className="text-sm text-white truncate">{item.displayName}</p>
+          <p className="text-xs text-gray-500">{currentItems.length > 1 ? `Source Items (${currentItems.length})` : 'Source:'}</p>
+          <p className="text-sm text-white truncate">
+            {currentItems.length > 1 ? `${currentItems.length} items selected` : currentItems[0].displayName}
+          </p>
         </div>
         {type === 'move' ? (
           <>
@@ -1688,17 +1860,29 @@ export default function App() {
   };
 
 
-  const ItemOptionsMenu = ({ item }) => (
-    <div className="space-y-2">
-      <button onClick={() => { setBottomSheet(null); setModal({ title: 'New Version', content: <NewVersionUploadModalContent targetItemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} onUpload={() => { }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.plus} Upload New Version</button>
-      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Versions', content: <SeeVersionsModalContent itemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} onClose={() => setModal(null)} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.clock} See Versions</button>
-      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Download Version', content: <DownloadVersionModalContent itemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} item={item} onDownload={(args) => { if (args) { const isEncrypted = item && (item.encryption === 'not_automatic' || item.encryption_mode === 'not_automatic'); if (isEncrypted) { setModal({ title: 'Passwords Required', content: <PasswordPromptModalContent items={[{ id: item.itemid, name: item.displayName, hash: item.password_seed_hash || '' }]} onConfirm={(passwords) => { setModal(null); const finalArgs = [...args]; if (Object.keys(passwords).length) { finalArgs.push('--passwords', JSON.stringify(passwords)); } runCmd(finalArgs, item.displayName, 'download'); showToast('Download queued', 'success'); }} /> }); } else { runCmd(args, item.displayName, 'download'); setModal(null); showToast('Download queued', 'success'); } } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.download} Download Version</button>
-      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Move / Copy', content: <ModifyModalContent type="move" item={item} onConfirm={(data) => { if (data) { const args = ['modify', data.type]; if (data.type === 'move') { args.push(data.src, data.dst); if (data.copyMode) args.push('--copy'); if (data.srcIdBased) args.push('--src_id_based'); if (data.dstIdBased) args.push('--dst_id_based'); } else { args.push(data.item, data.newName); if (data.nameMode !== 'D') args.push('--mode', data.nameMode); } args.push('-db', selectedDb); if (data.type !== 'move' && data.idBased) args.push('--id_based'); if (!data.nameCheck) args.push('--no_name_check'); runCmd(args, item.displayName, data.type); setModal(null); showToast(`${data.type} queued`, 'success'); } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.move} Move / Copy</button>
-      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Rename', content: <ModifyModalContent type="rename" item={item} onConfirm={(data) => { if (data) { const args = ['modify', data.type]; args.push(data.item, data.newName); if (data.nameMode !== 'D') args.push('--mode', data.nameMode); args.push('-db', selectedDb); if (data.idBased) args.push('--id_based'); if (!data.nameCheck) args.push('--no_name_check'); runCmd(args, item.displayName, 'rename'); setModal(null); showToast('Rename queued', 'success'); } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.rename} Rename</button>
-      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Delete Item', content: <DeleteModalContent singleItem={item} onConfirm={(opts) => { const a = ['delete']; if (item.itemid) a.push(item.itemid, '--id_based'); else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`); a.push('-db', selectedDb, '--skip_confirmation', 'yes'); if (opts.type === 'hard') a.push('--hard'); if (opts.scope === 'all') a.push('--all_versions', 'yes'); else if (opts.scope === 'specific' && opts.version) a.push('--version', opts.version); else if (opts.scope === 'range' && opts.startVersion && opts.endVersion) a.push('--st_version', opts.startVersion, '--en_version', opts.endVersion); runCmd(a, item.displayName, 'delete'); setModal(null); clearSelection(); showToast('Delete queued', 'success'); }} onCancel={() => setModal(null)} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/20 border border-red-900/30 rounded-xl text-sm text-red-400 btn-touch">{Ico.trash} Delete</button>
-      <button onClick={() => { setBottomSheet(null); setModal({ title: 'Full Name Metadata', content: <FullNameModalContent item={item} onClose={() => setModal(null)} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.info} Show Full Name</button>
-    </div>
-  );
+  const ItemOptionsMenu = ({ items }) => {
+    const isSingle = items.length === 1;
+    const item = isSingle ? items[0] : null;
+    return (
+      <div className="space-y-2">
+        {isSingle && (
+          <>
+            <button onClick={() => { setBottomSheet(null); setModal({ title: 'New Version', content: <NewVersionUploadModalContent targetItemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} onUpload={() => { }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.plus} Upload New Version</button>
+            <button onClick={() => { setBottomSheet(null); setModal({ title: 'Versions', content: <SeeVersionsModalContent itemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} onClose={() => setModal(null)} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.clock} See Versions</button>
+            <button onClick={() => { setBottomSheet(null); setModal({ title: 'Download Version', content: <DownloadVersionModalContent itemPath={currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`} item={item} onDownload={(args) => { if (args) { const isEncrypted = item && (item.encryption === 'not_automatic' || item.encryption_mode === 'not_automatic'); if (isEncrypted) { setModal({ title: 'Passwords Required', content: <PasswordPromptModalContent items={[{ id: item.itemid, name: item.displayName, hash: item.password_seed_hash || '' }]} onConfirm={(passwords) => { setModal(null); const finalArgs = [...args]; if (Object.keys(passwords).length) { finalArgs.push('--passwords', JSON.stringify(passwords)); } runCmd(finalArgs, item.displayName, 'download'); showToast('Download queued', 'success'); }} /> }); } else { runCmd(args, item.displayName, 'download'); setModal(null); showToast('Download queued', 'success'); } } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.download} Download Version</button>
+          </>
+        )}
+        <button onClick={() => { setBottomSheet(null); setModal({ title: 'Move / Copy', content: <ModifyModalContent type="move" items={items} onConfirm={(data) => { if (data) { const argsBase = ['modify', data.type]; const itemsToProcess = data.items || []; itemsToProcess.forEach(it => { const args = [...argsBase]; const itId = it.itemid || (currentPath === '.' ? it.displayName : `${currentPath}/${it.displayName}`); args.push(itId, data.dst); if (data.copyMode) args.push('--copy'); if (it.itemid) args.push('--src_id_based'); if (data.dstIdBased) args.push('--dst_id_based'); args.push('-db', selectedDb); if (!data.nameCheck) args.push('--no_name_check'); runCmd(args, it.displayName, data.type); }); setModal(null); showToast(`${data.type} queued`, 'success'); } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.move} Move / Copy</button>
+        {isSingle && (
+          <>
+            <button onClick={() => { setBottomSheet(null); setModal({ title: 'Rename', content: <ModifyModalContent type="rename" items={items} onConfirm={(data) => { if (data) { const args = ['modify', data.type]; args.push(data.item.itemid || (currentPath === '.' ? data.item.displayName : `${currentPath}/${data.item.displayName}`), data.newName); if (data.nameMode !== 'D') args.push('--mode', data.nameMode); args.push('-db', selectedDb); if (data.idBased) args.push('--id_based'); if (!data.nameCheck) args.push('--no_name_check'); runCmd(args, data.item.displayName, 'rename'); setModal(null); showToast('Rename queued', 'success'); } else setModal(null); }} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.rename} Rename</button>
+            <button onClick={() => { setBottomSheet(null); setModal({ title: 'Delete Item', content: <DeleteModalContent singleItem={item} onConfirm={(opts) => { const a = ['delete']; if (item.itemid) a.push(item.itemid, '--id_based'); else a.push(currentPath === '.' ? item.displayName : `${currentPath}/${item.displayName}`); a.push('-db', selectedDb, '--skip_confirmation', 'yes'); if (opts.type === 'hard') a.push('--hard'); if (opts.scope === 'all') a.push('--all_versions', 'yes'); else if (opts.scope === 'specific' && opts.version) a.push('--version', opts.version); else if (opts.scope === 'range' && opts.startVersion && opts.endVersion) a.push('--st_version', opts.startVersion, '--en_version', opts.endVersion); runCmd(a, item.displayName, 'delete'); setModal(null); clearSelection(); showToast('Delete queued', 'success'); }} onCancel={() => setModal(null)} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-red-900/20 border border-red-900/30 rounded-xl text-sm text-red-400 btn-touch">{Ico.trash} Delete</button>
+            <button onClick={() => { setBottomSheet(null); setModal({ title: 'Full Name Metadata', content: <FullNameModalContent item={item} onClose={() => setModal(null)} /> }); }} className="w-full flex items-center gap-3 px-4 py-3 bg-[#0f1f3a] rounded-xl text-sm text-gray-300 btn-touch">{Ico.info} Show Full Name</button>
+          </>
+        )}
+      </div>
+    );
+  };
 
   // -------------------- RENDER --------------------
   const renderExplorer = () => (
@@ -1753,11 +1937,11 @@ export default function App() {
       </div>
 
       {
-        selectedItems.length === 1 && (
+        selectedItems.length > 0 && (
           <div className="fixed bottom-24 left-4 right-4 bg-[#0a1628]/95 backdrop-blur-xl border border-[#3bb5ff]/40 px-6 py-4 rounded-3xl flex items-center justify-between z-40 shadow-2xl">
-            <span className="text-xs text-[#3bb5ff] font-black uppercase">1 SELECTED</span>
+            <span className="text-xs text-[#3bb5ff] font-black uppercase">{selectedItems.length === 1 ? '1 SELECTED' : `${selectedItems.length} SELECTED`}</span>
             <div className="flex gap-4">
-              <button onClick={() => setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu item={selectedItems[0]} /> })} className="p-3 bg-[#3bb5ff]/10 text-[#3bb5ff] rounded-xl btn-touch">{Ico.menu}</button>
+              <button onClick={() => setBottomSheet({ title: 'Item Options', content: <ItemOptionsMenu items={selectedItems} /> })} className="p-3 bg-[#3bb5ff]/10 text-[#3bb5ff] rounded-xl btn-touch">{Ico.menu}</button>
               <button onClick={clearSelection} className="p-3 text-gray-500 btn-touch hover:text-white">{Ico.close}</button>
             </div>
           </div>
@@ -1946,7 +2130,7 @@ export default function App() {
 
   const renderQueue = () => (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between"><h2 className="text-lg font-bold text-white">Queue</h2><button onClick={() => setQueue([])} className="text-xs text-gray-400 btn-touch">Clear All</button></div>
+      <div className="px-4 py-3 bg-[#0a1628] border-b border-[#1a3a5c] flex items-center justify-between"><h2 className="text-lg font-bold text-white">Queue</h2><button onClick={() => setQueue(q => q.filter(i => i.status === 'running' || i.status === 'queued'))} className="text-xs text-gray-400 btn-touch">Clear All</button></div>
       <div className="flex-1 overflow-y-auto p-3 space-y-2">{queue.length === 0 ? <div className="text-center py-20 text-gray-500 text-sm">No active tasks</div> : queue.slice().reverse().map(item => (<div key={item.id} className="flex items-center gap-3 px-3 py-2 bg-[#0a1628] border border-[#1a3a5c] rounded-xl"><div className={`w-2 h-2 rounded-full ${item.status === 'completed' ? 'bg-green-400' : item.status === 'failed' ? 'bg-red-400' : item.status === 'running' ? 'bg-[#3bb5ff] animate-pulse' : 'bg-gray-500'}`} /><div className="flex-1"><div className="text-xs text-gray-200 truncate">{item.name}</div><div className="text-[10px] text-gray-500 capitalize">{item.status}</div></div>{item.progress > 0 && <div className="text-xs text-[#3bb5ff]">{item.progress}%</div>}</div>))}</div>
     </div>
   );
@@ -2028,7 +2212,7 @@ export default function App() {
           </div>
         </Modal>
       )}
-      {promptQueue.length > 0 && <Modal open onClose={() => setPromptQueue(prev => prev.slice(1))} title="Input Required"><div className="space-y-4"><p className="text-sm text-gray-400">{promptQueue[0].text}</p><input type={promptQueue[0].isPassword ? 'password' : 'text'} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" onKeyDown={e => { if (e.key === 'Enter') { if (ws) ws.send(JSON.stringify({ action: 'input', data: e.target.value, task_id: promptQueue[0].taskId })); setPromptQueue(prev => prev.slice(1)); } }} /><button onClick={() => { if (ws) ws.send(JSON.stringify({ action: 'input', data: '', task_id: promptQueue[0].taskId })); setPromptQueue(prev => prev.slice(1)); }} className="w-full py-3 bg-[#3bb5ff] text-[#060d1a] rounded-xl font-bold">Submit</button></div></Modal>}
+      {promptQueue.length > 0 && <Modal open onClose={() => { if (ws) ws.send(JSON.stringify({ action: 'input', data: 'cancel', task_id: promptQueue[0].taskId })); setPromptQueue(prev => prev.slice(1)); }} title="Input Required"><div className="space-y-4"><p className="text-sm text-gray-400">{promptQueue[0].text}</p><input data-prompt-input type={promptQueue[0].isPassword ? 'password' : 'text'} autoFocus className="w-full bg-[#060d1a] border border-[#1a3a5c] rounded-xl px-3 py-3 text-sm" onKeyDown={e => { if (e.key === 'Enter') { if (ws) ws.send(JSON.stringify({ action: 'input', data: e.target.value, task_id: promptQueue[0].taskId })); setPromptQueue(prev => prev.slice(1)); } }} /><div className="flex gap-3"><button onClick={() => { if (ws) ws.send(JSON.stringify({ action: 'input', data: 'cancel', task_id: promptQueue[0].taskId })); setPromptQueue(prev => prev.slice(1)); }} className="flex-1 py-3 bg-[#0f1f3a] text-gray-300 rounded-xl border border-[#1a3a5c] font-bold btn-touch">Cancel</button><button onClick={() => { const inp = document.querySelector('[data-prompt-input]'); if (ws) ws.send(JSON.stringify({ action: 'input', data: inp ? inp.value : '', task_id: promptQueue[0].taskId })); setPromptQueue(prev => prev.slice(1)); }} className="flex-1 py-3 bg-[#3bb5ff] text-[#060d1a] rounded-xl font-bold btn-touch">Submit</button></div></div></Modal>}
       {showCreateVolume && (
         <Modal open onClose={() => setShowCreateVolume(false)} title="Create New Volume">
           <CreateVolumeModalContent />
@@ -2075,6 +2259,79 @@ export default function App() {
           </div>
         </Modal>
       )}
+      {showTerms && (
+        <div className="fixed inset-0 z-[150] flex flex-col bg-[#060d1a]/95 backdrop-blur-md p-6 overflow-y-auto safe-top safe-bottom">
+          <div className="flex-1 flex flex-col justify-center items-center max-w-md mx-auto w-full py-8 space-y-6">
+            <div className="w-16 h-16 rounded-full bg-[#3bb5ff]/15 flex items-center justify-center border border-[#3bb5ff]/30 shadow-[0_0_20px_rgba(59,181,255,0.25)] animate-pulse">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#3bb5ff" strokeWidth="2" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+
+            <div className="text-center space-y-1">
+              <h2 className="text-2xl font-black text-white tracking-tight uppercase">Our Terms and Policy</h2>
+              <p className="text-xs text-[#3bb5ff] font-bold uppercase tracking-widest opacity-85">Please review before proceeding</p>
+            </div>
+
+            <div className="w-full bg-[#0a1628]/80 border border-[#1a3a5c] rounded-2xl p-5 shadow-2xl overflow-y-auto max-h-[50vh] custom-scrollbar text-left">
+              <MiniMarkdown content={TERMS_AND_CONDITIONS_MARKDOWN} />
+            </div>
+
+            <button
+              onClick={handleAcceptTerms}
+              className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold uppercase tracking-widest text-xs btn-touch shadow-lg shadow-[#3bb5ff]/25 border border-[#3bb5ff]/30 cursor-pointer"
+            >
+              I Accept the Terms and Conditions
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showWelcomeVideo && (
+        <div className="fixed inset-0 z-[150] flex flex-col bg-[#060d1a]/95 backdrop-blur-md p-6 overflow-y-auto safe-top safe-bottom">
+          <div className="flex-1 flex flex-col justify-center items-center max-w-md mx-auto w-full py-8 space-y-6">
+            <div className="w-16 h-16 rounded-full bg-[#3bb5ff]/15 flex items-center justify-center border border-[#3bb5ff]/30 shadow-[0_0_20px_rgba(59,181,255,0.25)]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#3bb5ff" strokeWidth="2" className="w-8 h-8"><path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+
+            <div className="text-center space-y-1">
+              <h2 className="text-2xl font-black text-white tracking-tight uppercase">Setup Tutorial</h2>
+              <p className="text-xs text-[#3bb5ff] font-bold uppercase tracking-widest opacity-85">Follow this quick guide to start</p>
+            </div>
+
+            <div className="w-full bg-[#0a1628]/80 border border-[#1a3a5c] rounded-2xl p-5 shadow-2xl flex flex-col">
+              <p className="text-sm text-gray-200 mb-4 leading-relaxed font-semibold">
+                New here? go and look to this video:
+              </p>
+
+              {/* YouTube Video Embed */}
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#1a3a5c] shadow-lg mb-4 bg-black">
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src={WELCOME_YOUTUBE_VIDEO_URL}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
+
+              <p className="text-xs text-gray-400 leading-relaxed text-left font-medium">
+                then to use the requirements you setup. put the token and the channel id either in popup menu,if it shows up. and if it does and you put all the info you are done. BUT if it didn't show up, go inside requirements input places in settings. and then go to volumes tab and hit plus button to make a new volume and you are done
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowWelcomeVideo(false);
+                setTab('settings');
+              }}
+              className="w-full py-4 bg-gradient-to-r from-[#006fbe] to-[#3bb5ff] text-white rounded-2xl font-bold uppercase tracking-widest text-xs btn-touch shadow-lg shadow-[#3bb5ff]/25 border border-[#3bb5ff]/30 cursor-pointer"
+            >
+              I Understand
+            </button>
+          </div>
+        </div>
+      )}
+
       {toast && <Toast key={toast.key} message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );

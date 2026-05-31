@@ -11,7 +11,7 @@
 
 ---
 
-## 📌 Version of VAULT OPUS (DESKTOP) in this readme is **1-R9**
+## 📌 Version of VAULT OPUS (DESKTOP) in this readme is **1-R10**
 
 ## WANNA DO PRE INSTALL SETUP? <a href="https://youtu.be/i9rnTi9l2ww">
   <img src="https://img.youtube.com/vi/i9rnTi9l2ww/maxresdefault.jpg" width="500">

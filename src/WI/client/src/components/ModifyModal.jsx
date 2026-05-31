@@ -1,11 +1,12 @@
-// ModifyModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R9
+// ModifyModal.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R10
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState } from 'react';
 import ArchiveFolderPicker from './ArchiveFolderPicker';
 
-export default function ModifyModal({ type, item, onConfirm, onCancel, selectedDb }) {
+export default function ModifyModal({ type, items, item, onConfirm, onCancel, selectedDb }) {
+  const currentItems = items || (item ? [item] : []);
   const [destination, setDestination] = useState('.');
-  const [newName, setNewName] = useState(item?.displayName || '');
+  const [newName, setNewName] = useState(currentItems.length === 1 ? currentItems[0].displayName : '');
   const [copyMode, setCopyMode] = useState(false);
   const [nameMode, setNameMode] = useState('D');
   const [nameCheck, setNameCheck] = useState(true);
@@ -21,23 +22,20 @@ export default function ModifyModal({ type, item, onConfirm, onCancel, selectedD
     if (type === 'move') {
       onConfirm({
         type: 'move',
-        src: item.itemid || (item.parentPath ? `${item.parentPath}/${item.displayName}` : item.displayName),
+        items: currentItems,
         dst: destination,
         copyMode,
         nameCheck,
-        idBased: !!item.itemid,
-        // Source is ID-based when item has itemid, destination is always path-based
-        srcIdBased: !!item.itemid,
         dstIdBased: false
       });
     } else {
       onConfirm({
         type: 'rename',
-        item: item.itemid || (item.parentPath ? `${item.parentPath}/${item.displayName}` : item.displayName),
+        item: currentItems[0],
         newName,
         nameMode,
         nameCheck,
-        idBased: !!item.itemid
+        idBased: !!currentItems[0].itemid
       });
     }
   };
@@ -58,9 +56,15 @@ export default function ModifyModal({ type, item, onConfirm, onCancel, selectedD
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Source Item</label>
+            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+              {currentItems.length > 1 ? `Source Items (${currentItems.length})` : 'Source Item'}
+            </label>
             <div className="bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-4 py-2 text-gray-300 text-sm truncate">
-              {item.displayName} {item.itemid && <span className="text-[#3bb5ff]/50 font-mono ml-2">({item.itemid})</span>}
+              {currentItems.length > 1 ? `${currentItems.length} items selected` : (
+                <>
+                  {currentItems[0].displayName} {currentItems[0].itemid && <span className="text-[#3bb5ff]/50 font-mono ml-2">({currentItems[0].itemid})</span>}
+                </>
+              )}
             </div>
           </div>
 

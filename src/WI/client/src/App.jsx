@@ -1,4 +1,4 @@
-// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R9
+// App.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R10
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
@@ -697,36 +697,43 @@ export default function App() {
   };
 
   const handleModifyConfirm = (data) => {
-    const args = ['modify', data.type];
+    const argsBase = ['modify', data.type];
 
-    if (data.type === 'move') {
-      args.push(data.src, data.dst);
-      if (data.copyMode) args.push('--copy');
-      // Use separate src/dst ID-based flags if provided
-      if (data.srcIdBased) { args.push('--src_id_based'); }
-      if (data.dstIdBased) { args.push('--dst_id_based'); }
-    } else {
-      args.push(data.item, data.newName);
-      if (data.nameMode !== 'D') args.push('--mode', data.nameMode);
-    }
+    const itemsToProcess = data.items || (data.item ? [data.item] : []);
 
-    args.push('-db', selectedDb);
-    if (data.type !== 'move' && data.idBased) args.push('--id_based');
-    if (data.nameCheck === false) args.push('--no_name_check');
+    itemsToProcess.forEach(item => {
+      const args = [...argsBase];
+      const itemIdentifier = typeof item === 'object' ? (item.itemid || (item.parentPath ? `${item.parentPath}/${item.displayName}` : item.displayName)) : item;
+      const isIdBased = typeof item === 'object' ? !!item.itemid : data.idBased;
 
-    const taskId = `${data.type}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-    const queueItem = {
-      id: taskId,
-      name: `${data.type === 'move' ? 'Move' : 'Rename'} ${data.type === 'move' ? data.src : data.item}`,
-      status: 'queued',
-      progress: 0,
-      error: null
-    };
-    setQueue(prev => [...prev, queueItem]);
+      if (data.type === 'move') {
+        args.push(itemIdentifier, data.dst);
+        if (data.copyMode) args.push('--copy');
+        if (isIdBased) args.push('--src_id_based');
+        if (data.dstIdBased) args.push('--dst_id_based');
+      } else {
+        args.push(itemIdentifier, data.newName);
+        if (data.nameMode !== 'D') args.push('--mode', data.nameMode);
+      }
 
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ action: 'run', args, task_id: taskId }));
-    }
+      args.push('-db', selectedDb);
+      if (data.type !== 'move' && isIdBased) args.push('--id_based');
+      if (data.nameCheck === false) args.push('--no_name_check');
+
+      const taskId = `${data.type}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+      const queueItem = {
+        id: taskId,
+        name: `${data.type === 'move' ? 'Move' : 'Rename'} ${data.type === 'move' ? itemIdentifier : itemIdentifier}`,
+        status: 'queued',
+        progress: 0,
+        error: null
+      };
+      setQueue(prev => [...prev, queueItem]);
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: 'run', args, task_id: taskId }));
+      }
+    });
 
     setShowModifyModal(false);
   };
@@ -1071,12 +1078,12 @@ export default function App() {
                 setCurrentVersion(null);
                 fetchFiles(currentPath, null);
               }}
-              onMoveRequest={(item) => {
-                setModifyOptions({ type: 'move', item });
+              onMoveRequest={(items) => {
+                setModifyOptions({ type: 'move', items: Array.isArray(items) ? items : [items] });
                 setShowModifyModal(true);
               }}
               onRenameRequest={(item) => {
-                setModifyOptions({ type: 'rename', item });
+                setModifyOptions({ type: 'rename', items: [item] });
                 setShowModifyModal(true);
               }}
               onMakeFolder={() => setShowMakeFolderModal(true)}
@@ -1134,7 +1141,7 @@ export default function App() {
 
         <QueuePanel
           queue={queue}
-          onClear={() => setQueue([])}
+          onClear={() => setQueue(prev => prev.filter(item => item.status === 'running' || item.status === 'queued'))}
         />
       </div>
 
@@ -1224,7 +1231,12 @@ export default function App() {
             }
             setPromptQueue(prev => prev.slice(1));
           }}
-          onCancel={() => setPromptQueue(prev => prev.slice(1))}
+          onCancel={() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ action: 'input', data: 'cancel', task_id: promptQueue[0].taskId }));
+            }
+            setPromptQueue(prev => prev.slice(1));
+          }}
         />
       )}
 
@@ -1311,7 +1323,7 @@ export default function App() {
       {showModifyModal && (
         <ModifyModal
           type={modifyOptions.type}
-          item={modifyOptions.item}
+          items={modifyOptions.items}
           selectedDb={selectedDb}
           onConfirm={handleModifyConfirm}
           onCancel={() => setShowModifyModal(false)}

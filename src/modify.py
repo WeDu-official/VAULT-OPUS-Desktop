@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#modify.py (Valkyries) from the VAULT OPUS PROJECT version 1-R9
+#modify.py (Valkyries) from the VAULT OPUS PROJECT version 1-R10
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -88,15 +88,17 @@ class ModifyContext:
             # Re-read entries for next attempt
             all_entries = await self.db._db_read_sync(db_path, {})
 
-    async def _check_name_collision(self, db_path: str, parent_id: str, name: str, item_id_to_ignore: str = None) -> str:
+    async def _check_name_collision(self, db_path: str, parent_id: str, name: str, item_id_to_ignore: str = None, all_entries: Optional[List[Dict[str, Any]]] = None) -> str:
         """
         Checks if a name exists in a parent folder. Prompts for a new name if it does.
         """
         current_name = name
+        local_entries = all_entries
         while True:
-            all_entries = await self.db._db_read_sync(db_path, {})
+            if local_entries is None:
+                local_entries = await self.db._db_read_sync(db_path, {})
             colliding = [
-                e for e in all_entries 
+                e for e in local_entries 
                 if e.get("relative_path_in_archive") == parent_id 
                 and (e.get("base_filename") == current_name or e.get("original_base_filename") == current_name)
                 and e.get("itemid") != item_id_to_ignore
@@ -149,7 +151,7 @@ class ModifyContext:
         new_name = None
         if name_check:
             from_name = resolved_from[2]
-            unique_name = await self._check_name_collision(db_path, to_folder_id, from_name, item_id_to_ignore=from_id)
+            unique_name = await self._check_name_collision(db_path, to_folder_id, from_name, item_id_to_ignore=from_id, all_entries=all_entries)
             if not unique_name: return
             if unique_name != from_name:
                 new_name = unique_name
@@ -272,7 +274,7 @@ class ModifyContext:
 
         final_new_name = new_name
         if name_check:
-            unique_name = await self._check_name_collision(db_path, parent_id, new_name, item_id_to_ignore=item_id)
+            unique_name = await self._check_name_collision(db_path, parent_id, new_name, item_id_to_ignore=item_id, all_entries=all_entries)
             if not unique_name: return
             final_new_name = unique_name
 

@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#server.py (Sandalphon) from the VAULT OPUS PROJECT version 1-R9
+#server.py (Sandalphon) from the VAULT OPUS PROJECT version 1-R10
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -209,6 +209,7 @@ async def save_recent_volumes_endpoint(payload: Dict[str, Any]):
     return {"status": "success", "recent": recent}
 
 SETUP_FILE = os.path.join(VAULT_OPUS_SRC_DIR, "setup_complete.txt")
+TERMS_ACCEPTED_FILE = os.path.join(VAULT_OPUS_SRC_DIR, "terms_accepted.txt")
 
 def is_setup_complete() -> int:
     if not os.path.exists(SETUP_FILE):
@@ -218,6 +219,33 @@ def is_setup_complete() -> int:
             return int(f.read().strip())
     except:
         return 0
+
+def is_terms_accepted() -> int:
+    if not os.path.exists(TERMS_ACCEPTED_FILE):
+        try:
+            with open(TERMS_ACCEPTED_FILE, "w") as f:
+                f.write("0")
+        except:
+            pass
+        return 0
+    try:
+        with open(TERMS_ACCEPTED_FILE, "r") as f:
+            return int(f.read().strip())
+    except:
+        return 0
+
+@app.get("/api/terms_status")
+async def get_terms_status():
+    return {"terms_accepted": is_terms_accepted()}
+
+@app.post("/api/accept_terms")
+async def accept_terms():
+    try:
+        with open(TERMS_ACCEPTED_FILE, "w") as f:
+            f.write("1")
+        return {"status": "success", "terms_accepted": 1}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save terms status: {str(e)}")
 
 @app.get("/api/setup_status")
 async def get_setup_status():

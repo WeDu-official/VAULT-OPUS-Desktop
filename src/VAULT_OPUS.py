@@ -1,5 +1,5 @@
 #---------------------------------------------------------------------
-#VAULT_OPUS.py (AL-MALIK AL- A'LA) from the VAULT OPUS PROJECT version 1-R9
+#VAULT_OPUS.py (AL-MALIK AL- A'LA) from the VAULT OPUS PROJECT version 1-R10
 #by WEDUXOX/WEDUOFFICIAL - https://github.com/WeDu-official
 #I HAD MADE THIS PROJECT FOR FREE FOR ALL
 #from mankind to mankind... if I disappear don't worry it might just be my exams or anything else, but regardless
@@ -106,6 +106,152 @@ class FileBotAPI(commands.Bot):
 
 if __name__ == "__main__":
     SETUP_FILE = os.path.join(VAULT_OPUS_SRC_DIR, "setup_complete.txt")
+    if "--show-terms" in sys.argv:
+        terms_text = """
+=====================================================
+  VAULT OPUS — TERMS OF SERVICE & PRIVACY POLICY
+=====================================================
+Version 1-R10 | Effective Date: 2026
+
+Welcome to VAULT OPUS, an open-source, self-hosted cloud storage
+system created by WeDu. By using this software, you agree to the
+following terms. If you do not agree, do not use the application.
+
+─────────────────────────────────────────────────────
+1. ACCEPTANCE OF TERMS
+─────────────────────────────────────────────────────
+By downloading, installing, accessing, or using VAULT OPUS in any
+form (Desktop Client, Mobile Web Interface, CLI, or Android
+Application), you acknowledge that you have read, understood, and
+agree to be bound by these Terms of Service and Privacy Policy.
+
+─────────────────────────────────────────────────────
+2. NATURE OF THE SOFTWARE
+─────────────────────────────────────────────────────
+• Open Source: VAULT OPUS is released under the MIT License. You
+  are free to use, modify, merge, publish, distribute, sublicense,
+  and/or sell copies, provided the copyright notice is included.
+• Self-Hosted: VAULT OPUS runs entirely on your own infrastructure.
+  There are no centralized servers operated by WeDu.
+• No Accounts: VAULT OPUS does not require you to create an account,
+  provide personal information, or register with any WeDu service.
+
+─────────────────────────────────────────────────────
+3. DISCORD INTEGRATION & THIRD-PARTY COMPLIANCE
+─────────────────────────────────────────────────────
+• Discord as Storage Backend: VAULT OPUS uses Discord's platform as
+  a file storage backend by uploading encrypted file chunks to
+  Discord channels via your personal Discord Bot Token.
+• Your Responsibility: You are solely responsible for ensuring your
+  use complies with Discord's Terms of Service
+  (https://discord.com/terms) and Community Guidelines.
+• Risk of Account Action: Discord may suspend, terminate, or restrict
+  your account or bot if your usage violates their terms. This
+  includes excessive API usage, storage abuse, or uploading
+  prohibited content. WeDu bears NO liability for such actions.
+• Bot Token Security: Your Bot Token is stored locally in config.json.
+  Never share this token. If compromised, regenerate it immediately
+  via the Discord Developer Portal.
+
+─────────────────────────────────────────────────────
+4. DATA PRIVACY & NO DATA COLLECTION
+─────────────────────────────────────────────────────
+• Zero Telemetry: VAULT OPUS collects absolutely NO usage data,
+  analytics, telemetry, crash reports, or personal information.
+• Local-Only Operation: All config files, databases, encryption keys,
+  and volume configs are stored exclusively on your local filesystem.
+  WeDu never has access to any of your data.
+• No Network Calls to WeDu: The only external network communication
+  is between your machine and the Discord API, initiated by your
+  own Bot Token.
+
+─────────────────────────────────────────────────────
+5. ENCRYPTION & SECURITY
+─────────────────────────────────────────────────────
+• Encryption Architecture: Two-layer system using Argon2id
+  (memory-hard key derivation) + HKDF-SHA256, producing Fernet
+  (AES-128-CBC + HMAC-SHA256) encrypted data.
+• Per-Volume Encryption: Each volume has its own unique cryptographic
+  salt. Keys are derived from your seed + volume-specific salt.
+• Your Keys, Your Responsibility: WeDu does NOT store, manage, or
+  have access to your encryption seeds, keys, or passwords. If you
+  lose your encryption seed or volume config, YOUR DATA IS
+  IRRECOVERABLE. No recovery mechanism, no master key, no backdoor.
+• No Warranty on Security: The software is provided without warranty
+  regarding the absolute security of your data.
+
+─────────────────────────────────────────────────────
+6. VOLUME SHARING & PACKAGES
+─────────────────────────────────────────────────────
+• Volume Packages (.vov): You can export volumes for sharing. These
+  packages contain your database and encryption configuration.
+• Password-Protected (.e.vov): Optionally protect packages with
+  AES-256 encryption. Unprotected packages expose your volume data
+  and encryption config to anyone who receives the file.
+• Sharing Risks: Recipients gain FULL access to the volume data,
+  including encryption keys. Only share with trusted parties.
+
+─────────────────────────────────────────────────────
+7. DATA LOSS & LIABILITY
+─────────────────────────────────────────────────────
+• No Guarantee: VAULT OPUS is provided "AS IS" without warranty.
+  WeDu makes NO guarantees about data integrity or availability.
+• Causes of Data Loss May Include:
+  - Discord API changes, outages, or account suspensions
+  - Corruption of local SQLite databases or volume config files
+  - Loss or misconfiguration of encryption seeds/keys
+  - Software bugs, hardware failures, or power loss during uploads
+  - Accidental deletion of volumes, chunks, or config files
+• No Recovery Service: WeDu does NOT offer data recovery. You are
+  solely responsible for maintaining backups.
+• Limitation of Liability: WeDu and its contributors shall NOT be
+  liable for any direct, indirect, incidental, special, or
+  consequential damages arising from use of this software.
+
+─────────────────────────────────────────────────────
+8. PROHIBITED USES
+─────────────────────────────────────────────────────
+You agree NOT to use VAULT OPUS to:
+  - Store or distribute illegal content (including CSAM, malware,
+    ransomware, or stolen data)
+  - Distribute copyrighted material without authorization
+  - Abuse Discord infrastructure (excessive requests, rate limit
+    circumvention, storage exploitation)
+  - Harass, threaten, or harm any individual or group
+  - Circumvent security measures of Discord or third-party services
+  - Violate any applicable local, national, or international law
+
+─────────────────────────────────────────────────────
+9. SOFTWARE UPDATES & CHANGES
+─────────────────────────────────────────────────────
+• No Automatic Updates: You choose when to update.
+• Breaking Changes: Future versions may change database schemas,
+  encryption methods, or file formats. Always backup before updating.
+• Terms Updates: We may modify these Terms at any time. Continued
+  use after updating constitutes acceptance of revised terms.
+
+─────────────────────────────────────────────────────
+10. OPEN SOURCE LICENSE (MIT)
+─────────────────────────────────────────────────────
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+─────────────────────────────────────────────────────
+11. CONTACT
+─────────────────────────────────────────────────────
+• GitHub: https://github.com/WeDu-official
+• Project: VAULT OPUS (WeDu)
+=====================================================
+"""
+        print(terms_text)
+        sys.exit(0)
+
     if "--flip-setup" in sys.argv:
         current_val = 0
         if os.path.exists(SETUP_FILE):
@@ -118,6 +264,21 @@ if __name__ == "__main__":
         with open(SETUP_FILE, "w") as f:
             f.write(str(new_val))
         print(f"Setup status flipped from {current_val} to {new_val}.")
+        sys.exit(0)
+
+    TERMS_FILE = os.path.join(VAULT_OPUS_SRC_DIR, "terms_accepted.txt")
+    if "--flip-terms" in sys.argv:
+        current_val = 0
+        if os.path.exists(TERMS_FILE):
+            try:
+                with open(TERMS_FILE, "r") as f:
+                    current_val = int(f.read().strip())
+            except:
+                pass
+        new_val = 1 if current_val == 0 else 0
+        with open(TERMS_FILE, "w") as f:
+            f.write(str(new_val))
+        print(f"Terms acceptance status flipped from {current_val} to {new_val}.")
         sys.exit(0)
 
     setup_complete = 0
@@ -137,11 +298,11 @@ if __name__ == "__main__":
             new_token = input("Please enter your Discord Bot Token: ").strip()
             new_channel = input("Please enter your Discord Channel ID: ").strip()
             new_db_name = input("Please enter the name of your first Volume (e.g. main): ").strip()
-            
+
             config_obj.update("discord", "token", value=new_token)
             config_obj.update("discord", "channel_id", value=new_channel)
             token = new_token
-            
+
             import re
             from volume_manager import validate_volume_name, create_volume_config
             try:
@@ -154,7 +315,7 @@ if __name__ == "__main__":
                     await db._db_insert_sync(db_path, dummy_entry)
                     await db._db_delete_sync(db_path, [{"base_filename": ""}])
                     create_volume_config(db_name)
-                    
+
                     recent_file = os.path.join(VAULT_OPUS_SRC_DIR, "recent_volumes.json")
                     try:
                         import json
@@ -170,7 +331,7 @@ if __name__ == "__main__":
                         pass
             except Exception as e:
                 print(f"Failed to create initial database: {e}")
-                
+
             with open(SETUP_FILE, "w") as f:
                 f.write("1")
             print("Setup complete! Resuming command...")
@@ -192,6 +353,8 @@ if __name__ == "__main__":
         print("")
         print("Global options:")
         print("  --flip-setup  Toggle the setup completed flag and exit immediately")
+        print("  --flip-terms  Toggle the terms accepted flag and exit immediately")
+        print("  --show-terms  Show terms and conditions and exit immediately")
         print("")
         print("Available commands:")
         print("  upload     Upload a file or folder")
@@ -209,6 +372,8 @@ if __name__ == "__main__":
     async def run_cli():
         parser = argparse.ArgumentParser(description="VAULT_OPUS CLI Tool")
         parser.add_argument("--flip-setup", action="store_true", help="Toggle the setup completed flag and exit immediately")
+        parser.add_argument("--flip-terms", action="store_true", help="Toggle the terms accepted flag and exit immediately")
+        parser.add_argument("--show-terms", action="store_true", help="Show terms and conditions and exit immediately")
         subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
         # Upload Command
@@ -374,7 +539,7 @@ if __name__ == "__main__":
         if not token:
             print("Error: Discord Token is empty. Please run setup.")
             sys.exit(1)
-            
+
         await bot.login(token)
 
         if args.command in ["upload", "update"]:

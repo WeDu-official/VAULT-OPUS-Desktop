@@ -1,4 +1,4 @@
-// FileExplorer.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R9
+// FileExplorer.jsx (FOR CLIENT/DESKTOP) from the VAULT OPUS PROJECT version 1-R10
 // ==================== FULL CLIENT/DESKTOP GUI====================
 import React, { useState, useEffect, useRef } from 'react';
 import { RefreshCw } from 'lucide-react';
@@ -238,7 +238,7 @@ export default function FileExplorer({ tree, currentPath, onNavigate, selectedIt
     setContextMenu(null);
   };
   const handleDeleteVersions = () => { if (contextMenu && onDeleteVersionsRequest) onDeleteVersionsRequest(); setContextMenu(null); };
-  const handleMove = () => { if (contextMenu && onMoveRequest) onMoveRequest(contextMenu.item); setContextMenu(null); };
+  const handleMove = () => { if (contextMenu && onMoveRequest) onMoveRequest(selectedItems); setContextMenu(null); };
   const handleRename = () => { if (contextMenu && onRenameRequest) onRenameRequest(contextMenu.item); setContextMenu(null); };
   const handleShowFullName = () => { if (contextMenu && onShowFullName) onShowFullName(contextMenu.item); setContextMenu(null); };
 
@@ -321,37 +321,48 @@ export default function FileExplorer({ tree, currentPath, onNavigate, selectedIt
       )}
 
       {/* Item Context Menu */}
-      {contextMenu && selectedItems.length === 1 && (
+      {contextMenu && selectedItems.length > 0 && (
         <div className="fixed z-50 bg-[#0a1628] border border-[#1a3a5c] rounded-lg shadow-xl py-1 min-w-[200px] animate-in fade-in slide-in-from-top-1"
           style={{ left: Math.min(contextMenu.x, window.innerWidth - 220), top: Math.min(contextMenu.y, window.innerHeight - 200) }}>
-          <button onClick={handleNewVersion} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
-            <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 8m4-4v12"></path></svg>
-            Upload New Version
-          </button>
-          <button onClick={handleSeeVersions} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
-            <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            See Versions
-          </button>
-          <button onClick={handleDownloadVersion} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
-            <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 8m4-4v12"></path></svg>
-            Download Version
-          </button>
+
+          {selectedItems.length === 1 && (
+            <>
+              <button onClick={handleNewVersion} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
+                <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Upload New Version
+              </button>
+              <button onClick={handleSeeVersions} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
+                <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                See Versions
+              </button>
+              <button onClick={handleDownloadVersion} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
+                <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Download Version
+              </button>
+            </>
+          )}
+
           <button onClick={handleMove} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
             <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
             Move / Copy Item
           </button>
-          <button onClick={handleRename} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
-            <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-            Rename Item
-          </button>
-          <button onClick={handleDeleteVersions} className="w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300 flex items-center gap-2 transition-colors">
-            <svg className="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            Delete versions
-          </button>
-          <button onClick={handleShowFullName} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-t border-[#1a3a5c]">
-            <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            Show Full Name
-          </button>
+
+          {selectedItems.length === 1 && (
+            <>
+              <button onClick={handleRename} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-b border-[#1a3a5c]">
+                <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                Rename Item
+              </button>
+              <button onClick={handleDeleteVersions} className="w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300 flex items-center gap-2 transition-colors">
+                <svg className="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                Delete versions
+              </button>
+              <button onClick={handleShowFullName} className="w-full px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#3bb5ff]/10 hover:text-white flex items-center gap-2 transition-colors border-t border-[#1a3a5c]">
+                <svg className="w-3.5 h-3.5 text-[#3bb5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Show Full Name
+              </button>
+            </>
+          )}
         </div>
       )}
 
