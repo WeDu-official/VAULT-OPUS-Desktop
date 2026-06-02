@@ -417,7 +417,7 @@ function SettingsTabContent({ config, fetchConfig, showToast }) {
 }
 
 // ---------- Onboarding Terms & Markdown Renderer ----------
-const WELCOME_YOUTUBE_VIDEO_URL = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Swap with your actual YouTube setup guide link
+const WELCOME_YOUTUBE_VIDEO_URL = "https://www.youtube.com/embed/i9rnTi9l2ww"; // Swap with your actual YouTube setup guide link
 
 const TERMS_AND_CONDITIONS_MARKDOWN = `# VAULT OPUS — TERMS OF SERVICE & PRIVACY POLICY
 
