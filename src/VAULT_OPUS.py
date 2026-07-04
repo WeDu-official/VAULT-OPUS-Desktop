@@ -492,15 +492,17 @@ SOFTWARE.
         # Make Package Command
         makepkg_parser = subparsers.add_parser("makepkg", help="Package a volume for sharing")
         makepkg_parser.add_argument("volume_name", help="Name of the volume to package")
+        makepkg_parser.add_argument("--password", type=str, default=None, help="Password to encrypt the package (creates .e.vov)")
 
         # Open Package Command
         openpkg_parser = subparsers.add_parser("openpkg", help="Open and import a volume package (.vov)")
         openpkg_parser.add_argument("package_path", help="Path to the .vov file")
-
+        openpkg_parser.add_argument("--password", type=str, default=None, help="Password to decrypt an encrypted package")
+        
         # Volume Creation Command
         mkvol_parser = subparsers.add_parser("mkvol", help="Create a new volume (DB + Config)")
         mkvol_parser.add_argument("volume_name", help="Name or absolute path for the new volume")
-
+        
         args = parser.parse_args()
         ph = PlatformHandler(platform="cli")
         if hasattr(args, "inputfile") and args.inputfile:
@@ -721,7 +723,7 @@ SOFTWARE.
                 return
             db_path = os.path.join(VAULT_OPUS_SRC_DIR, "DATABASES", db_name)
             try:
-                package_path = volume_manager.make_package(db_path)
+                package_path = volume_manager.make_package(db_name, args.password)
                 print(f"[CLI] Package created successfully: {package_path}")
                 choice = await ph.prompt_input("Would you like to open the src/SHARABLES folder in your file explorer? (y/n): ")
                 if choice and choice.lower() == 'y':
@@ -732,12 +734,39 @@ SOFTWARE.
 
         elif args.command == "openpkg":
             import volume_manager
+            from pathlib import Path
             try:
-                db_path, cfg_path = volume_manager.open_package(args.package_path)
-                print(f"[CLI] Package opened and imported successfully to: {db_path}")
-            except Exception as e: print(f"[CLI] Error opening package: {e}")
-            await bot.close()
+                vov_path = Path(args.package_path)
 
+                # Auto-detect .e.vov extension if the exact path doesn't exist
+                if not vov_path.exists():
+                    if args.package_path.lower().endswith('.vov') and not args.package_path.lower().endswith('.e.vov'):
+                        alt = vov_path.with_suffix('').with_suffix('.e.vov')
+                        if alt.exists():
+                            vov_path = alt
+                    elif not args.package_path.lower().endswith('.vov'):
+                        for ext in ['.vov', '.e.vov']:
+                            alt = Path(args.package_path + ext)
+                            if alt.exists():
+                                vov_path = alt
+                                break
+
+                password = args.password
+
+                # If the package is encrypted and no password was provided, prompt automatically
+                if str(vov_path).lower().endswith('.e.vov'):
+                    if not password or not password.strip():
+                        while True:
+                            password = await ph.prompt_input("This package is encrypted. Enter password: ", is_password=True)
+                            if password and password.strip():
+                                break
+                            print("[CLI] Password cannot be empty. Please try again.")
+
+                db_path, cfg_path = volume_manager.open_package(str(vov_path), password)
+                print(f"[CLI] Package opened and imported successfully to: {db_path}")
+            except Exception as e:
+                print(f"[CLI] Error opening package: {e}")
+            await bot.close()
         if bot.http_session:
             await bot.http_session.close()
 
